@@ -5,7 +5,10 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:order_booker/com/pbc/dao/repository.dart';
+import 'package:order_booker/globals.dart';
 import 'package:order_booker/order_cart_view.dart';
 import 'package:order_booker/pre_sell_route.dart';
 import 'package:order_booker/shopAction.dart';
@@ -114,7 +117,7 @@ class _NoOrder extends State<NoOrder> {
 
           print(position);
           repo.saveNoOrder(
-              globals.getUniqueMobileId(),
+              globals.orderId,
               globals.OutletID,
               noOrderReason,
               lat,
@@ -123,7 +126,6 @@ class _NoOrder extends State<NoOrder> {
               globals.DeviceID);
           Navigator.of(context, rootNavigator: true).pop('dialog');
           _UploadNoOrder();
-          _UploadOrder(context);
           repo.setVisitType(globals.OutletID, 2).then((value) {
             Navigator.push(
               context,
@@ -159,7 +161,7 @@ class _NoOrder extends State<NoOrder> {
       });
     }else{
       repo.saveNoOrder(
-          globals.getUniqueMobileId(),
+          globals.orderId,
           globals.OutletID,
           noOrderReason,
           position.latitude,
@@ -168,7 +170,7 @@ class _NoOrder extends State<NoOrder> {
           globals.DeviceID);
       Navigator.of(context, rootNavigator: true).pop('dialog');
       _UploadNoOrder();
-      _UploadOrder(context);
+      //(context);
       repo.setVisitType(globals.OutletID, 2).then((value) {
         Navigator.push(
           context,
@@ -183,111 +185,112 @@ class _NoOrder extends State<NoOrder> {
     }
 
   }
-
-
-  Future _UploadOrder(context) async {
-
-    DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
-    String currDateTime = dateFormat.format(DateTime.now());
-    var str = currDateTime.split(".");
-
-    String TimeStamp = str[0];
-
-    print("currDateTime" + TimeStamp);
-
-    int ORDERIDToDelete = 0;
-    AllOrders = new List();
-    await repo.getAllOrdersByIsUploaded(0).then((val) async {
-      setState(() {
-        AllOrders = val;
-
-        print("MAIN ORDER" + AllOrders.toString());
-      });
-      AllOrdersItems = new List();
-
-      print(AllOrders.toString());
-      for (int i = 0; i < AllOrders.length; i++) {
-        String orderParam = "timestamp=" +
-            TimeStamp +
-            "&order_no=" +
-            AllOrders[i]['id'].toString() +
-            "&outlet_id=" +
-            AllOrders[i]['outlet_id'].toString() +
-            "&created_on=" +
-            AllOrders[i]['created_on'].toString() +
-            "&created_by=" +
-            globals.UserID.toString() +
-            "&uuid=" +
-            globals.DeviceID +
-            "&platform=android&lat=" +
-            AllOrders[i]['lat'] +
-            "&lng=" +
-            AllOrders[i]['lng'] +
-            "&accuracy=" +
-            AllOrders[i]['accuracy'];
-
-        ORDERIDToDelete = AllOrders[i]['id'];
-        await repo
-            .getAllAddedItemsOfOrder(AllOrders[i]['id'])
-            .then((val) async {
-          setState(() {
-            AllOrdersItems = val;
-            print("ITEMS" + AllOrdersItems.toString());
-          });
-          String orderItemParam = "";
-          for (int j = 0; j < AllOrdersItems.length; j++) {
-            orderParam += "&product_id=" +
-                AllOrdersItems[j]['product_id'].toString() +
-                "&quantity=" +
-                AllOrdersItems[j]['quantity'].toString() +
-                "&discount=" +
-                AllOrdersItems[j]['discount'].toString() +
-                "&unit_quantity=0&is_promotion=0&promotion_id=0";
-          }
+  Future SaveOutletImage() async {
+   
+    for (int i = 0; i < 2; i++) {
+      if (outletImagePath.elementAt(i) != "") { 
+        List imageDetailList = new List();
+        int mobileRequestID = orderId;
+        imageDetailList.add({
+          "id": mobileRequestID,
+          "documentfile": outletImagePath.elementAt(i),
+          "file_type_id": i+1,
         });
 
-        var QueryParameters = <String, String>{
-          "SessionID": EncryptSessionID(orderParam),
-        };
+        // await repo.insertOutletOrderTimestamp(globals.orderId, 3);
+        bool result1 = await repo.saveOutletNOOrderImage(imageDetailList);
+        if (result1 == true) {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => ShopAction()
+            //MaterialPageRoute(
+            //builder: (context) => Orders(outletId: widget.outletId)
+          ));
+        }
+      } else {
+        if(i<1){
+          Flushbar(
+            messageText: Column(
+              children: <Widget>[
+                Text(
+                  "Please provide outlet image",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            backgroundGradient:
+            LinearGradient(colors: [Colors.black, Colors.black]),
+            icon: Icon(
+              Icons.notifications_active,
+              size: 30.0,
+              color: Colors.red[800],
+            ),
+            duration: Duration(seconds: 2),
+            leftBarIndicatorColor: Colors.red[800],
+          )
+            ..show(context);
+          
+        }
+       
+      }
+    } //end of images Loop
+  }
 
-        var url =
-        Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncOrdersV9');
-        print(url);
-
+  Future _UploadDocuments() async {
+    print("_UploadDocuments called");
+    List AllDocuments = new List();
+    print("================"+globals.orderId.toString());
+    repo.getNoOrderImages(globals.orderId).then((val) async {
+      setState(() {
+        AllDocuments = val;
+      });
+print("=========="+AllDocuments.length.toString());
+      for (int i = 0; i < AllDocuments.length; i++) {
+        int MobileRequestID = int.parse(AllDocuments[i]['id'].toString());
         try {
-          var response = await http.post(url,
-              headers: {
-                HttpHeaders.contentTypeHeader:
-                'application/x-www-form-urlencoded'
-              },
-              body: QueryParameters);
+          print("AllDocuments.length" + AllDocuments.length.toString());
+          File photoFile = File(AllDocuments[i]['file']);
+          //  var stream =
+          var stream = ByteStream(photoFile.openRead());
+          var length = await photoFile.length();
+          var url = Uri.http(
+              globals.ServerURL, '/portal/mobile/MobileUploadNoOrdersImage');
+          print(url.toString());
+          print("===Hello===");
+          String fileName = photoFile.path.split('/').last;
 
-          var responseBody = json.decode(utf8.decode(response.bodyBytes));
-          print('called4');
+          var request = new http.MultipartRequest("POST", url);
+          request.fields['NoOrderNo'] = MobileRequestID.toString();
+          print("===Hello1===");
+          var multipartFile = new http.MultipartFile('file', stream, length,
+              filename: "Outlet_" + fileName);
+
+          request.files.add(multipartFile);
+          print("multipartFile===>" + multipartFile.toString());
+          var response = await request.send();
+          print("===Hello=="+response.toString());
+
+          print("====="+response.statusCode.toString());
+
+          print("response"+response.statusCode.toString());
+          print(response.toString());
           if (response.statusCode == 200) {
-            if (responseBody["success"] == "true") {
-              await repo.markOrderUploaded(ORDERIDToDelete);
-              //_showDialog("Success","order uploaded. ",1);
-
-            } else {
-               _showDialog("Error Uploading Order", responseBody["error_code"], 0);
-            }
-          } else {
-            // If that response was not OK, throw an error.
-
-            //await _showDialog("Error Uploading Order", "An error has occured " + responseBody.statusCode);
+            print("MarkImage SUCCESS");
+            await repo.markNoOrderPhotoUploaded(MobileRequestID, i+1);
+          }else{
+            print("False");
           }
         } catch (e) {
-          //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          //await _showDialog("Error Uploading Order", "An error has occured " + e.toString());
+          print("===Hello3===");
+          print("e.toString()  " + e.toString());
         }
-        //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
-
       }
     });
   }
-
   Future _UploadNoOrder() async {
+
     String TimeStamp = globals.getCurrentTimestamp();
     print("currDateTime" + TimeStamp);
     int ORDERIDToDelete = 0;
@@ -349,11 +352,11 @@ class _NoOrder extends State<NoOrder> {
           } else {
             // If that response was not OK, throw an error.
 
-            //_showDialog("Error", "An error has occured " + responseBody.statusCode, 0);
+            _showDialog("Error", "An error has occured " + responseBody.statusCode, 0);
           }
         } catch (e) {
           //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          //_showDialog("Error", "An error has occured " + e.toString(), 1);
+          _showDialog("Error", "An error has occured " + e.toString(), 1);
         }
         //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
 
@@ -448,6 +451,21 @@ class _NoOrder extends State<NoOrder> {
   }
 
   double cardWidth = 0.0;
+  List<String> outletImagePath = ["", ""];
+
+
+  openCamera(int count) async {
+    print("add for "+count.toString());
+    final _picker = ImagePicker();
+
+    final imageFile = await _picker.getImage(
+        source: ImageSource.camera,
+        imageQuality: 30,
+        preferredCameraDevice: CameraDevice.rear);
+    setState(() {
+      if (imageFile != null)if (imageFile != null) outletImagePath.insert(count, imageFile.path);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -488,7 +506,9 @@ class _NoOrder extends State<NoOrder> {
                   onPressed: () {
                     /* _UploadOrder();*/
                     //  _showIndicator();
+                    SaveOutletImage();
                     noOrderReason == 0 ? ShowError(context) : saveNoOrder();
+                    _UploadDocuments();
                   },
                 ),
               ]),
@@ -502,6 +522,89 @@ class _NoOrder extends State<NoOrder> {
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Text(
+                          "Please use the camera  icon to take image"),
+
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Column(
+                        children: [
+
+                          Row(
+                            children: <Widget>[
+                              outletImagePath.elementAt(0) != ""
+                                  ? Container(
+                                  margin: const EdgeInsets.all(15.0),
+                                  padding: const EdgeInsets.all(3.0),
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.black)),
+                                  width: 100,
+                                  height: 100,
+                                  child:
+                                  Image.file(File(outletImagePath.elementAt(0))))
+                                  : Container(
+                                margin: const EdgeInsets.all(15.0),
+                                padding: const EdgeInsets.all(3.0),
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Colors.black)),
+                                width: 100,
+                                height: 100,
+                              ),
+                              TextButton.icon(
+                                onPressed: () {
+                                  openCamera(0);
+                                },
+                                icon: Icon(Icons.camera_alt,
+                                    color: Color(0xFFC9002B)),
+                                label: Text("Camera",
+                                    style: TextStyle(
+                                        color: Color(0xFFC9002B))),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: <Widget>[
+                              outletImagePath.elementAt(1) != ""
+                                  ? Container(
+                                  margin: const EdgeInsets.all(15.0),
+                                  padding: const EdgeInsets.all(3.0),
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.black)),
+                                  width: 100,
+                                  height: 100,
+                                  child:
+                                  Image.file(File(outletImagePath.elementAt(1))))
+                                  : Container(
+                                margin: const EdgeInsets.all(15.0),
+                                padding: const EdgeInsets.all(3.0),
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: Colors.black)),
+                                width: 100,
+                                height: 100,
+                              ),
+                              TextButton.icon(
+                                onPressed: () {
+                                  openCamera(1);
+                                },
+                                icon: Icon(Icons.camera_alt,
+                                    color: Color(0xFFC9002B)),
+                                label: Text("Camera",
+                                    style: TextStyle(
+                                        color: Color(0xFFC9002B))),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Divider(height: 2,),
                       Column(
                         children: [
                           Container(
@@ -533,7 +636,8 @@ class _NoOrder extends State<NoOrder> {
                             )),
                           )
                         ],
-                      )
+                      ),
+
                     ],
                   ),
                 ),

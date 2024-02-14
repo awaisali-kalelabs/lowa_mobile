@@ -19,6 +19,7 @@ bool isLoggedIn = false;
 String DisplayName = "Islam Danish";
 
 String ServerURL = "3.78.122.135";
+int sparkMobileRequestId = 0;
 
 String DeviceID = "";
 int UserID = 0;
@@ -86,6 +87,7 @@ String productLabel = "";
 int productId = 0;
 int orderId = 0;
 int isAlternative = 1;
+int No_orderId = 0;
 
 StreamSubscription<Position> locationStream;
 Position currentPosition;

@@ -2,12 +2,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-
+import 'dart:async';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:order_booker/com/pbc/dao/repository.dart';
 /*import 'package:order_booker/delivery.dart';*/
@@ -142,6 +143,8 @@ class _OrderCartView extends State<OrderCartView> {
                 /* _UploadOrder();*/
                 //  _showIndicator();
                 completeOrder(context);
+                _UploadDocuments();
+
               },
             ),
           ],
@@ -623,7 +626,9 @@ class _OrderCartView extends State<OrderCartView> {
           await repo.setVisitType(globals.OutletID, 1);
           Navigator.of(context, rootNavigator: true).pop('dialog');
           _UploadOrder(context);
-          _UploadNoOrder(context);
+          //_UploadDocuments();
+
+          // _UploadNoOrder(context);
 
 
           Navigator.pushAndRemoveUntil(
@@ -665,7 +670,7 @@ class _OrderCartView extends State<OrderCartView> {
       await repo.completeOrder( position.latitude,position.longitude,position.accuracy, globals.OutletID);
       await repo.setVisitType(globals.OutletID, 1);
       _UploadOrder(context);
-      _UploadNoOrder(context);
+     // _UploadDocuments();
       Navigator.pop(context);
       Navigator.pushAndRemoveUntil(
           context,
@@ -860,6 +865,56 @@ class _OrderCartView extends State<OrderCartView> {
         }
         //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
 
+      }
+    });
+  }
+  Future _UploadDocuments() async {
+    print("_UploadDocuments called");
+    List AllDocuments = new List();
+    repo.getAllOutletImages(globals.orderId).then((val) async {
+      setState(() {
+        AllDocuments = val;
+      });
+
+      for (int i = 0; i < AllDocuments.length; i++) {
+        int MobileRequestID = int.parse(AllDocuments[i]['id'].toString());
+        try {
+          print("AllDocuments.length" + AllDocuments.length.toString());
+          File photoFile = File(AllDocuments[i]['file']);
+        //  var stream =
+          var stream = ByteStream(photoFile.openRead());
+          var length = await photoFile.length();
+          var url = Uri.http(
+              globals.ServerURL, '/portal/mobile/MobileUploadOrdersImage');
+          print(url.toString());
+          print("===Hello===");
+          String fileName = photoFile.path.split('/').last;
+
+          var request = new http.MultipartRequest("POST", url);
+          request.fields['OrderNo'] = MobileRequestID.toString();
+          print("===Hello1===");
+          var multipartFile = new http.MultipartFile('file', stream, length,
+              filename: "Outlet_" + fileName);
+
+          request.files.add(multipartFile);
+          print("multipartFile===>" + multipartFile.toString());
+          var response = await request.send();
+          print("===Hello=="+response.toString());
+
+          print("====="+response.statusCode.toString());
+
+          print("response"+response.statusCode.toString());
+          print(response.toString());
+          if (response.statusCode == 200) {
+            print("MarkImage SUCCESS");
+            await repo.markPhotoUploaded(MobileRequestID);
+          }else{
+            print("False");
+          }
+        } catch (e) {
+          print("===Hello3===");
+          print("e.toString()  " + e.toString());
+        }
       }
     });
   }

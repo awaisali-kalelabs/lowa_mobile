@@ -2,6 +2,7 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
+import 'package:order_booker/OutletOrderImage.dart';
 import 'package:order_booker/com/pbc/dao/repository.dart';
 /*import 'package:order_booker/delivery.dart';*/
 import 'package:order_booker/gauge_segment.dart';
@@ -135,13 +136,11 @@ class _PreSellRoute extends State<PreSellRoute> {
             globals.OutletIdforupdate = PreSellOutlets[index]['outlet_id'];
 
               Navigator.push(
-                context,
-                //
-                MaterialPageRoute(builder: (context) => ShopAction()
-                    //  MaterialPageRoute(builder: (context) =>ShopAction_test()
-
-                    ),
-              );
+                  context,
+                  //
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          OutletOrderImage(outletId: globals.OutletID)));
             },
             trailing: Container(
               width: 110,
