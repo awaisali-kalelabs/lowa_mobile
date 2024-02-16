@@ -13,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:order_booker/com/pbc/dao/repository.dart';
 /*import 'package:order_booker/delivery.dart';*/
 import 'package:order_booker/gauge_segment.dart';
+import 'package:order_booker/globals.dart';
 import 'package:order_booker/no_order.dart';
 import 'package:order_booker/pre_sell_route.dart';
 import 'package:order_booker/shopAction.dart';
@@ -143,7 +144,7 @@ class _OrderCartView extends State<OrderCartView> {
                 /* _UploadOrder();*/
                 //  _showIndicator();
                 completeOrder(context);
-                _UploadDocuments();
+                //_UploadDocuments();
 
               },
             ),
@@ -229,6 +230,7 @@ class _OrderCartView extends State<OrderCartView> {
                                             ),
                                           ),
                                         ),
+/*
                                         Expanded(
                                           child: Container(
                                             // width: cardWidth,
@@ -280,6 +282,7 @@ class _OrderCartView extends State<OrderCartView> {
                                             ),
                                           ),
                                         )
+*/
                                       ],
                                     ),
                                     Row(
@@ -313,30 +316,37 @@ class _OrderCartView extends State<OrderCartView> {
                                                                 color: Colors.white),
                                                           ),
                                                         ),
-                                                        Expanded(
-                                                          flex: 1,
-                                                          child: Text(
-                                                            "Rate",
-                                                            style: TextStyle(
-                                                                fontSize: 12.5,
-                                                                fontWeight:
-                                                                FontWeight.bold,
-                                                                color: Colors.white),
-                                                            textAlign:
-                                                            TextAlign.center,
+                                                        Visibility(
+                                                          visible: false,
+                                                          child: Expanded(
+                                                            flex: 1,
+                                                            child: Text(
+                                                              "Rate",
+                                                              style: TextStyle(
+                                                                  fontSize: 12.5,
+                                                                  fontWeight:
+                                                                  FontWeight.bold,
+                                                                  color: Colors.white),
+                                                              textAlign:
+                                                              TextAlign.center,
+                                                            ),
                                                           ),
                                                         ),
-                                                        Expanded(
-                                                          flex: 1,
-                                                          child: Text(
-                                                            "Disc",
-                                                            style: TextStyle(
-                                                                fontSize: 12.5,
-                                                                fontWeight:
-                                                                FontWeight.bold,
-                                                                color: Colors.white),
-                                                            textAlign:
-                                                            TextAlign.center,
+                                                        Visibility(
+                                                          visible: false,
+
+                                                          child: Expanded(
+                                                            flex: 1,
+                                                            child: Text(
+                                                              "Disc",
+                                                              style: TextStyle(
+                                                                  fontSize: 12.5,
+                                                                  fontWeight:
+                                                                  FontWeight.bold,
+                                                                  color: Colors.white),
+                                                              textAlign:
+                                                              TextAlign.center,
+                                                            ),
                                                           ),
                                                         ),
                                                         Expanded(
@@ -352,17 +362,20 @@ class _OrderCartView extends State<OrderCartView> {
                                                             TextAlign.center,
                                                           ),
                                                         ),
-                                                        Expanded(
-                                                          flex: 1,
-                                                          child: Text(
-                                                            "Amount",
-                                                            style: TextStyle(
-                                                                fontSize: 12.5,
-                                                                fontWeight:
-                                                                FontWeight.bold,
-                                                                color: Colors.white),
-                                                            textAlign:
-                                                            TextAlign.right,
+                                                        Visibility(
+                                                          visible: false,
+                                                          child: Expanded(
+                                                            flex: 1,
+                                                            child: Text(
+                                                              "Amount",
+                                                              style: TextStyle(
+                                                                  fontSize: 12.5,
+                                                                  fontWeight:
+                                                                  FontWeight.bold,
+                                                                  color: Colors.white),
+                                                              textAlign:
+                                                              TextAlign.right,
+                                                            ),
                                                           ),
                                                         ),
                                                       ],
@@ -545,28 +558,34 @@ class _OrderCartView extends State<OrderCartView> {
                   ),
                 ),
               ),
-              Expanded(
-                flex: 1,
-                child: Container(
-                  child: Text(
-                    globals
-                        .getDisplayCurrencyFormatTwoDecimal(
-                        AllOrdersItems[index]['rate'])
-                        .toString(),
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontSize: 12),
+              Visibility(
+                visible: false,
+                child: Expanded(
+                  flex: 1,
+                  child: Container(
+                    child: Text(
+                      globals
+                          .getDisplayCurrencyFormatTwoDecimal(
+                          AllOrdersItems[index]['rate'])
+                          .toString(),
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontSize: 12),
+                    ),
                   ),
                 ),
               ),
-              Expanded(
-                flex: 1,
-                child: Text(
-                    globals
-                        .getDisplayCurrencyFormatTwoDecimal(
-                        AllOrdersItems[index]['discount'])
-                        .toString(),
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontSize: 12)),
+              Visibility(
+                visible: false,
+                child: Expanded(
+                  flex: 1,
+                  child: Text(
+                      globals
+                          .getDisplayCurrencyFormatTwoDecimal(
+                          AllOrdersItems[index]['discount'])
+                          .toString(),
+                      textAlign: TextAlign.right,
+                      style: TextStyle(fontSize: 12)),
+                ),
               ),
               Expanded(
                 flex: 1,
@@ -576,14 +595,17 @@ class _OrderCartView extends State<OrderCartView> {
                   style: TextStyle(fontSize: 12),
                 ),
               ),
-              Expanded(
-                flex: 2,
-                child: Text(
-                  globals
-                      .getDisplayCurrencyFormat(AllOrdersItems[index]['amount'])
-                      .toString(),
-                  textAlign: TextAlign.right,
-                  style: TextStyle(fontSize: 12),
+              Visibility(
+                visible: false,
+                child: Expanded(
+                  flex: 2,
+                  child: Text(
+                    globals
+                        .getDisplayCurrencyFormat(AllOrdersItems[index]['amount'])
+                        .toString(),
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ),
               ),
             ],
@@ -626,7 +648,7 @@ class _OrderCartView extends State<OrderCartView> {
           await repo.setVisitType(globals.OutletID, 1);
           Navigator.of(context, rootNavigator: true).pop('dialog');
           _UploadOrder(context);
-          //_UploadDocuments();
+          _UploadDocuments();
 
           // _UploadNoOrder(context);
 
@@ -670,7 +692,7 @@ class _OrderCartView extends State<OrderCartView> {
       await repo.completeOrder( position.latitude,position.longitude,position.accuracy, globals.OutletID);
       await repo.setVisitType(globals.OutletID, 1);
       _UploadOrder(context);
-     // _UploadDocuments();
+      _UploadDocuments();
       Navigator.pop(context);
       Navigator.pushAndRemoveUntil(
           context,
@@ -797,7 +819,9 @@ class _OrderCartView extends State<OrderCartView> {
             "&lng=" +
             AllOrders[i]['lng'] +
             "&accuracy=" +
-            AllOrders[i]['accuracy'];
+            AllOrders[i]['accuracy'] +
+        "&version=" +
+            appVersion;
 
         ORDERIDToDelete = AllOrders[i]['id'];
         await repo
@@ -866,21 +890,22 @@ class _OrderCartView extends State<OrderCartView> {
         //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
 
       }
+
     });
   }
   Future _UploadDocuments() async {
     print("_UploadDocuments called");
-    List AllDocuments = new List();
-    repo.getAllOutletImages(globals.orderId).then((val) async {
-      setState(() {
+   // List AllDocuments = new List();
+   await repo.getAllOutletImages(globals.orderId).then((val) async {
+   /*   setState(() {
         AllDocuments = val;
-      });
+      });*/
 
-      for (int i = 0; i < AllDocuments.length; i++) {
-        int MobileRequestID = int.parse(AllDocuments[i]['id'].toString());
+      for (int i = 0; i < val.length; i++) {
+        int MobileRequestID = int.parse(val[i]['id'].toString());
         try {
-          print("AllDocuments.length" + AllDocuments.length.toString());
-          File photoFile = File(AllDocuments[i]['file']);
+          print("AllDocuments.length" + val.length.toString());
+          File photoFile = File(val[i]['file']);
         //  var stream =
           var stream = ByteStream(photoFile.openRead());
           var length = await photoFile.length();

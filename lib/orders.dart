@@ -821,15 +821,15 @@ class _OrdersState extends State<Orders> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Flexible(
+             /*   Flexible(
                     child: Container(
                   padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
                   child: IconButton(
                       icon: Icon(Icons.account_balance_wallet),
                       color: Colors.white,
                       onPressed: () {}),
-                )),
-                Flexible(
+                )),*/
+              /*  Flexible(
                     child: Container(
                         padding: EdgeInsets.fromLTRB(0.0, 10.0, 15.0, 0.0),
                         child: Text(
@@ -837,7 +837,7 @@ class _OrdersState extends State<Orders> {
                               .getDisplayCurrencyFormat(totalAmount)
                               .toString(),
                           style: TextStyle(color: Colors.white),
-                        )))
+                        )))*/
               ],
             ),
             Padding(

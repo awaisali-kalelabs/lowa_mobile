@@ -43,7 +43,7 @@ class Repository {
       // Set the path to the database. Note: Using the `join` function from the
       // `path` package is best practice to ensure the path is correctly
       // constructed for each platform.
-      join(await getDatabasesPath(), 'delivery_managerV62.db'),
+      join(await getDatabasesPath(), 'delivery_managerV63.db'),
       // When the database is first created, create a table to store dogs.
       onUpgrade: _onUpgrade,
       onCreate: (db, version) {
@@ -58,6 +58,9 @@ class Repository {
         //Created By Irteza
         db.execute(
             "CREATE TABLE outlet_no_orders_images(id INTEGER, file_type_id INTEGER, file TEXT,is_uploaded INTEGER DEFAULT 0)");
+        db.execute(
+            "CREATE TABLE outlet_Registration_images(id INTEGER, file_type_id TEXT, file TEXT,is_uploaded INTEGER DEFAULT 0)");
+        //
         db.execute(
             "CREATE TABLE products( product_id INTEGER,product_label TEXT,package_id INTEGER,package_label TEXT,sort_order INTEGER,brand_id INTEGER,brand_label TEXT,unit_per_case INTEGER,lrb_type_id INTEGER);");
         db.execute(
@@ -1480,8 +1483,36 @@ class Repository {
       //print("not created");
       return false;
     }
-  }
+  }//
 //Created by Irteza
+  Future<bool> saveOutletRegistrationImage(List DocumentPicture) async {
+    await this.initdb();
+    final Database db = await database;
+    int j = 0;
+    try {
+      for (int i = 0; i < DocumentPicture.length; i++) {
+        List args = new List();
+
+        args.add(DocumentPicture[i]['id']);
+        args.add(DocumentPicture[i]['documentfile'].toString());
+
+        j = await db.rawInsert(
+            'insert into outlet_Registration_images(id  , file) values  (?,?) ',
+            args);
+      }
+    } catch (error) {
+      //print("//print ERROR");
+      //print(error);
+    }
+    if (j > 0) {
+      print("created");
+      return true;
+    } else {
+      print("not created");
+      return false;
+    }
+  }
+
   Future<bool> saveOutletNOOrderImage(List DocumentPicture) async {
     await this.initdb();
     final Database db = await database;
@@ -1519,9 +1550,22 @@ class Repository {
             id.toString());
 
     return maps;
-  }
+  }//
 //Created by Irteza
+
+  Future<List<Map<String, dynamic>>> getNewOutletImages(int id) async {
+    await this.initdb();
+    print("=============================="+id.toString());
+    final Database db = await database;
+    final List<Map> maps = await db.rawQuery(
+        "select *  from outlet_Registration_images where is_uploaded=0 and id=" +
+            id.toString());
+
+    return maps;
+  }
+
   Future<List<Map<String, dynamic>>> getNoOrderImages(int id) async {
+    print("ID=======>" + id.toString());
     await this.initdb();
     final Database db = await database;
     final List<Map> maps = await db.rawQuery(
@@ -1530,7 +1574,7 @@ class Repository {
 
     return maps;
   }
-
+//
   Future markPhotoUploaded(int id) async {
     await this.initdb();
     final Database db = await database;
@@ -1547,16 +1591,31 @@ class Repository {
   }
 
   //Created by Irteza
-  Future markNoOrderPhotoUploaded(int id , int file_type) async {
-    print("file_type"+file_type.toString());
+  Future markOutletRegistrationPhotoUploaded(int id) async {
     await this.initdb();
     final Database db = await database;
     List args = new List();
     args.add(id);
-    args.add(file_type);
     try {
       await db.rawUpdate(
-          'update outlet_no_orders_images set is_uploaded=1  where id=?1 and file_type_id=?1', args);
+          'update outlet_Registration_images set is_uploaded=1  where id=?1 ', args);
+    } catch (error) {
+      print("markMerchandisingPhotoUploaded  ==>> " + error);
+    }
+
+    return true;
+  }
+
+  Future markNoOrderPhotoUploaded(int id , int file_type_id ) async {
+   print("file_type_id"+file_type_id.toString());
+    await this.initdb();
+    final Database db = await database;
+    List args = new List();
+    args.add(id);
+    args.add(file_type_id);
+    try {
+      await db.rawUpdate(
+          'update outlet_no_orders_images set is_uploaded=1  where id=?1 and file_type_id=?2' , args);
     } catch (error) {
       print("markMerchandisingPhotoUploaded  ==>> " + error);
     }

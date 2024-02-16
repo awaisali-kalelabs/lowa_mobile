@@ -10,7 +10,7 @@ import 'package:order_booker/com/pbc/dao/repository.dart';
 import 'package:order_booker/home.dart';
 import 'package:permission_handler/permission_handler.dart';
 //wildspace1@%88
-String appVersion = "v1.0";
+String appVersion = "v1.1";
 final oCcy = new NumberFormat("#,##0");
 final oCcy1 = new NumberFormat("#,##0.##");
 double maxDiscountPercentage = 0;
@@ -20,7 +20,9 @@ String DisplayName = "Islam Danish";
 
 String ServerURL = "3.78.122.135";
 int sparkMobileRequestId = 0;
-
+//for Item_Quantity check
+int Rate  = 0;
+//
 String DeviceID = "";
 int UserID = 0;
 int isLocalLoggedIn = 0;

@@ -483,116 +483,126 @@ print('Remainder'+Remainder.toString());
                             children: [
                               Expanded(
                                   child: Container(
+                                    // width: cardWidth,
+                                    padding: EdgeInsets.all(5.0),
+                                    child: TextFormField(
+                                        autofocus: true,
+                                        onChanged: (val) {
+                                          print("==========");
+                                          quantityController.text=val;
+                                          print("priceRate" + priceRate.toString());
+                                          print("discountController" + discountController.text.toString());
+
+                                          priceRateAfterDiscount = priceRate - double.parse(discountController.text);
+                                          double price = double.parse(val) *
+                                              priceRateAfterDiscount;
+                                          amountController.text =
+                                              price.toString();
+                                          print("Val"+val);
+                                          print("priceRateAfterDiscount"+priceRateAfterDiscount.toString());
+                                          print("price"+price.toString());
+
+
+                                        },
+                                        validator: (val) {
+                                          if (val == null ||
+                                              val.isEmpty ||
+                                              int.parse(val) <= 0) {
+                                            return 'Please enter a valid quantity.';
+                                          }
+                                          return null;
+                                        },
+                                        focusNode: myFocusNode,
+                                        // controller: quantityController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                          enabledBorder:
+                                          const UnderlineInputBorder(
+                                            borderSide: const BorderSide(
+                                                color: Colors.black12,
+                                                width: 0.0),
+                                          ),
+                                          labelText: 'Quantity *',
+                                        )),
+                                  )),
+                              Expanded(
+                                  child: Visibility(
+                                    visible: false,
+                                    child: Container(
                                 // width: cardWidth,
                                 padding: EdgeInsets.all(5.0),
                                 child: TextField(
-                                    controller: rateController,
-                                    keyboardType: TextInputType.number,
-                                    readOnly: true,
-                                    autofocus: false,
-                                    onChanged: (val) {},
-                                    decoration: InputDecoration(
-                                      enabledBorder: const UnderlineInputBorder(
-                                        borderSide: const BorderSide(
-                                            color: Colors.black12, width: 0.0),
-                                      ),
-                                      labelText: 'Rate',
-                                    )),
-                              )),
-
-                              Expanded(
-                                  child: Container(
-                                // width: cardWidth,
-                                padding: EdgeInsets.all(5.0),
-                                child: TextFormField(
-                                    autofocus: true,
-                                    onChanged: (val) {
-                                      print("==========");
-                                      quantityController.text=val;
-                                      print("priceRate" + priceRate.toString());
-                                      print("discountController" + discountController.text.toString());
-
-                                      priceRateAfterDiscount = priceRate - double.parse(discountController.text);
-                                      double price = double.parse(val) *
-                                          priceRateAfterDiscount;
-                                      amountController.text =
-                                          price.toString();
-                                      print("Val"+val);
-                                      print("priceRateAfterDiscount"+priceRateAfterDiscount.toString());
-                                      print("price"+price.toString());
+                                      controller: rateController,
+                                      keyboardType: TextInputType.number,
+                                      readOnly: true,
+                                      autofocus: false,
+                                      onChanged: (val) {},
+                                      decoration: InputDecoration(
+                                        enabledBorder: const UnderlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              color: Colors.black12, width: 0.0),
+                                        ),
+                                        labelText: 'Rate',
+                                      )),
+                              ),
+                                  )),
 
 
-                                    },
-                                    validator: (val) {
-                                      if (val == null ||
-                                          val.isEmpty ||
-                                          int.parse(val) <= 0) {
-                                        return 'Please enter a valid quantity.';
-                                      }
-                                      return null;
-                                    },
-                                    focusNode: myFocusNode,
-                                    // controller: quantityController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      enabledBorder:
-                                      const UnderlineInputBorder(
-                                        borderSide: const BorderSide(
-                                            color: Colors.black12,
-                                            width: 0.0),
-                                      ),
-                                      labelText: 'Quantity *',
-                                    )),
-                              )),
                             ],
                           ),
                           Row(
                             children: [
                               Expanded(
-                                  child: Container(
+                                  child: Visibility(
+                                    visible: false,
+                                    child: Container(
                                 // width: cardWidth,
                                 padding: EdgeInsets.all(5.0),
                                 child: TextFormField(
-                                    //inputFormatters: [DecimalTextInputFormatter(decimalRange: 2)],
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                                    ],
+                                      //inputFormatters: [DecimalTextInputFormatter(decimalRange: 2)],
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                      ],
 
-                                    enabled: isDiscountAllowed,
-                                    enableInteractiveSelection: isDiscountAllowed,
-                                    controller: discountController,
-                                    keyboardType: TextInputType.number,
-                                    autofocus: false,
-                                    onChanged: (val) {
-                                      //ToReset Value to intital
-                                      onDiscountChange(val);
-                                    },
-                                    decoration: InputDecoration(
-                                      enabledBorder: const UnderlineInputBorder(
-                                        borderSide: const BorderSide(
-                                            color: Colors.black12, width: 0.0),
-                                      ),
-                                      labelText: 'Discount',
-                                    )),
-                              )),
+                                      enabled: isDiscountAllowed,
+                                      enableInteractiveSelection: isDiscountAllowed,
+                                      controller: discountController,
+                                      keyboardType: TextInputType.number,
+                                      autofocus: false,
+                                      onChanged: (val) {
+                                        //ToReset Value to intital
+                                        onDiscountChange(val);
+                                      },
+                                      decoration: InputDecoration(
+                                        enabledBorder: const UnderlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              color: Colors.black12, width: 0.0),
+                                        ),
+                                        labelText: 'Discount',
+                                      )),
+                              ),
+                                  )),
                               Expanded(
-                                  child: Container(
+                                  child: Visibility(
+                                    visible: false,
+                                    child: Container(
                                 // width: cardWidth,
                                 padding: EdgeInsets.all(5.0),
                                 child: TextField(
-                                    autofocus: false,
-                                    readOnly: true,
-                                    onChanged: (val) {},
-                                    keyboardType: TextInputType.number,
-                                    controller: amountController,
-                                    decoration: InputDecoration(
-                                      enabledBorder: const UnderlineInputBorder(
-                                        borderSide: const BorderSide(
-                                            color: Colors.black12, width: 0.0),
-                                      ),
-                                      labelText: 'Amount',
-                                    )),
-                              )),
+                                      autofocus: false,
+                                      readOnly: true,
+                                      onChanged: (val) {},
+                                      keyboardType: TextInputType.number,
+                                      controller: amountController,
+                                      decoration: InputDecoration(
+                                        enabledBorder: const UnderlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              color: Colors.black12, width: 0.0),
+                                        ),
+                                        labelText: 'Amount',
+                                      )),
+                              ),
+                                  )),
                             ],
                           )
                         ],
@@ -629,12 +639,6 @@ print('Remainder'+Remainder.toString());
 
 
                                     addItemOrder(globals.orderId, globals.productId, Discount, int.parse(quantityController.text), double.parse(amountController.text), str[0], double.parse(rateController.text), globals.productLabel);
-                                    Navigator.pushAndRemoveUntil(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                Orders(outletId: globals.OutletID)),
-                                        ModalRoute.withName("/Orders"));
                                     /*
                                     Navigator.push(
                                       context,
@@ -667,6 +671,38 @@ print('Remainder'+Remainder.toString());
                                       leftBarIndicatorColor: Colors.red,
                                     )..show(context);
                                   }
+                                }
+
+                                if(rateController != 0 || rateController != null){
+                                  Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              Orders(outletId: globals.OutletID)),
+                                      ModalRoute.withName("/Orders"));
+                                }else{
+                                  Flushbar(
+                                    messageText: Column(
+                                      children: <Widget>[
+                                        Text(
+                                          "SKU Amount is 0",
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    backgroundGradient:
+                                    LinearGradient(colors: [Colors.black, Colors.black]),
+                                    icon: Icon(
+                                      Icons.notifications_active,
+                                      size: 30.0,
+                                      color: Colors.red[800],
+                                    ),
+                                    duration: Duration(seconds: 2),
+                                    leftBarIndicatorColor: Colors.red[800],
+                                  )..show(context);
                                 }
                               },
                               child: Row(

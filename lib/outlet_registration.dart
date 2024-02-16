@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:another_flushbar/flushbar.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:order_booker/com/pbc/dao/repository.dart';
+import 'package:order_booker/globals.dart';
 //import 'package:order_booker/shopAction.dart';
 
 import 'com/pbc/model/pre_sell_outlets.dart';
@@ -78,40 +82,6 @@ class _OutletRegisteration extends State<OutletRegisteration> {
     });
 
 
-    // repo.GetOutletformID(globals.OutletIdforupdate).then((val) {
-    //   pic_channel_id=val[0]['pic_channel_id'];
-    //   _selectedChannelArea=int. parse(val[0]['pic_channel_id']);
-    //   outlet_name=val[0]['outlet_name'];
-    //   Address =val[0]['address'];
-    //   Channel =val[0]['channel_label'];
-    //   Owner_Name =val[0]['owner'];
-    //   telephone =val[0]['telephone'];
-    //   Area =val[0]['area_label'];
-    //   Sub_area =val[0]['sub_area_label'];
-    //   CNIC =val[0]['cache_contact_nic'];
-    //   PurchaserName =val[0]['purchaser_name'];
-    //   Purchaser_Number =val[0]['purchaser_mobile_no'];
-    //   lat = double.parse(val[0]['lat']);
-    //   lng = double.parse(val[0]['lng']);
-    //   outletNameController.text = outlet_name;
-    //   _ChanneltypeAheadController.text = Channel;
-    //   _AreatypeAheadController.text = Area;
-    //   _SubAreatypeAheadController.text = Sub_area;
-    //   addressController.text = Address;
-    //   ownerNameController.text = Owner_Name;
-    //   mobileNoController.text = telephone;
-    //   cnicController.text = CNIC.toString();
-    //   ownerPurchaseController.text = PurchaserName;
-    //   mobileNumberPurchaserController.text = Purchaser_Number.toString();
-    //   LatController.text= lat.toString();
-    //   LongController.text=lng.toString();
-    //
-    //
-    //
-    //
-    //   // Owner_Name =val[0]['owner'];
-    //
-    // });
 
     repo.getOutletAreas().then((val) {
       setState(() {
@@ -134,8 +104,107 @@ class _OutletRegisteration extends State<OutletRegisteration> {
 
     return true;
   }
+  String outletImagePath = "";
+  int mobileRequestID = globals.getUniqueMobileId();
 
+  Future SaveOutletImage() async {
+    if (outletImagePath != "") {
+      List imageDetailList = new List();
+      imageDetailList.add({
+        "id": mobileRequestID,
+        "documentfile": outletImagePath,
+      });
 
+      // await repo.insertOutletOrderTimestamp(globals.orderId, 3);
+      bool result1 = await repo.saveOutletRegistrationImage(imageDetailList);
+      if (result1 == true) {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => Home()
+          //MaterialPageRoute(
+          //builder: (context) => Orders(outletId: widget.outletId)
+        ));
+      }
+    } else {
+      Flushbar(
+        messageText: Column(
+          children: <Widget>[
+            Text(
+              "Please provide outlet image",
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        backgroundGradient:
+        LinearGradient(colors: [Colors.black, Colors.black]),
+        icon: Icon(
+          Icons.notifications_active,
+          size: 30.0,
+          color: Colors.red[800],
+        ),
+        duration: Duration(seconds: 2),
+        leftBarIndicatorColor: Colors.red[800],
+      )..show(context);
+    }
+  }
+
+  Future _UploadDocuments() async {
+    print("_UploadDocuments called");
+   // List AllDocuments = new List();
+    await repo.getNewOutletImages(mobileRequestID).then((val) async {
+     /* setState(() {
+        AllDocuments = val;
+      });*/
+
+      for (int i = 0; i < val.length; i++) {
+        int MobileRequestID = int.parse(val[i]['id'].toString());
+        try {
+          print("AllDocuments.length" + val.length.toString());
+          File photoFile = File(val[i]['file']);
+          //  var stream =
+          var stream = ByteStream(photoFile.openRead());
+          var length = await photoFile.length();
+          var url = Uri.http(
+              globals.ServerURL, '/portal/mobile/MobileUploadNewOutletImage');
+          print(url.toString());
+          String fileName = photoFile.path.split('/').last;
+
+          var request = new http.MultipartRequest("POST", url);
+          request.fields['RequestId'] = MobileRequestID.toString();
+          print("===Hello1===");
+          var multipartFile = new http.MultipartFile('file', stream, length,
+              filename: "Outlet_" + fileName);
+
+          request.files.add(multipartFile);
+          print("multipartFile===>" + multipartFile.toString());
+          var response = await request.send();
+          print("====="+response.statusCode.toString());
+          if (response.statusCode == 200) {
+            print("MarkImage SUCCESS");
+            await repo.markOutletRegistrationPhotoUploaded(MobileRequestID);
+          }else{
+            print("False");
+          }
+        } catch (e) {
+          print("===Hello3===");
+          print("e.toString()  " + e.toString());
+        }
+      }
+    });
+  }
+  openCamera() async {
+    final _picker = ImagePicker();
+
+    final imageFile = await _picker.getImage(
+        source: ImageSource.camera,
+        imageQuality: 30,
+        preferredCameraDevice: CameraDevice.rear);
+    setState(() {
+      if (imageFile != null) outletImagePath = imageFile.path;
+    });
+  }
   TextEditingController outletNameController = TextEditingController();
   TextEditingController channelController = TextEditingController();
   TextEditingController areaController = TextEditingController();
@@ -187,6 +256,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                     color: Colors.white,
                   )),
               onPressed: () {
+                SaveOutletImage();
                 print("globals.currentPosition:"+globals.currentPosition.toString());
                 if(globals.currentPosition==null){
                   Dialogs.showLoadingDialog(context, _keyLoader);
@@ -264,7 +334,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                   String encodedOutletName = base64.encode(utf8.encode(outletNameController.text));
                   args.add({
                     'outlet_name': encodedOutletName,
-                    'mobile_request_id': globals.getUniqueMobileId(),
+                    'mobile_request_id': mobileRequestID,
                     'mobile_timestamp': globals.getCurrentTimestamp(),
                     'pic_channel_id': _selectedChannelArea,
                     'area_label': _AreatypeAheadController.text,
@@ -284,7 +354,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                     'is_uploaded': 0,
                     'is_new' :1,
                   });
-
+                  _UploadDocuments();
                   _registerOutlet(context, args);
                 } else {}
               },
@@ -311,6 +381,54 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                           child: (Column(
                             children: [
                               Container(
+                                padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
+                                child: Text(
+                                    "Please use the camera  icon to take image"),
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Container(
+                                child:  Row(
+                                  children: <Widget>[
+                                    outletImagePath != ""
+                                        ? Container(
+                                        margin: const EdgeInsets.all(15.0),
+                                        padding: const EdgeInsets.all(3.0),
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.black)),
+                                        width: 100,
+                                        height: 100,
+                                        child:
+                                        Image.file(File(outletImagePath)))
+                                        : Container(
+                                      margin: const EdgeInsets.all(15.0),
+                                      padding: const EdgeInsets.all(3.0),
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: Colors.black)),
+                                      width: 100,
+                                      height: 100,
+                                    ),
+                                    TextButton.icon(
+                                      onPressed: () {
+                                        openCamera();
+                                      },
+                                      icon: Icon(Icons.camera_alt,
+                                          color: Color(0xFFC9002B)),
+                                      label: Text("Camera",
+                                          style: TextStyle(
+                                              color: Color(0xFFC9002B))),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Divider(height: 10,),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Container(
                                 // width: cardWidth,
                                 padding: EdgeInsets.all(5.0),
                                 child: TextFormField(
@@ -319,7 +437,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                                   keyboardType: TextInputType.text,
                                   textInputAction: TextInputAction.next,
                                   //readOnly: true,
-                                  autofocus: true,
+                                  // autofocus: true,
                                   onChanged: (val) {
                                   },
                                   decoration: InputDecoration(
@@ -628,7 +746,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                               //alignment: Alignment.bottomRight,
                               //  flex: 1,
                               //   child:
-                              /*   MaterialButton(
+                                 MaterialButton(
                                   minWidth: MediaQuery.of(context).size.width,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
@@ -770,7 +888,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                                     ),
                                   ],
                                 ),
-                              )*/
+                              )
                             ],
                           ))),
                     ],
@@ -843,6 +961,8 @@ class _OutletRegisteration extends State<OutletRegisteration> {
             AllRegisteredOutlets[i]['created_by'].toString() +
             "&uuid=" +
             globals.DeviceID +
+            "&version=" +
+            globals.appVersion +
             "&platform=android";
         print("outletRegisterationsParams:" + outletRegisterationsParams);
 

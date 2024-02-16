@@ -316,6 +316,7 @@ class _LoginPageState extends State<LoginPage>
         "&DeviceID=" +
         globals.DeviceID +
         "&DeviceToken=123";
+
     var QueryParameters = <String, String>{
       "SessionID": EncryptSessionID(param),
     };
@@ -324,7 +325,7 @@ class _LoginPageState extends State<LoginPage>
 
     print("Called1111");
 
-    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV1', QueryParameters);
+    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV2', QueryParameters);
      print("Url........." + url.toString());
       var response = await http.get(url, headers: {
         HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
