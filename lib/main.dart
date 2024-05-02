@@ -33,8 +33,8 @@ import 'globals.dart' as globals;
 void main() async {
   HttpOverrides.global = new MyHttpOverrides();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    systemNavigationBarColor: Colors.red[800], // navigation bar color
-    statusBarColor: Colors.red[800], // status bar color
+    systemNavigationBarColor: Colors.yellow[800], // navigation bar color
+    statusBarColor: Colors.yellow[800], // status bar color
   ));
   runApp(MyApp());
 }
@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Theia',
       debugShowCheckedModeBanner: false,
       theme: new ThemeData(
-          primarySwatch: Colors.red,
+          primarySwatch: Colors.yellow,
           fontFamily: 'Nunito',
           primaryTextTheme:
               TextTheme(headline6: TextStyle(color: Colors.white))),
@@ -79,7 +79,7 @@ class _MyAppState extends State<MyApp> {
                   fontSize: 44,
                   color: Colors.white,
                   fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.red[800],
+          backgroundColor: Colors.yellow[800],
           styleTextUnderTheLoader: new TextStyle(),
           photoSize: 100.0,
           // onClick: ()=>print("Flutter Egypt"),
@@ -184,10 +184,10 @@ class _LoginPageState extends State<LoginPage>
           icon: Icon(
             Icons.notifications_active,
             size: 30.0,
-            color: Colors.red,
+            color: Colors.yellow,
           ),
           duration: Duration(seconds: 2),
-          leftBarIndicatorColor: Colors.red,
+          leftBarIndicatorColor: Colors.yellow,
         )..show(context);
       }
     } else {
@@ -208,10 +208,10 @@ class _LoginPageState extends State<LoginPage>
         icon: Icon(
           Icons.notifications_active,
           size: 30.0,
-          color: Colors.red,
+          color: Colors.yellow,
         ),
         duration: Duration(seconds: 2),
-        leftBarIndicatorColor: Colors.red,
+        leftBarIndicatorColor: Colors.yellow,
       )..show(context);
     }
 
@@ -325,7 +325,7 @@ class _LoginPageState extends State<LoginPage>
 
     print("Called1111");
 
-    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV2', QueryParameters);
+    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV4', QueryParameters);
      print("Url........." + url.toString());
       var response = await http.get(url, headers: {
         HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
@@ -667,9 +667,9 @@ class _LoginPageState extends State<LoginPage>
                       width: MediaQuery.of(context).size.width,
                       //padding: EdgeInsets.all(18.0),
                       decoration: BoxDecoration(
-                          color: Colors.red[800],
+                          color: Colors.yellow[800],
                           gradient: LinearGradient(
-                              colors: [Colors.red[800], Colors.red[400]]),
+                              colors: [Colors.red[800], Colors.yellow[400]]),
                           image: DecorationImage(
                             image: AssetImage("images/backgroundimage.png"),
                             fit: BoxFit.cover,
@@ -762,7 +762,7 @@ class _LoginPageState extends State<LoginPage>
                                                             fontSize: 22.0,
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            color: Colors.red),
+                                                            color: Colors.yellow),
                                                       ),
 
                                                       SizedBox(
@@ -852,7 +852,7 @@ class _LoginPageState extends State<LoginPage>
                                                             'Local',
                                                             style: TextStyle(
                                                                 color:
-                                                                    Colors.red),
+                                                                    Colors.yellow),
                                                           ),
                                                           controlAffinity:
                                                               ListTileControlAffinity
@@ -868,7 +868,7 @@ class _LoginPageState extends State<LoginPage>
                                                         child: Material(
                                                           // needed
                                                           color:
-                                                              Colors.red[600],
+                                                              Colors.yellow[600],
                                                           borderRadius:
                                                               BorderRadius
                                                                   .circular(

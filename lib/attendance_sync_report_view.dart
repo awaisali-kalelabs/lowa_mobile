@@ -146,7 +146,7 @@ class _AttendanceSyncReportView extends State<AttendanceSyncReportView> {
             "Attendance Sync Report",
             style: TextStyle(fontSize: 15),
           ),
-          backgroundColor: Colors.red[800],
+          backgroundColor: Colors.yellow[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -325,7 +325,7 @@ class _AttendanceSyncReportView extends State<AttendanceSyncReportView> {
 
   Widget itemsList(BuildContext context, int index) {
     return InkWell(
-      splashColor: Colors.red,
+      splashColor: Colors.yellow,
       onDoubleTap: null,
       child: Column(
         children: <Widget>[

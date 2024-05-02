@@ -1235,8 +1235,6 @@ class Repository {
     maps = await db.rawQuery(
         "select * from products where  product_id=?1 ",
         args);
-
-
     return maps;
   }
 

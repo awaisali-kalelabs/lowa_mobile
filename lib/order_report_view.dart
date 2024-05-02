@@ -86,7 +86,7 @@ class _SalesReportView extends State<SalesReportView> {
       "SessionID":EncryptSessionID(param) ,
     };
     try{
-      var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileSalesReport', QueryParameters);
+      var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileSalesReportV2', QueryParameters);
       //var url = Uri.http("192.168.30.125:8080", '/nisa_portal/mobile/MobileSalesReport', QueryParameters);
 //      Wave/grain/sales/MobileVFSalesContractExecute
       var response = await http.get(url, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'});
@@ -133,7 +133,7 @@ class _SalesReportView extends State<SalesReportView> {
             "Sales Report",
             style: TextStyle(fontSize: 15),
           ),
-          backgroundColor: Colors.red[800],
+          backgroundColor: Colors.yellow[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -265,6 +265,7 @@ class _SalesReportView extends State<SalesReportView> {
                               textAlign: TextAlign.center,
                             )),
                       ),
+
                       TableCell(
                         child: Container(
                             padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
@@ -363,6 +364,7 @@ class _SalesReportView extends State<SalesReportView> {
                                         textAlign: TextAlign.right,
                                       )),
                                 ),
+
                                 TableCell(
                                   child: Container(
                                       padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
@@ -395,7 +397,7 @@ class _SalesReportView extends State<SalesReportView> {
 
   Widget itemsList(BuildContext context, int index) {
     return InkWell(
-      splashColor: Colors.red,
+      splashColor: Colors.yellow,
       onDoubleTap: null,
       child: Column(
         children: <Widget>[

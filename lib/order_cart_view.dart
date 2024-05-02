@@ -17,6 +17,7 @@ import 'package:order_booker/globals.dart';
 import 'package:order_booker/no_order.dart';
 import 'package:order_booker/pre_sell_route.dart';
 import 'package:order_booker/shopAction.dart';
+import 'package:another_flushbar/flushbar.dart';
 
 import 'globals.dart' as globals;
 import 'orders.dart';
@@ -44,6 +45,12 @@ class _OrderCartView extends State<OrderCartView> {
   List<String> freeProductsQuantity;
   Repository repo = new Repository();
   bool isLocationTimedOut = false;
+  bool isDiscountAllowed = false;
+  TextEditingController discountController = TextEditingController();
+  double priceRateAfterDiscount = 0.0;
+  double priceRate = 0.0;
+  double maximumDiscount = 0;
+  double defaultDiscount = 0;
 
   _OrderCartView(int OrderId) {
     this.OrderId = OrderId;
@@ -107,8 +114,80 @@ class _OrderCartView extends State<OrderCartView> {
 
       }
     });
-  }
+    globals.isFeatureAllowed(411).then((value)  {
+      setState(() {
+        isDiscountAllowed = value;
+      });
+    });
+    repo.getSpotDiscount(globals.productId).then((value) => {
+      setState(() {
+        if(value==null){
 
+          defaultDiscount = 0;
+          maximumDiscount = 0;
+          discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
+
+        }else{
+
+          defaultDiscount = value['default_discount'];
+          maximumDiscount = value['maximum_discount'];
+          discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
+
+        }
+
+        print("defaultDiscount : " + defaultDiscount.toString());
+        print("maximumDiscount : " + maximumDiscount.toString());
+      })
+    });
+  }
+  onDiscountChange(val){
+
+    if(val==null){
+      val="0";
+    }
+    priceRateAfterDiscount = priceRate;
+
+    String errorMessage = "Discount cannot be greater than rate";
+    if(double.parse(discountController.text)>maximumDiscount){
+      errorMessage = "Discount cannot be greater than " + maximumDiscount.toString() + "";
+    }
+   // print("check......................................");
+   // print("maximumDiscount==> " + maximumDiscount.toString());
+  //  print("discountController 1==> " + discountController.text.toString());
+
+    if (double.parse(discountController.text) < priceRate && double.parse(discountController.text)<=maximumDiscount) {
+      priceRateAfterDiscount = priceRate - double.parse(discountController.text);
+      print("discountController==> " + discountController.text.toString());
+      print("priceRateAfterDiscount==> " + priceRateAfterDiscount.toString());
+
+    } else {
+      Flushbar(
+        messageText: Column(
+          children: <Widget>[
+            Text(
+              errorMessage,
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        backgroundGradient: LinearGradient(
+            colors: [
+              Colors.black,
+              Colors.black
+            ]),
+        icon: Icon(
+          Icons.notifications_active,
+          size: 30.0,
+          color: Colors.yellow,
+        ),
+        duration: Duration(seconds: 2),
+        leftBarIndicatorColor: Colors.yellow,
+      )..show(context);
+    }
+  }
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
   @override
   Widget build(BuildContext context) {
@@ -116,7 +195,7 @@ class _OrderCartView extends State<OrderCartView> {
     return Scaffold(
       //backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.red[800],
+          backgroundColor: Colors.yellow[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -230,7 +309,7 @@ class _OrderCartView extends State<OrderCartView> {
                                             ),
                                           ),
                                         ),
-/*
+
                                         Expanded(
                                           child: Container(
                                             // width: cardWidth,
@@ -282,7 +361,7 @@ class _OrderCartView extends State<OrderCartView> {
                                             ),
                                           ),
                                         )
-*/
+
                                       ],
                                     ),
                                     Row(
@@ -316,37 +395,30 @@ class _OrderCartView extends State<OrderCartView> {
                                                                 color: Colors.white),
                                                           ),
                                                         ),
-                                                        Visibility(
-                                                          visible: false,
-                                                          child: Expanded(
-                                                            flex: 1,
-                                                            child: Text(
-                                                              "Rate",
-                                                              style: TextStyle(
-                                                                  fontSize: 12.5,
-                                                                  fontWeight:
-                                                                  FontWeight.bold,
-                                                                  color: Colors.white),
-                                                              textAlign:
-                                                              TextAlign.center,
-                                                            ),
+                                                        Expanded(
+                                                          flex: 1,
+                                                          child: Text(
+                                                            "Rate",
+                                                            style: TextStyle(
+                                                                fontSize: 12.5,
+                                                                fontWeight:
+                                                                FontWeight.bold,
+                                                                color: Colors.white),
+                                                            textAlign:
+                                                            TextAlign.center,
                                                           ),
                                                         ),
-                                                        Visibility(
-                                                          visible: false,
-
-                                                          child: Expanded(
-                                                            flex: 1,
-                                                            child: Text(
-                                                              "Disc",
-                                                              style: TextStyle(
-                                                                  fontSize: 12.5,
-                                                                  fontWeight:
-                                                                  FontWeight.bold,
-                                                                  color: Colors.white),
-                                                              textAlign:
-                                                              TextAlign.center,
-                                                            ),
+                                                        Expanded(
+                                                          flex: 1,
+                                                          child: Text(
+                                                            "Disc",
+                                                            style: TextStyle(
+                                                                fontSize: 12.5,
+                                                                fontWeight:
+                                                                FontWeight.bold,
+                                                                color: Colors.white),
+                                                            textAlign:
+                                                            TextAlign.center,
                                                           ),
                                                         ),
                                                         Expanded(
@@ -362,25 +434,22 @@ class _OrderCartView extends State<OrderCartView> {
                                                             TextAlign.center,
                                                           ),
                                                         ),
-                                                        Visibility(
-                                                          visible: false,
-                                                          child: Expanded(
-                                                            flex: 1,
-                                                            child: Text(
-                                                              "Amount",
-                                                              style: TextStyle(
-                                                                  fontSize: 12.5,
-                                                                  fontWeight:
-                                                                  FontWeight.bold,
-                                                                  color: Colors.white),
-                                                              textAlign:
-                                                              TextAlign.right,
-                                                            ),
+                                                        Expanded(
+                                                          flex: 1,
+                                                          child: Text(
+                                                            "Amount",
+                                                            style: TextStyle(
+                                                                fontSize: 12.5,
+                                                                fontWeight:
+                                                                FontWeight.bold,
+                                                                color: Colors.white),
+                                                            textAlign:
+                                                            TextAlign.right,
                                                           ),
                                                         ),
                                                       ],
                                                     ),
-                                                    color: Colors.redAccent,
+                                                    color: Colors.yellow,
                                                   ),
                                                   SizedBox(
                                                     height: 10,
@@ -404,7 +473,8 @@ class _OrderCartView extends State<OrderCartView> {
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        Expanded(child:
+                                        Expanded(
+                                            child:
                                         Container(
 
                                             margin: EdgeInsets.fromLTRB(
@@ -423,7 +493,7 @@ class _OrderCartView extends State<OrderCartView> {
                                                     fontWeight:
                                                     FontWeight.bold,
                                                     color: Colors.white),), alignment: Alignment.centerLeft,
-                                                  color: Colors.redAccent,
+                                                  color: Colors.yellow,
                                                 ),
                                                 SizedBox(height: 10,),
                                                 Container(
@@ -476,8 +546,40 @@ class _OrderCartView extends State<OrderCartView> {
                                                       itemBuilder: itemsListPromotion,
                                                     ))
                                               ],
-                                            )))
-                                      ],)
+                                            ))),
+
+                                      ],),
+                                    Row(
+                                      children :[
+                                        Expanded(
+                                            child: Container(
+                                              // width: cardWidth,
+                                              padding: EdgeInsets.all(5.0),
+                                              child: TextFormField(
+                                                //inputFormatters: [DecimalTextInputFormatter(decimalRange: 2)],
+                                                /*  inputFormatters: [
+                                                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                                  ],*/
+
+                                                    enabled: isDiscountAllowed,
+                                                   enableInteractiveSelection: isDiscountAllowed,
+                                                 controller: discountController,
+                                                  keyboardType: TextInputType.number,
+                                                  autofocus: false,
+                                                  onChanged: (val) {
+                                                    //ToReset Value to intital
+                                                    onDiscountChange(val);
+                                                  },
+                                                  decoration: InputDecoration(
+                                                    enabledBorder: const UnderlineInputBorder(
+                                                      borderSide: const BorderSide(
+                                                          color: Colors.black12, width: 0.0),
+                                                    ),
+                                                    labelText: 'Discount',
+                                                  )),
+                                            )),
+                                      ]
+                                    )
 
                                   ],
                                 ))),
@@ -490,7 +592,7 @@ class _OrderCartView extends State<OrderCartView> {
   }
   Widget itemsListPromotion(BuildContext context, int index) {
     return InkWell(
-      splashColor: Colors.red,
+      splashColor: Colors.yellow,
       onDoubleTap: () {
         print("M tapped");
         _confirmItemDelete(
@@ -535,7 +637,7 @@ class _OrderCartView extends State<OrderCartView> {
   }
   Widget itemsList(BuildContext context, int index) {
     return InkWell(
-      splashColor: Colors.red,
+      splashColor: Colors.yellow,
       onDoubleTap: () {
         print("M tapped");
         _confirmItemDelete(
@@ -558,34 +660,28 @@ class _OrderCartView extends State<OrderCartView> {
                   ),
                 ),
               ),
-              Visibility(
-                visible: false,
-                child: Expanded(
-                  flex: 1,
-                  child: Container(
-                    child: Text(
-                      globals
-                          .getDisplayCurrencyFormatTwoDecimal(
-                          AllOrdersItems[index]['rate'])
-                          .toString(),
-                      textAlign: TextAlign.right,
-                      style: TextStyle(fontSize: 12),
-                    ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  child: Text(
+                    globals
+                        .getDisplayCurrencyFormatTwoDecimal(
+                        AllOrdersItems[index]['rate'])
+                        .toString(),
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontSize: 12),
                   ),
                 ),
               ),
-              Visibility(
-                visible: false,
-                child: Expanded(
-                  flex: 1,
-                  child: Text(
-                      globals
-                          .getDisplayCurrencyFormatTwoDecimal(
-                          AllOrdersItems[index]['discount'])
-                          .toString(),
-                      textAlign: TextAlign.right,
-                      style: TextStyle(fontSize: 12)),
-                ),
+              Expanded(
+                flex: 1,
+                child: Text(
+                    globals
+                        .getDisplayCurrencyFormatTwoDecimal(
+                        AllOrdersItems[index]['discount'])
+                        .toString(),
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontSize: 12)),
               ),
               Expanded(
                 flex: 1,
@@ -595,17 +691,14 @@ class _OrderCartView extends State<OrderCartView> {
                   style: TextStyle(fontSize: 12),
                 ),
               ),
-              Visibility(
-                visible: false,
-                child: Expanded(
-                  flex: 2,
-                  child: Text(
-                    globals
-                        .getDisplayCurrencyFormat(AllOrdersItems[index]['amount'])
-                        .toString(),
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontSize: 12),
-                  ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  globals
+                      .getDisplayCurrencyFormat(AllOrdersItems[index]['amount'])
+                      .toString(),
+                  textAlign: TextAlign.right,
+                  style: TextStyle(fontSize: 12),
                 ),
               ),
             ],

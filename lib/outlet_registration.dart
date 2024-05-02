@@ -117,13 +117,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
 
       // await repo.insertOutletOrderTimestamp(globals.orderId, 3);
       bool result1 = await repo.saveOutletRegistrationImage(imageDetailList);
-      if (result1 == true) {
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => Home()
-          //MaterialPageRoute(
-          //builder: (context) => Orders(outletId: widget.outletId)
-        ));
-      }
+
     } else {
       Flushbar(
         messageText: Column(
@@ -142,10 +136,10 @@ class _OutletRegisteration extends State<OutletRegisteration> {
         icon: Icon(
           Icons.notifications_active,
           size: 30.0,
-          color: Colors.red[800],
+          color: Colors.yellow[800],
         ),
         duration: Duration(seconds: 2),
-        leftBarIndicatorColor: Colors.red[800],
+        leftBarIndicatorColor: Colors.yellow[800],
       )..show(context);
     }
   }
@@ -238,7 +232,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.red[800],
+          backgroundColor: Colors.yellow[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,

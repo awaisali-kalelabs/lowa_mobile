@@ -147,7 +147,7 @@ class _OrdersSyncReportView extends State<OrdersSyncReportView> {
             "Sync Report",
             style: TextStyle(fontSize: 15),
           ),
-          backgroundColor: Colors.red[800],
+          backgroundColor: Colors.yellow[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -331,7 +331,7 @@ class _OrdersSyncReportView extends State<OrdersSyncReportView> {
 
   Widget itemsList(BuildContext context, int index) {
     return InkWell(
-      splashColor: Colors.red,
+      splashColor: Colors.yellow,
       onDoubleTap: null,
       child: Column(
         children: <Widget>[

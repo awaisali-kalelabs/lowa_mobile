@@ -49,7 +49,6 @@ dependencies:
   another_flushbar: ^1.12.30
   splashscreen: ^1.3.5
   progress_dialog: 1.2.4
-#  wave: ^0.1.0
   flutter_typeahead: ^3.2.4
   back_button_interceptor: ^4.4.0
   camera: ^0.10.5

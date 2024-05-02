@@ -262,7 +262,7 @@ class _OrdersState extends State<Orders> {
         index == 0 ? Container() : Divider(),
         ListTile(
           selected: SelectedLRBType[index],
-          selectedTileColor: SelectedLRBType[index] ? Colors.red : Colors.white,
+          selectedTileColor: SelectedLRBType[index] ? Colors.yellow : Colors.white,
           focusColor: Colors.lightBlueAccent,
           onTap: () async {
             setState(() {
@@ -414,7 +414,7 @@ class _OrdersState extends State<Orders> {
         ListTile(
           selected: SelectedCategories[index],
           selectedTileColor:
-              SelectedCategories[index] ? Colors.red : Colors.white,
+              SelectedCategories[index] ? Colors.yellow : Colors.white,
           focusColor: Colors.lightBlueAccent,
           onTap: () async {
             setState(() {
@@ -800,12 +800,12 @@ class _OrdersState extends State<Orders> {
     );
     return MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.yellow,
       ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.red[800],
+          backgroundColor: Colors.yellow[800],
           leading: Container(
               padding: EdgeInsets.fromLTRB(0.0, 10.0, 15.0, 0.0),
               child: IconButton(
@@ -974,7 +974,7 @@ class _OrdersState extends State<Orders> {
             },
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.red,
+                color: Colors.yellow,
               ),
               child: Center(
                 child: Text(

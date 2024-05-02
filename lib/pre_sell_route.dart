@@ -148,7 +148,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   IconButton(
-                      icon: Icon(Icons.directions, color: Colors.redAccent),
+                      icon: Icon(Icons.directions, color: Colors.yellow),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -169,7 +169,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                         );
                       }),
                   IconButton(
-                      icon: Icon(Icons.phone, color: Colors.redAccent),
+                      icon: Icon(Icons.phone, color: Colors.yellow),
                       onPressed: () async {
                         var url = "tel:" +
                             PreSellOutlets[index]['telephone'].toString();
@@ -226,12 +226,12 @@ class _PreSellRoute extends State<PreSellRoute> {
             ),
         child: MaterialApp(
           theme: ThemeData(
-            primarySwatch: Colors.red,
+            primarySwatch: Colors.yellow,
           ),
           debugShowCheckedModeBanner: false,
           home: Scaffold(
               appBar: AppBar(
-                backgroundColor: Colors.red[800],
+                backgroundColor: Colors.yellow[800],
                 leading: IconButton(
                     icon: Icon(Icons.arrow_back),
                     color: Colors.white,

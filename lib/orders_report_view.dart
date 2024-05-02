@@ -90,7 +90,7 @@ class _OrdersReportView extends State<OrdersReportView> {
       "SessionID":EncryptSessionID(param) ,
     };
     try{
-      var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileOrdersReport', QueryParameters);
+      var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileOrdersReportV2', QueryParameters);
 //      Wave/grain/sales/MobileVFOrdersContractExecute
       var response = await http.get(url, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'});
       var responseBody = json.decode(utf8.decode(response.bodyBytes));
@@ -136,7 +136,7 @@ class _OrdersReportView extends State<OrdersReportView> {
             "Orders Report",
             style: TextStyle(fontSize: 15),
           ),
-          backgroundColor: Colors.red[800],
+          backgroundColor: Colors.yellow[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -149,185 +149,236 @@ class _OrdersReportView extends State<OrdersReportView> {
                     ModalRoute.withName("/sales_report_select_date"));
               }),
         ),
-        body: ListView(
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(5, 10, 5, 0),
-                child: Table(
-                  border: TableBorder(
-                      bottom: BorderSide(color: Colors.grey, width: 0.5),
-                      top: BorderSide(color: Colors.grey, width: 0.5),
-                      left: BorderSide(color: Colors.grey, width: 1),
-                      right: BorderSide(color: Colors.grey, width: 1),
-                      horizontalInside:
-                      BorderSide(color: Colors.grey, width: 1),
-                      verticalInside:
-                      BorderSide(color: Colors.grey, width: 1)),
-                  columnWidths: {
-                    0: FlexColumnWidth(6),
-                    1: FlexColumnWidth(5),
+        body: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Date: ${OrdersPosition.isNotEmpty ? OrdersPosition[0]["Date"].toString() : ""}',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.yellow),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'So Name: ${OrdersPosition.isNotEmpty ? OrdersPosition[0]["SoName"].toString() : ""}',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.yellow),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Zone: ${OrdersPosition.isNotEmpty ? OrdersPosition[0]["Zone"].toString() : ""}',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.yellow // Change this color to whatever you prefer
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Area: ${OrdersPosition.isNotEmpty ? OrdersPosition[0]["Area"].toString() : ""}',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.yellow // Change this color to whatever you prefer
+                  ),
+                ),
+              ),
+            ),
 
-                  },
-                  children: [
-                    TableRow(children: [
-                      TableCell(
-                        child: Container(
-                            padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-                            child: Text(
-                              "Products",
-                              style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black),
-                              textAlign: TextAlign.center,
-                            )),
-                      ),
-                      TableCell(
-                        child: Container(
-                            padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-                            child: Text(
-                              "Order",
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            )),
-                      ),
-                    ])
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                child: Table(
-                  border: TableBorder(
-                      bottom: BorderSide(color: Colors.grey, width: 0.5),
-                      left: BorderSide(color: Colors.grey, width: 1),
-                      right: BorderSide(color: Colors.grey, width: 1),
-                      horizontalInside:
-                          BorderSide(color: Colors.grey, width: 1),
-                      verticalInside:
-                          BorderSide(color: Colors.grey, width: 1)),
-                  columnWidths: {
-                    0: FlexColumnWidth(6),
-                    1: FlexColumnWidth(2.5),
-                    2: FlexColumnWidth(2.5),
-                  },
-                  children: [
-                    TableRow(children: [
-                      TableCell(
-                        child: Container(
-                            padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-                            child: Text(
-                              "",
-                              style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black),
-                            )),
-                      ),
-                      TableCell(
-                        child: Container(
-                            padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-                            child: Text(
-                              "Qty",
-                              style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black),
-                              textAlign: TextAlign.center,
-                            )),
-                      ),
-                      TableCell(
-                        child: Container(
-                            padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-                            child: Text(
-                              "Rs",
-                              style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black),
-                              textAlign: TextAlign.center,
-                            )),
-                      ),
-                    ])
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                child: Table(
-                  children: OrdersPosition.map((e) => TableRow(children: [
-                        TableCell(
-                          child: Table(
-                            border: TableBorder(
-                              horizontalInside: e['IsSubcategory'] == 0
-                                  ? BorderSide(width: 0.5, color: Colors.grey)
-                                  : BorderSide(color: Colors.white10),
-                              verticalInside: e['IsSubcategory'] == 0
-                                  ? BorderSide(width: 0.5, color: Colors.grey)
-                                  : BorderSide(color: Colors.white10),
-                              left: BorderSide(width: 1, color: Colors.grey),
-                              right: BorderSide(width: 1, color: Colors.grey),
-                              bottom: BorderSide(width: 0.5, color: Colors.grey),
-                              top: BorderSide(width: 0.5, color: Colors.grey),
+
+
+            Expanded(
+              child: ListView(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(5, 10, 5, 0),
+                      child: Table(
+                        border: TableBorder(
+                            bottom: BorderSide(color: Colors.grey, width: 0.5),
+                            top: BorderSide(color: Colors.grey, width: 0.5),
+                            left: BorderSide(color: Colors.grey, width: 1),
+                            right: BorderSide(color: Colors.grey, width: 1),
+                            horizontalInside:
+                            BorderSide(color: Colors.grey, width: 1),
+                            verticalInside:
+                            BorderSide(color: Colors.grey, width: 1)),
+                        columnWidths: {
+                          0: FlexColumnWidth(6),
+                          1: FlexColumnWidth(5),
+
+                        },
+                        children: [
+                          TableRow(children: [
+                            TableCell(
+                              child: Container(
+                                  padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                  child: Text(
+                                    "Products",
+                                    style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black),
+                                    textAlign: TextAlign.center,
+                                  )),
                             ),
-                            //border: TableBorder.all(width: 0.5),
-                            defaultVerticalAlignment:
-                                TableCellVerticalAlignment.middle,
-                            columnWidths:  {
-                              0: FlexColumnWidth(6),
-                              1: FlexColumnWidth(2.5),
-                              2: FlexColumnWidth(2.5),
-                            },
-                            children: [
-                              TableRow(children: [
-                                TableCell(
-                                    child: Container(
-                                        padding:
-                                            EdgeInsets.fromLTRB(5, 5, 5, 5),
-                                        child: Text(
-                                          e['ProductLabel'],
-                                          style: TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.black,
-                                              fontWeight:
-                                                  e['IsSubcategory'] == 1
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal),
-                                        ))),
-                                TableCell(
-                                  child: Container(
-                                      padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-                                      child: Text(
-                                        e['OrderQuantity'],
-                                        style: TextStyle(
-                                            fontSize: 11, color: Colors.black),
-                                        textAlign: TextAlign.center,
-                                      )),
+                            TableCell(
+                              child: Container(
+                                  padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                  child: Text(
+                                    "Order",
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  )),
+                            ),
+                          ])
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                      child: Table(
+                        border: TableBorder(
+                            bottom: BorderSide(color: Colors.grey, width: 0.5),
+                            left: BorderSide(color: Colors.grey, width: 1),
+                            right: BorderSide(color: Colors.grey, width: 1),
+                            horizontalInside:
+                                BorderSide(color: Colors.grey, width: 1),
+                            verticalInside:
+                                BorderSide(color: Colors.grey, width: 1)),
+                        columnWidths: {
+                          0: FlexColumnWidth(6),
+                          1: FlexColumnWidth(2.5),
+                          2: FlexColumnWidth(2.5),
+                        },
+                        children: [
+                          TableRow(children: [
+                            TableCell(
+                              child: Container(
+                                  padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                  child: Text(
+                                    "",
+                                    style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black),
+                                  )),
+                            ),
+                            TableCell(
+                              child: Container(
+                                  padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                  child: Text(
+                                    "Qty",
+                                    style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black),
+                                    textAlign: TextAlign.center,
+                                  )),
+                            ),
+                            TableCell(
+                              child: Container(
+                                  padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                  child: Text(
+                                    "Rs",
+                                    style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black),
+                                    textAlign: TextAlign.center,
+                                  )),
+                            ),
+                          ])
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                      child: Table(
+                        children: OrdersPosition.map((e) => TableRow(children: [
+                              TableCell(
+                                child: Table(
+                                  border: TableBorder(
+                                    horizontalInside: e['IsSubcategory'] == 0
+                                        ? BorderSide(width: 0.5, color: Colors.grey)
+                                        : BorderSide(color: Colors.white10),
+                                    verticalInside: e['IsSubcategory'] == 0
+                                        ? BorderSide(width: 0.5, color: Colors.grey)
+                                        : BorderSide(color: Colors.white10),
+                                    left: BorderSide(width: 1, color: Colors.grey),
+                                    right: BorderSide(width: 1, color: Colors.grey),
+                                    bottom: BorderSide(width: 0.5, color: Colors.grey),
+                                    top: BorderSide(width: 0.5, color: Colors.grey),
+                                  ),
+                                  //border: TableBorder.all(width: 0.5),
+                                  defaultVerticalAlignment:
+                                      TableCellVerticalAlignment.middle,
+                                  columnWidths:  {
+                                    0: FlexColumnWidth(6),
+                                    1: FlexColumnWidth(2.5),
+                                    2: FlexColumnWidth(2.5),
+                                  },
+                                  children: [
+                                    TableRow(children: [
+                                      TableCell(
+                                          child: Container(
+                                              padding:
+                                                  EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                              child: Text(
+                                                e['ProductLabel'],
+                                                style: TextStyle(
+                                                    fontSize: 11,
+                                                    color: Colors.black,
+                                                    fontWeight:
+                                                        e['IsSubcategory'] == 1
+                                                            ? FontWeight.bold
+                                                            : FontWeight.normal),
+                                              ))),
+                                      TableCell(
+                                        child: Container(
+                                            padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                            child: Text(
+                                              e['OrderQuantity'],
+                                              style: TextStyle(
+                                                  fontSize: 11, color: Colors.black),
+                                              textAlign: TextAlign.center,
+                                            )),
+                                      ),
+                                      TableCell(
+                                        child: Container(
+                                            padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                            child: Text(
+                                              e['OrderAmount'],
+                                              style: TextStyle(
+                                                  fontSize: 11, color: Colors.black),
+                                              textAlign: TextAlign.right,
+                                            )),
+                                      ),
+                                    ])
+                                  ],
                                 ),
-                                TableCell(
-                                  child: Container(
-                                      padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-                                      child: Text(
-                                        e['OrderAmount'],
-                                        style: TextStyle(
-                                            fontSize: 11, color: Colors.black),
-                                        textAlign: TextAlign.right,
-                                      )),
-                                ),
-                              ])
-                            ],
-                          ),
-                        ),
-                      ])).toList(),
-                ),
-              ),
-            ]));
+                              ),
+                            ])).toList(),
+                      ),
+                    ),
+                  ]),
+            ),
+          ],
+        ));
   }
 
   Widget itemsList(BuildContext context, int index) {

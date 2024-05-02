@@ -127,6 +127,7 @@ class _AddToCart extends State<AddToCart> {
           discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
 
         }
+        print("maximumDiscount : " + maximumDiscount.toString());
 
         print("defaultDiscount : " + defaultDiscount.toString());
       })
@@ -390,10 +391,10 @@ print('Remainder'+Remainder.toString());
         icon: Icon(
           Icons.notifications_active,
           size: 30.0,
-          color: Colors.red,
+          color: Colors.yellow,
         ),
         duration: Duration(seconds: 2),
-        leftBarIndicatorColor: Colors.red,
+        leftBarIndicatorColor: Colors.yellow,
       )..show(context);
     }
     if (int.parse(quantityController.text) !=
@@ -413,13 +414,13 @@ print('Remainder'+Remainder.toString());
     cardWidth = width / 1.1;
     return MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.yellow,
       ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         key: _formkey,
           appBar: AppBar(
-            backgroundColor: Colors.red[800],
+            backgroundColor: Colors.yellow[800],
             title: Text(
               globals.productLabel,
               style: new TextStyle(color: Colors.white, fontSize: 14),
@@ -526,82 +527,73 @@ print('Remainder'+Remainder.toString());
                                         )),
                                   )),
                               Expanded(
-                                  child: Visibility(
-                                    visible: false,
-                                    child: Container(
+                                  child: Container(
                                 // width: cardWidth,
                                 padding: EdgeInsets.all(5.0),
                                 child: TextField(
-                                      controller: rateController,
-                                      keyboardType: TextInputType.number,
-                                      readOnly: true,
-                                      autofocus: false,
-                                      onChanged: (val) {},
-                                      decoration: InputDecoration(
-                                        enabledBorder: const UnderlineInputBorder(
-                                          borderSide: const BorderSide(
-                                              color: Colors.black12, width: 0.0),
-                                        ),
-                                        labelText: 'Rate',
-                                      )),
-                              ),
-                                  )),
+                                    controller: rateController,
+                                    keyboardType: TextInputType.number,
+                                    readOnly: true,
+                                    autofocus: false,
+                                    onChanged: (val) {},
+                                    decoration: InputDecoration(
+                                      enabledBorder: const UnderlineInputBorder(
+                                        borderSide: const BorderSide(
+                                            color: Colors.black12, width: 0.0),
+                                      ),
+                                      labelText: 'Rate',
+                                    )),
+                              )),
 
 
                             ],
                           ),
                           Row(
                             children: [
-                              Expanded(
-                                  child: Visibility(
-                                    visible: false,
-                                    child: Container(
-                                // width: cardWidth,
-                                padding: EdgeInsets.all(5.0),
-                                child: TextFormField(
+                             /* Expanded(
+                                  child: Container(
+                                    // width: cardWidth,
+                                    padding: EdgeInsets.all(5.0),
+                                    child: TextFormField(
                                       //inputFormatters: [DecimalTextInputFormatter(decimalRange: 2)],
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                                      ],
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                        ],
 
-                                      enabled: isDiscountAllowed,
-                                      enableInteractiveSelection: isDiscountAllowed,
-                                      controller: discountController,
-                                      keyboardType: TextInputType.number,
-                                      autofocus: false,
-                                      onChanged: (val) {
-                                        //ToReset Value to intital
-                                        onDiscountChange(val);
-                                      },
-                                      decoration: InputDecoration(
-                                        enabledBorder: const UnderlineInputBorder(
-                                          borderSide: const BorderSide(
-                                              color: Colors.black12, width: 0.0),
-                                        ),
-                                        labelText: 'Discount',
-                                      )),
-                              ),
-                                  )),
+                                        enabled: isDiscountAllowed,
+                                        enableInteractiveSelection: isDiscountAllowed,
+                                        controller: discountController,
+                                        keyboardType: TextInputType.number,
+                                        autofocus: false,
+                                        onChanged: (val) {
+                                          //ToReset Value to intital
+                                          onDiscountChange(val);
+                                        },
+                                        decoration: InputDecoration(
+                                          enabledBorder: const UnderlineInputBorder(
+                                            borderSide: const BorderSide(
+                                                color: Colors.black12, width: 0.0),
+                                          ),
+                                          labelText: 'Discount',
+                                        )),
+                                  )),*/
                               Expanded(
-                                  child: Visibility(
-                                    visible: false,
-                                    child: Container(
-                                // width: cardWidth,
-                                padding: EdgeInsets.all(5.0),
-                                child: TextField(
-                                      autofocus: false,
-                                      readOnly: true,
-                                      onChanged: (val) {},
-                                      keyboardType: TextInputType.number,
-                                      controller: amountController,
-                                      decoration: InputDecoration(
-                                        enabledBorder: const UnderlineInputBorder(
-                                          borderSide: const BorderSide(
-                                              color: Colors.black12, width: 0.0),
-                                        ),
-                                        labelText: 'Amount',
-                                      )),
-                              ),
+                                  child: Container(
+                                    // width: cardWidth,
+                                    padding: EdgeInsets.all(5.0),
+                                    child: TextField(
+                                        autofocus: false,
+                                        readOnly: true,
+                                        onChanged: (val) {},
+                                        keyboardType: TextInputType.number,
+                                        controller: amountController,
+                                        decoration: InputDecoration(
+                                          enabledBorder: const UnderlineInputBorder(
+                                            borderSide: const BorderSide(
+                                                color: Colors.black12, width: 0.0),
+                                          ),
+                                          labelText: 'Amount',
+                                        )),
                                   )),
                             ],
                           )
@@ -612,7 +604,7 @@ print('Remainder'+Remainder.toString());
                       child: Align(
                           alignment: FractionalOffset.bottomCenter,
                           child: Container(
-                            color: Colors.red,
+                            color: Colors.yellow,
                             height: 57,
                             //  color: Colors.red,
                             child: InkWell(
@@ -638,7 +630,15 @@ print('Remainder'+Remainder.toString());
                                     var str = currDateTime.split(".");
 
 
-                                    addItemOrder(globals.orderId, globals.productId, Discount, int.parse(quantityController.text), double.parse(amountController.text), str[0], double.parse(rateController.text), globals.productLabel);
+                                    addItemOrder(
+                                        globals.orderId,
+                                        globals.productId,
+                                        Discount,
+                                        int.parse(quantityController.text)
+                                        , double.parse(amountController.text),
+                                        str[0],
+                                        double.parse(rateController.text),
+                                        globals.productLabel);
                                     /*
                                     Navigator.push(
                                       context,
@@ -665,10 +665,10 @@ print('Remainder'+Remainder.toString());
                                       icon: Icon(
                                         Icons.notifications_active,
                                         size: 30.0,
-                                        color: Colors.red,
+                                        color: Colors.yellow,
                                       ),
                                       duration: Duration(seconds: 2),
-                                      leftBarIndicatorColor: Colors.red,
+                                      leftBarIndicatorColor: Colors.yellow,
                                     )..show(context);
                                   }
                                 }
@@ -698,10 +698,10 @@ print('Remainder'+Remainder.toString());
                                     icon: Icon(
                                       Icons.notifications_active,
                                       size: 30.0,
-                                      color: Colors.red[800],
+                                      color: Colors.yellow[800],
                                     ),
                                     duration: Duration(seconds: 2),
-                                    leftBarIndicatorColor: Colors.red[800],
+                                    leftBarIndicatorColor: Colors.yellow[800],
                                   )..show(context);
                                 }
                               },

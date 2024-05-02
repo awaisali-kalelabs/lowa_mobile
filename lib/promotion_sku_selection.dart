@@ -102,7 +102,7 @@ class _PromotionSkuSelection extends State<PromotionSkuSelection> {
     return Scaffold(
         //backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.red[800],
+          backgroundColor: Colors.yellow[800],
           title: Container(
 
             child: Text(
@@ -270,7 +270,7 @@ class _PromotionSkuSelection extends State<PromotionSkuSelection> {
 
 
     return InkWell(
-      splashColor: Colors.red,
+      splashColor: Colors.yellow,
       onDoubleTap: () {
         print("M tapped");
       },

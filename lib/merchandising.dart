@@ -289,7 +289,7 @@ class _Merchandising extends State<Merchandising> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.red[800],
+          backgroundColor: Colors.yellow[800],
           title: Text(
             "Merchandising",
             style: new TextStyle(color: Colors.white, fontSize: 14),
@@ -305,7 +305,7 @@ class _Merchandising extends State<Merchandising> {
         bottomNavigationBar: BottomAppBar(
           shape: CircularNotchedRectangle(),
           notchMargin: 4.0,
-          color: Colors.redAccent[100],
+          color: Colors.yellow[100],
           child: new Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -316,7 +316,7 @@ class _Merchandising extends State<Merchandising> {
               RawMaterialButton(
                   // fillColor: Colors.teal,
                   elevation: 0,
-                  splashColor: Colors.red,
+                  splashColor: Colors.red[800],
                   textStyle: TextStyle(color: Colors.white),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

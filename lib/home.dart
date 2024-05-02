@@ -1103,7 +1103,7 @@ class _Home extends State<Home> {
                             height: 91.0,
                             child: new DrawerHeader(
                               decoration: BoxDecoration(
-                                color: Colors.red[800],
+                                color: Colors.yellow[800],
                               ),
                               child: Text(
                                 'Theia',
@@ -1118,7 +1118,7 @@ class _Home extends State<Home> {
                 ListTile(
                   leading: Icon(
                     Icons.file_upload,
-                    color: Colors.red,
+                    color: Colors.yellow,
                   ),
                   title: Text('Upload Data'),
                   onTap: () async {
@@ -1196,7 +1196,7 @@ class _Home extends State<Home> {
                   color: Colors.grey,
                 ),
                 ListTile(
-                  leading: Icon(Icons.settings, color: Colors.red),
+                  leading: Icon(Icons.settings, color: Colors.yellow),
                   title: Text('Logout'),
                   onTap: () {
                     globals.Reset();
@@ -1228,7 +1228,7 @@ class _Home extends State<Home> {
             ),
           ),
           appBar: AppBar(
-            backgroundColor: Colors.red[800],
+            backgroundColor: Colors.yellow[800],
             actions: <Widget>[
               new Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
@@ -2014,7 +2014,7 @@ void main() {
   runApp(
     MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.yellow,
       ),
       home: Home(),
     ),
