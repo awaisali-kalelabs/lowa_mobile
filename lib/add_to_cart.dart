@@ -112,7 +112,7 @@ class _AddToCart extends State<AddToCart> {
       });
     });
 
-    repo.getSpotDiscount(globals.productId).then((value) => {
+    repo.getSpotDiscount().then((value) => {
       setState(() {
         if(value==null){
 
@@ -195,7 +195,7 @@ class _AddToCart extends State<AddToCart> {
             onChanged: (val) {
               setAddToCartReason(val);
             },
-            activeColor: Colors.orange[200],
+            activeColor: Colors.blue[200],
 
             selected: true,
           ),
@@ -391,10 +391,10 @@ print('Remainder'+Remainder.toString());
         icon: Icon(
           Icons.notifications_active,
           size: 30.0,
-          color: Colors.yellow,
+          color: Colors.blue,
         ),
         duration: Duration(seconds: 2),
-        leftBarIndicatorColor: Colors.yellow,
+        leftBarIndicatorColor: Colors.blue,
       )..show(context);
     }
     if (int.parse(quantityController.text) !=
@@ -414,13 +414,13 @@ print('Remainder'+Remainder.toString());
     cardWidth = width / 1.1;
     return MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.yellow,
+        primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         key: _formkey,
           appBar: AppBar(
-            backgroundColor: Colors.yellow[800],
+            backgroundColor: Colors.blue[800],
             title: Text(
               globals.productLabel,
               style: new TextStyle(color: Colors.white, fontSize: 14),
@@ -604,12 +604,12 @@ print('Remainder'+Remainder.toString());
                       child: Align(
                           alignment: FractionalOffset.bottomCenter,
                           child: Container(
-                            color: Colors.yellow,
+                            color: Colors.blue,
                             height: 57,
                             //  color: Colors.red,
                             child: InkWell(
                               onTap: () {
-                                if (_formKey.currentState.validate()) {
+                              /*  if (_formKey.currentState.validate()) {
                                   double Discount = 0;
                                   if (discountController.text == "") {
                                     Discount = 0;
@@ -639,14 +639,14 @@ print('Remainder'+Remainder.toString());
                                         str[0],
                                         double.parse(rateController.text),
                                         globals.productLabel);
-                                    /*
+                                    *//*
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => Orders(
                                               outletId: globals.OutletID)),
                                     );
-                                    */
+                                    *//*
                                   } else {
                                     Flushbar(
                                       messageText: Column(
@@ -665,14 +665,29 @@ print('Remainder'+Remainder.toString());
                                       icon: Icon(
                                         Icons.notifications_active,
                                         size: 30.0,
-                                        color: Colors.yellow,
+                                        color: Colors.blue,
                                       ),
                                       duration: Duration(seconds: 2),
-                                      leftBarIndicatorColor: Colors.yellow,
+                                      leftBarIndicatorColor: Colors.blue,
                                     )..show(context);
                                   }
-                                }
+                                }*/
+                                DateFormat dateFormat =
+                                DateFormat("dd/MM/yyyy HH:mm:ss");
+                                String currDateTime =
+                                dateFormat.format(DateTime.now());
+                                var str = currDateTime.split(".");
 
+
+                                addItemOrder(
+                                    globals.orderId,
+                                    globals.productId,
+                                    0,
+                                    int.parse(quantityController.text)
+                                    , double.parse(amountController.text),
+                                    str[0],
+                                    double.parse(rateController.text),
+                                    globals.productLabel);
                                 if(rateController != 0 || rateController != null){
                                   Navigator.pushAndRemoveUntil(
                                       context,
@@ -698,10 +713,10 @@ print('Remainder'+Remainder.toString());
                                     icon: Icon(
                                       Icons.notifications_active,
                                       size: 30.0,
-                                      color: Colors.yellow[800],
+                                      color: Colors.blue[800],
                                     ),
                                     duration: Duration(seconds: 2),
-                                    leftBarIndicatorColor: Colors.yellow[800],
+                                    leftBarIndicatorColor: Colors.blue[800],
                                   )..show(context);
                                 }
                               },

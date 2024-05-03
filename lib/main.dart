@@ -33,8 +33,8 @@ import 'globals.dart' as globals;
 void main() async {
   HttpOverrides.global = new MyHttpOverrides();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    systemNavigationBarColor: Colors.yellow[800], // navigation bar color
-    statusBarColor: Colors.yellow[800], // status bar color
+    systemNavigationBarColor: Colors.blue[800], // navigation bar color
+    statusBarColor: Colors.blue[800], // status bar color
   ));
   runApp(MyApp());
 }
@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Theia',
       debugShowCheckedModeBanner: false,
       theme: new ThemeData(
-          primarySwatch: Colors.yellow,
+          primarySwatch: Colors.blue,
           fontFamily: 'Nunito',
           primaryTextTheme:
               TextTheme(headline6: TextStyle(color: Colors.white))),
@@ -79,7 +79,7 @@ class _MyAppState extends State<MyApp> {
                   fontSize: 44,
                   color: Colors.white,
                   fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.yellow[800],
+          backgroundColor: Colors.blue[800],
           styleTextUnderTheLoader: new TextStyle(),
           photoSize: 100.0,
           // onClick: ()=>print("Flutter Egypt"),
@@ -184,10 +184,10 @@ class _LoginPageState extends State<LoginPage>
           icon: Icon(
             Icons.notifications_active,
             size: 30.0,
-            color: Colors.yellow,
+            color: Colors.blue,
           ),
           duration: Duration(seconds: 2),
-          leftBarIndicatorColor: Colors.yellow,
+          leftBarIndicatorColor: Colors.blue,
         )..show(context);
       }
     } else {
@@ -208,10 +208,10 @@ class _LoginPageState extends State<LoginPage>
         icon: Icon(
           Icons.notifications_active,
           size: 30.0,
-          color: Colors.yellow,
+          color: Colors.blue,
         ),
         duration: Duration(seconds: 2),
-        leftBarIndicatorColor: Colors.yellow,
+        leftBarIndicatorColor: Colors.blue,
       )..show(context);
     }
 
@@ -315,7 +315,9 @@ class _LoginPageState extends State<LoginPage>
         _password +
         "&DeviceID=" +
         globals.DeviceID +
-        "&DeviceToken=123";
+        "&DeviceToken=123" +
+    "&AppVersion=" +
+        globals.appVersion.toString();
 
     var QueryParameters = <String, String>{
       "SessionID": EncryptSessionID(param),
@@ -325,13 +327,15 @@ class _LoginPageState extends State<LoginPage>
 
     print("Called1111");
 
-    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV4', QueryParameters);
+    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV5', QueryParameters);
      print("Url........." + url.toString());
       var response = await http.get(url, headers: {
         HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
       });
       var responseBody = json.decode(utf8.decode(response.bodyBytes));
-      if (response.statusCode == 200) {
+    print(responseBody.toString());
+
+    if (response.statusCode == 200) {
         print(responseBody.toString());
         if (responseBody["success"] == "true") {
           globals.DisplayName = responseBody['DisplayName'];
@@ -667,9 +671,9 @@ class _LoginPageState extends State<LoginPage>
                       width: MediaQuery.of(context).size.width,
                       //padding: EdgeInsets.all(18.0),
                       decoration: BoxDecoration(
-                          color: Colors.yellow[800],
+                          color: Colors.blue[800],
                           gradient: LinearGradient(
-                              colors: [Colors.red[800], Colors.yellow[400]]),
+                              colors: [Colors.blue,Colors.white]),
                           image: DecorationImage(
                             image: AssetImage("images/backgroundimage.png"),
                             fit: BoxFit.cover,
@@ -762,7 +766,7 @@ class _LoginPageState extends State<LoginPage>
                                                             fontSize: 22.0,
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            color: Colors.yellow),
+                                                            color: Colors.blue),
                                                       ),
 
                                                       SizedBox(
@@ -852,7 +856,7 @@ class _LoginPageState extends State<LoginPage>
                                                             'Local',
                                                             style: TextStyle(
                                                                 color:
-                                                                    Colors.yellow),
+                                                                    Colors.blue),
                                                           ),
                                                           controlAffinity:
                                                               ListTileControlAffinity
@@ -868,7 +872,7 @@ class _LoginPageState extends State<LoginPage>
                                                         child: Material(
                                                           // needed
                                                           color:
-                                                              Colors.yellow[600],
+                                                              Colors.blue[600],
                                                           borderRadius:
                                                               BorderRadius
                                                                   .circular(
@@ -911,9 +915,35 @@ class _LoginPageState extends State<LoginPage>
                                                         delay:
                                                             delayedAmount + 500,
                                                       ),
+
+                                                      Container(
+                                                          height: 45.0,
+                                                          child: Row(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            children: [
+                                                              Image(
+                                                                fit: BoxFit.fill,
+                                                                height: 35,
+                                                                width: 35,
+                                                                image: AssetImage(
+                                                                    'images/logo.png'),
+                                                              ),
+                                                              Text(
+                                                                'Powered by Kale Labs'
+                                                                /*AppLocalizations.of(context).translate('continue_string')*/,
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                    15.0,
+                                                                    color: Colors
+                                                                        .blue),
+                                                              ),
+
+                                                            ],
+                                                          )),
                                                       SizedBox(
                                                         height: 100.0,
                                                       ),
+
                                                     ],
                                                   ))
                                             ]))),

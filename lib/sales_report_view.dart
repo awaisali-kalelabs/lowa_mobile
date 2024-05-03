@@ -130,7 +130,7 @@ class _SalesReportView extends State<SalesReportView> {
             "Sales Report",
             style: TextStyle(fontSize: 15),
           ),
-          backgroundColor: Colors.yellow[800],
+          backgroundColor: Colors.blue[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -392,7 +392,7 @@ class _SalesReportView extends State<SalesReportView> {
 
   Widget itemsList(BuildContext context, int index) {
     return InkWell(
-      splashColor: Colors.yellow,
+      splashColor: Colors.blue,
       onDoubleTap: null,
       child: Column(
         children: <Widget>[

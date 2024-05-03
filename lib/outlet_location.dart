@@ -61,7 +61,7 @@ class _OutletLocation extends State<OutletLocation> {
   @override
   Widget build(BuildContext context) => MaterialApp(
         theme: ThemeData(
-          primarySwatch: Colors.yellow,
+          primarySwatch: Colors.blue,
         ),
         debugShowCheckedModeBanner: false,
         home: Scaffold(

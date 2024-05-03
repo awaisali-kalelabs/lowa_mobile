@@ -1103,7 +1103,7 @@ class _Home extends State<Home> {
                             height: 91.0,
                             child: new DrawerHeader(
                               decoration: BoxDecoration(
-                                color: Colors.yellow[800],
+                                color: Colors.blue[800],
                               ),
                               child: Text(
                                 'Theia',
@@ -1118,7 +1118,7 @@ class _Home extends State<Home> {
                 ListTile(
                   leading: Icon(
                     Icons.file_upload,
-                    color: Colors.yellow,
+                    color: Colors.blue,
                   ),
                   title: Text('Upload Data'),
                   onTap: () async {
@@ -1196,7 +1196,7 @@ class _Home extends State<Home> {
                   color: Colors.grey,
                 ),
                 ListTile(
-                  leading: Icon(Icons.settings, color: Colors.yellow),
+                  leading: Icon(Icons.settings, color: Colors.blue),
                   title: Text('Logout'),
                   onTap: () {
                     globals.Reset();
@@ -1228,7 +1228,7 @@ class _Home extends State<Home> {
             ),
           ),
           appBar: AppBar(
-            backgroundColor: Colors.yellow[800],
+            backgroundColor: Colors.blue[800],
             actions: <Widget>[
               new Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
@@ -1383,14 +1383,14 @@ class _Home extends State<Home> {
                                         child: Text(
                                           "Activities",
                                           style: TextStyle(
-                                              color: Colors.black54,
+                                              color: Colors.blue,
                                               fontSize: 17),
                                         )),
                                   ),
                                   Container(
                                     child: Divider(
                                       height: 1,
-                                      color: Colors.grey,
+                                      color: Colors.blue,
                                     ),
                                   ),
                                   Row(
@@ -1585,14 +1585,14 @@ class _Home extends State<Home> {
                                         child: Text(
                                           "Reports",
                                           style: TextStyle(
-                                              color: Colors.black45,
+                                              color: Colors.blue,
                                               fontSize: 17),
                                         )),
                                   ),
                                   Container(
                                     child: Divider(
                                       height: 1,
-                                      color: Colors.grey,
+                                      color: Colors.blue,
                                     ),
                                   ),
                                   Row(
@@ -2014,7 +2014,7 @@ void main() {
   runApp(
     MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.yellow,
+        primarySwatch: Colors.blue,
       ),
       home: Home(),
     ),

@@ -110,7 +110,7 @@ print(globals.PCI_Channel_Lable);
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.yellow[800],
+          backgroundColor: Colors.blue[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -260,7 +260,7 @@ print(globals.PCI_Channel_Lable);
                                                         BorderRadius.circular(
                                                             0.0),
                                                   ),
-                                                  color: HexColor("ed6f00"),
+                                                  color: HexColor("0000FF"),
                                                   elevation: 2,
                                                   child: Center(
                                                     child: Container(
@@ -337,7 +337,7 @@ print(globals.PCI_Channel_Lable);
                                                         BorderRadius.circular(
                                                             0.0),
                                                   ),
-                                                  color: HexColor("ed6f00"),
+                                                  color: HexColor("0000FF"),
                                                   elevation: 2,
                                                   child: Center(
                                                     child: Container(
@@ -392,7 +392,7 @@ print(globals.PCI_Channel_Lable);
                                                         BorderRadius.circular(
                                                             0.0),
                                                   ),
-                                                  color: HexColor("ed6f00"),
+                                                  color: HexColor("0000FF"),
                                                   elevation: 2,
                                                   child: Center(
                                                     child: Container(
@@ -441,7 +441,7 @@ print(globals.PCI_Channel_Lable);
                                                         BorderRadius.circular(
                                                             0.0),
                                                   ),
-                                                  color: HexColor("ed6f00"),
+                                                  color: HexColor("0000FF"),
                                                   elevation: 2,
                                                   child: Center(
                                                     child: Container(

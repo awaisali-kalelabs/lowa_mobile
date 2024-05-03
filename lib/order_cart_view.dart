@@ -51,6 +51,7 @@ class _OrderCartView extends State<OrderCartView> {
   double priceRate = 0.0;
   double maximumDiscount = 0;
   double defaultDiscount = 0;
+  int DiscountID = 0;
 
   _OrderCartView(int OrderId) {
     this.OrderId = OrderId;
@@ -119,16 +120,17 @@ class _OrderCartView extends State<OrderCartView> {
         isDiscountAllowed = value;
       });
     });
-    repo.getSpotDiscount(globals.productId).then((value) => {
+    repo.getSpotDiscount().then((value) => {
       setState(() {
         if(value==null){
 
-          defaultDiscount = 0;
+          DiscountID = 0;
           maximumDiscount = 0;
           discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
 
         }else{
 
+          DiscountID = value['product_id'];
           defaultDiscount = value['default_discount'];
           maximumDiscount = value['maximum_discount'];
           discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
@@ -150,6 +152,9 @@ class _OrderCartView extends State<OrderCartView> {
     String errorMessage = "Discount cannot be greater than rate";
     if(double.parse(discountController.text)>maximumDiscount){
       errorMessage = "Discount cannot be greater than " + maximumDiscount.toString() + "";
+    }
+    if(double.parse(discountController.text)<defaultDiscount){
+      errorMessage = "Discount cannot be less than " + defaultDiscount.toString() + "";
     }
    // print("check......................................");
    // print("maximumDiscount==> " + maximumDiscount.toString());
@@ -181,10 +186,10 @@ class _OrderCartView extends State<OrderCartView> {
         icon: Icon(
           Icons.notifications_active,
           size: 30.0,
-          color: Colors.yellow,
+          color: Colors.blue,
         ),
         duration: Duration(seconds: 2),
-        leftBarIndicatorColor: Colors.yellow,
+        leftBarIndicatorColor: Colors.blue,
       )..show(context);
     }
   }
@@ -195,7 +200,7 @@ class _OrderCartView extends State<OrderCartView> {
     return Scaffold(
       //backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.yellow[800],
+          backgroundColor: Colors.blue[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -271,7 +276,7 @@ class _OrderCartView extends State<OrderCartView> {
                                                 borderRadius:
                                                 BorderRadius.circular(0.0),
                                               ),
-                                              color: HexColor("ed6f00"),
+                                              color: HexColor("0000FF"),
                                               elevation: 2,
                                               child: Center(
                                                 child: Container(
@@ -320,7 +325,7 @@ class _OrderCartView extends State<OrderCartView> {
                                                 borderRadius:
                                                 BorderRadius.circular(0.0),
                                               ),
-                                              color: HexColor("ed6f00"),
+                                              color: HexColor("0000FF"),
                                               elevation: 2,
                                               child: Center(
                                                 child: Container(
@@ -408,7 +413,7 @@ class _OrderCartView extends State<OrderCartView> {
                                                             TextAlign.center,
                                                           ),
                                                         ),
-                                                        Expanded(
+                                                      /*  Expanded(
                                                           flex: 1,
                                                           child: Text(
                                                             "Disc",
@@ -420,7 +425,7 @@ class _OrderCartView extends State<OrderCartView> {
                                                             textAlign:
                                                             TextAlign.center,
                                                           ),
-                                                        ),
+                                                        ),*/
                                                         Expanded(
                                                           flex: 1,
                                                           child: Text(
@@ -449,7 +454,7 @@ class _OrderCartView extends State<OrderCartView> {
                                                         ),
                                                       ],
                                                     ),
-                                                    color: Colors.yellow,
+                                                    color: Colors.blue,
                                                   ),
                                                   SizedBox(
                                                     height: 10,
@@ -493,7 +498,7 @@ class _OrderCartView extends State<OrderCartView> {
                                                     fontWeight:
                                                     FontWeight.bold,
                                                     color: Colors.white),), alignment: Alignment.centerLeft,
-                                                  color: Colors.yellow,
+                                                  color: Colors.blue,
                                                 ),
                                                 SizedBox(height: 10,),
                                                 Container(
@@ -556,27 +561,24 @@ class _OrderCartView extends State<OrderCartView> {
                                               // width: cardWidth,
                                               padding: EdgeInsets.all(5.0),
                                               child: TextFormField(
-                                                //inputFormatters: [DecimalTextInputFormatter(decimalRange: 2)],
-                                                /*  inputFormatters: [
-                                                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                                                  ],*/
+                                                // Your existing properties...
+                                                enabled: isDiscountAllowed,
+                                                enableInteractiveSelection: isDiscountAllowed,
+                                                controller: discountController,
+                                                keyboardType: TextInputType.number,
+                                                autofocus: false,
+                                                onChanged: (val) {
+                                                  //ToReset Value to initial
+                                                  onDiscountChange(val);
+                                                },
+                                                decoration: InputDecoration(
+                                                  enabledBorder: OutlineInputBorder(
+                                                    borderSide: BorderSide(color: Colors.black12, width: 1.0),
+                                                  ),
+                                                  labelText: 'Discount',
+                                                ),
+                                              )
 
-                                                    enabled: isDiscountAllowed,
-                                                   enableInteractiveSelection: isDiscountAllowed,
-                                                 controller: discountController,
-                                                  keyboardType: TextInputType.number,
-                                                  autofocus: false,
-                                                  onChanged: (val) {
-                                                    //ToReset Value to intital
-                                                    onDiscountChange(val);
-                                                  },
-                                                  decoration: InputDecoration(
-                                                    enabledBorder: const UnderlineInputBorder(
-                                                      borderSide: const BorderSide(
-                                                          color: Colors.black12, width: 0.0),
-                                                    ),
-                                                    labelText: 'Discount',
-                                                  )),
                                             )),
                                       ]
                                     )
@@ -592,7 +594,7 @@ class _OrderCartView extends State<OrderCartView> {
   }
   Widget itemsListPromotion(BuildContext context, int index) {
     return InkWell(
-      splashColor: Colors.yellow,
+      splashColor: Colors.blue,
       onDoubleTap: () {
         print("M tapped");
         _confirmItemDelete(
@@ -637,7 +639,7 @@ class _OrderCartView extends State<OrderCartView> {
   }
   Widget itemsList(BuildContext context, int index) {
     return InkWell(
-      splashColor: Colors.yellow,
+      splashColor: Colors.blue,
       onDoubleTap: () {
         print("M tapped");
         _confirmItemDelete(
@@ -673,7 +675,7 @@ class _OrderCartView extends State<OrderCartView> {
                   ),
                 ),
               ),
-              Expanded(
+            /*  Expanded(
                 flex: 1,
                 child: Text(
                     globals
@@ -682,7 +684,7 @@ class _OrderCartView extends State<OrderCartView> {
                         .toString(),
                     textAlign: TextAlign.right,
                     style: TextStyle(fontSize: 12)),
-              ),
+              ),*/
               Expanded(
                 flex: 1,
                 child: Text(
@@ -914,7 +916,11 @@ class _OrderCartView extends State<OrderCartView> {
             "&accuracy=" +
             AllOrders[i]['accuracy'] +
         "&version=" +
-            appVersion;
+            appVersion +
+            "&Spot_Discount=" +
+            discountController.text +
+      "&Spot_Discount_ID=" +
+            DiscountID.toString();
 
         ORDERIDToDelete = AllOrders[i]['id'];
         await repo
@@ -950,7 +956,7 @@ class _OrderCartView extends State<OrderCartView> {
         };
 
         var url =
-        Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncOrdersV9');
+        Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncOrdersV10');
         print(url);
 
         try {
@@ -964,6 +970,7 @@ class _OrderCartView extends State<OrderCartView> {
           var responseBody = json.decode(utf8.decode(response.bodyBytes));
           print('called4');
           if (response.statusCode == 200) {
+          //  print();
             if (responseBody["success"] == "true") {
               await repo.markOrderUploaded(ORDERIDToDelete);
               //_showDialog("Success","order uploaded. ",1);

@@ -136,7 +136,7 @@ class _OrdersReportView extends State<OrdersReportView> {
             "Orders Report",
             style: TextStyle(fontSize: 15),
           ),
-          backgroundColor: Colors.yellow[800],
+          backgroundColor: Colors.blue[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -157,7 +157,7 @@ class _OrdersReportView extends State<OrdersReportView> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Date: ${OrdersPosition.isNotEmpty ? OrdersPosition[0]["Date"].toString() : ""}',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.yellow),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.blue),
                 ),
               ),
             ),
@@ -167,7 +167,7 @@ class _OrdersReportView extends State<OrdersReportView> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'So Name: ${OrdersPosition.isNotEmpty ? OrdersPosition[0]["SoName"].toString() : ""}',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.yellow),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.blue),
                 ),
               ),
             ),
@@ -177,7 +177,7 @@ class _OrdersReportView extends State<OrdersReportView> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Zone: ${OrdersPosition.isNotEmpty ? OrdersPosition[0]["Zone"].toString() : ""}',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.yellow // Change this color to whatever you prefer
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.blue // Change this color to whatever you prefer
                   ),
                 ),
               ),
@@ -188,7 +188,7 @@ class _OrdersReportView extends State<OrdersReportView> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Area: ${OrdersPosition.isNotEmpty ? OrdersPosition[0]["Area"].toString() : ""}',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.yellow // Change this color to whatever you prefer
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.blue // Change this color to whatever you prefer
                   ),
                 ),
               ),

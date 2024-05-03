@@ -312,7 +312,7 @@ class _OutletCloseState extends State<OutletClose> {
   Widget build(BuildContext context) {
     return  Scaffold(
 
-        appBar: AppBar(backgroundColor: Colors.yellow[800],
+        appBar: AppBar(backgroundColor: Colors.blue[800],
           title: Text(
             globals.OutletID.toString() + " - " + globals.OutletName,
             style: new TextStyle(color: Colors.white, fontSize: 14),
@@ -330,7 +330,7 @@ class _OutletCloseState extends State<OutletClose> {
         bottomNavigationBar: BottomAppBar(
           shape: CircularNotchedRectangle(),
           notchMargin: 4.0,
-          color: Colors.yellow[100],
+          color: Colors.blue[100],
           child: new Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -339,7 +339,7 @@ class _OutletCloseState extends State<OutletClose> {
               RawMaterialButton(
                 //fillColor: Colors.teal,
                 elevation: 0,
-                splashColor: Colors.yellow,
+                splashColor: Colors.blue,
                 textStyle: TextStyle(color: Colors.white),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -360,7 +360,7 @@ class _OutletCloseState extends State<OutletClose> {
               RawMaterialButton(
                  // fillColor: Colors.teal,
                   elevation: 0,
-                  splashColor: Colors.yellow,
+                  splashColor: Colors.blue,
                   textStyle: TextStyle(color: Colors.white),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

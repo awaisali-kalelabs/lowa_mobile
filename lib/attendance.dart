@@ -121,12 +121,12 @@ class _Attendance extends State<Attendance> {
     cardWidth = width / 1.1;
     return MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.yellow,
+        primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
           appBar: AppBar(
-              backgroundColor: Colors.yellow[800],
+              backgroundColor: Colors.blue[800],
               /*title: Text(
                 globals.OutletID.toString() + " - " + globals.OutletName,
                 style: new TextStyle(color: Colors.white, fontSize: 14),

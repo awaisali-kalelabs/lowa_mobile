@@ -311,10 +311,10 @@ class _NoOrder extends State<NoOrder> {
             icon: Icon(
               Icons.notifications_active,
               size: 30.0,
-              color: Colors.yellow[800],
+              color: Colors.blue[800],
             ),
             duration: Duration(seconds: 2),
-            leftBarIndicatorColor: Colors.yellow[800],
+            leftBarIndicatorColor: Colors.blue[800],
           )..show(context);
         }
       }
@@ -463,7 +463,7 @@ class _NoOrder extends State<NoOrder> {
               print("Radio Tile pressed $val");
               setNoOrderReason(val);
             },
-            activeColor: Colors.orange[200],
+            activeColor: Colors.blue[200],
             selected: true,
           ),
         )
@@ -479,12 +479,12 @@ class _NoOrder extends State<NoOrder> {
     cardWidth = width / 1.1;
     return MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.yellow,
+        primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.yellow[800],
+          backgroundColor: Colors.blue[800],
           title: Text(
             globals.OutletID.toString() + " - " + globals.OutletName,
             style: new TextStyle(color: Colors.white, fontSize: 14),
@@ -537,10 +537,10 @@ class _NoOrder extends State<NoOrder> {
                       icon: Icon(
                         Icons.notifications_active,
                         size: 30.0,
-                        color: Colors.yellow[800],
+                        color: Colors.blue[800],
                       ),
                       duration: Duration(seconds: 2),
-                      leftBarIndicatorColor: Colors.yellow[800],
+                      leftBarIndicatorColor: Colors.blue[800],
                     )..show(context);
                   }
                 }

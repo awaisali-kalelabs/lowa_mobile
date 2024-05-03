@@ -136,10 +136,10 @@ class _OutletRegisteration extends State<OutletRegisteration> {
         icon: Icon(
           Icons.notifications_active,
           size: 30.0,
-          color: Colors.yellow[800],
+          color: Colors.blue[800],
         ),
         duration: Duration(seconds: 2),
-        leftBarIndicatorColor: Colors.yellow[800],
+        leftBarIndicatorColor: Colors.blue[800],
       )..show(context);
     }
   }
@@ -232,7 +232,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.yellow[800],
+          backgroundColor: Colors.blue[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -745,7 +745,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  color: Colors.redAccent,
+                                  color: Colors.blue,
                                   child: Text(
                                     'Get GPS Location',
                                     style: TextStyle(color: Colors.white),

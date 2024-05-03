@@ -82,7 +82,7 @@ class _StockReportView extends State<StockReportView> {
         //backgroundColor: Colors.white,
         appBar: AppBar(
           title: Text("Stock Position", style: TextStyle(fontSize: 15),),
-          backgroundColor: Colors.yellow[800],
+          backgroundColor: Colors.blue[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -170,7 +170,7 @@ class _StockReportView extends State<StockReportView> {
                                                   ),
                                                 ],
                                               ),
-                                              color: Colors.redAccent,
+                                              color: Colors.blue,
                                             ),
                                             SizedBox(
                                               height: 10,
@@ -214,7 +214,7 @@ class _StockReportView extends State<StockReportView> {
     }
 
     return InkWell(
-      splashColor: Colors.yellow,
+      splashColor: Colors.blue,
       onDoubleTap: null,
       child: Column(
         children: <Widget>[

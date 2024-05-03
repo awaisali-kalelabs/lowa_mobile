@@ -87,7 +87,7 @@ class SalesReportSelectDateState extends State<SalesReportSelectDate> {
             "Sales Report",
             style: TextStyle(fontSize: 15),
           ),
-          backgroundColor: Colors.yellow[800],
+          backgroundColor: Colors.blue[800],
           actions: <Widget>[
             ElevatedButton(
               style: ElevatedButton.styleFrom(

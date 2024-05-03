@@ -141,10 +141,10 @@ class _OutletOrderImage extends State<OutletOrderImage> {
         icon: Icon(
           Icons.notifications_active,
           size: 30.0,
-          color: Colors.yellow[800],
+          color: Colors.blue[800],
         ),
         duration: Duration(seconds: 2),
-        leftBarIndicatorColor: Colors.yellow[800],
+        leftBarIndicatorColor: Colors.blue[800],
       )..show(context);
     }
   }
@@ -181,13 +181,13 @@ class _OutletOrderImage extends State<OutletOrderImage> {
                     child: Container(
                       padding: const EdgeInsets.all(10.0),
                       child: const Text('Next',
-                          style: TextStyle(fontSize: 20, color: Colors.yellow)),
+                          style: TextStyle(fontSize: 20, color: Colors.blue)),
                     ),
                   )
                 ]),
           ),
           appBar: AppBar(
-              backgroundColor: Colors.yellow[800],
+              backgroundColor: Colors.blue[800],
               actions: <Widget>[
                 new Padding(
                   padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),

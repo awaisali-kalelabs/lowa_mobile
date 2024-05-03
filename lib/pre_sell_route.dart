@@ -101,12 +101,13 @@ class _PreSellRoute extends State<PreSellRoute> {
     return true;
 
   }
+/*
   Widget _getOutletsList(BuildContext context, int index) {
     var color = Colors.white;
     if (PreSellOutlets[index]['visit_type'] == 1) {
       color = Colors.green[100];
     } else if (PreSellOutlets[index]['visit_type'] == 2) {
-      color = Colors.orange[100];
+      color = Colors.blue[100];
     } else if (PreSellOutlets[index]['visit_type'] == 3) {
       color = Colors.purple[100];
     }
@@ -148,7 +149,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   IconButton(
-                      icon: Icon(Icons.directions, color: Colors.yellow),
+                      icon: Icon(Icons.directions, color: Colors.blue),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -169,7 +170,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                         );
                       }),
                   IconButton(
-                      icon: Icon(Icons.phone, color: Colors.yellow),
+                      icon: Icon(Icons.phone, color: Colors.blue),
                       onPressed: () async {
                         var url = "tel:" +
                             PreSellOutlets[index]['telephone'].toString();
@@ -202,9 +203,11 @@ class _PreSellRoute extends State<PreSellRoute> {
                   style: TextStyle(fontSize: 16),
                 )
                     : Container(),
-                /*Text('Rs. '+
+                */
+/*Text('Rs. '+
                     PreSellOutlets[index]['net_amount'].toString() + "",
-                    style: new TextStyle(fontSize: 16))*/
+                    style: new TextStyle(fontSize: 16))*//*
+
               ],
             ),
           ),
@@ -212,6 +215,7 @@ class _PreSellRoute extends State<PreSellRoute> {
       ],
     );
   }
+*/
 
   double cardWidth = 0.0;
 
@@ -226,12 +230,12 @@ class _PreSellRoute extends State<PreSellRoute> {
             ),
         child: MaterialApp(
           theme: ThemeData(
-            primarySwatch: Colors.yellow,
+            primarySwatch: Colors.blue,
           ),
           debugShowCheckedModeBanner: false,
           home: Scaffold(
               appBar: AppBar(
-                backgroundColor: Colors.yellow[800],
+                backgroundColor: Colors.blue[800],
                 leading: IconButton(
                     icon: Icon(Icons.arrow_back),
                     color: Colors.white,
@@ -350,7 +354,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                               ],
                               color: Colors.white,
                               selectedColor: Colors.white,
-                              fillColor: Colors.red,
+                              fillColor: Colors.blue,
                               focusColor: Colors.green,
                               splashColor: Colors.lightBlueAccent,
                               highlightColor: Colors.grey,
@@ -449,7 +453,117 @@ class _PreSellRoute extends State<PreSellRoute> {
                                         itemCount: PreSellOutlets != null
                                             ? PreSellOutlets.length
                                             : 0,
-                                        itemBuilder: _getOutletsList,
+                                          itemBuilder: (context, index) {
+                                          var color = Colors.white;
+                                          if (PreSellOutlets[index]['visit_type'] == 1) {
+                                            color = Colors.green[100];
+                                          } else if (PreSellOutlets[index]['visit_type'] == 2) {
+                                            color = Colors.blue[100];
+                                          } else if (PreSellOutlets[index]['visit_type'] == 3) {
+                                            color = Colors.purple[100];
+                                          }
+                                          return Column(
+                                            children: <Widget>[
+                                              index == 0 ? Container() : Divider(),
+                                              Container(
+                                                color: color,
+                                                child: ListTile(
+                                                  enabled: PreSellOutlets[index]['is_delivered'] == 1 ? false : true,
+                                                  onTap: () async {
+                                                    globals.OutletID = PreSellOutlets[index]['outlet_id'];
+                                                    globals.OutletAddress = PreSellOutlets[index]['address'];
+                                                    globals.OutletName = PreSellOutlets[index]['outlet_name'];
+                                                    globals.OutletNumber = PreSellOutlets[index]['telephone'];
+                                                    globals.OutletOwner = PreSellOutlets[index]['owner'];
+                                                    globals.Lat = double.parse(PreSellOutlets[index]['lat']);
+                                                    globals.Lng = double.parse(PreSellOutlets[index]['lng']);
+                                                    globals.VisitType = int.parse(PreSellOutlets[index]['visit_type'].toString());
+                                                    globals.PCI_Channel_ID = PreSellOutlets[index]['pic_channel_id'];
+                                                    globals.PCI_Channel_Lable = PreSellOutlets[index]['channel_label'].toString();
+                                                    globals.order_created_on_date = PreSellOutlets[index]['order_created_on_date'];
+                                                    globals.common_outlets_vpo_classifications= PreSellOutlets[index]['common_outlets_vpo_classifications'];
+                                                    globals.Visit=PreSellOutlets[index]['Visit'];
+
+                                                    await repo.deleteAllIncompleteOrder(PreSellOutlets[index]['outlet_id']);
+                                                    globals.OutletIdforupdate = PreSellOutlets[index]['outlet_id'];
+
+                                                    Navigator.push(
+                                                        context,
+                                                        //
+                                                        MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                OutletOrderImage(outletId: globals.OutletID)));
+                                                  },
+                                                  trailing: Container(
+                                                    width: 110,
+                                                    child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.end,
+                                                      children: <Widget>[
+                                                        IconButton(
+                                                            icon: Icon(Icons.directions, color: Colors.blue),
+                                                            onPressed: () {
+                                                              Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                    builder: (context) => OutletLocation(
+                                                                      address: PreSellOutlets[index]['address']
+                                                                          .toString(),
+                                                                      name: PreSellOutlets[index]['outlet_name']
+                                                                          .toString(),
+                                                                      lat: double.parse(
+                                                                          PreSellOutlets[index]['lat']),
+                                                                      lng: double.parse(
+                                                                          PreSellOutlets[index]['lng']),
+
+
+
+                                                                    )),
+                                                              );
+                                                            }),
+                                                        IconButton(
+                                                            icon: Icon(Icons.phone, color: Colors.blue),
+                                                            onPressed: () async {
+                                                              var url = "tel:" +
+                                                                  PreSellOutlets[index]['telephone'].toString();
+                                                              if (await canLaunch(url)) {
+                                                                await launch(url);
+                                                              } else {
+                                                                throw 'Could not launch $url';
+                                                              }
+                                                            }),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  title: Text(
+                                                      PreSellOutlets[index]['outlet_id'].toString() +
+                                                          " - " +
+                                                          PreSellOutlets[index]['outlet_name'],
+                                                      style: new TextStyle(fontSize: 16)),
+                                                  subtitle: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisSize: MainAxisSize.max,
+                                                    children: <Widget>[
+                                                      Text(PreSellOutlets[index]['address'],
+                                                          style: new TextStyle(fontSize: 16)),
+                                                      PreSellOutlets[index]['area_label'] != null
+                                                          ? Text(
+                                                        (PreSellOutlets[index]['area_label'] ?? "Empty") +
+                                                            ", " +
+                                                            (PreSellOutlets[index]['sub_area_label'] ?? "Empty"),
+                                                        style: TextStyle(fontSize: 16),
+                                                      )
+                                                          : Container(),
+                                                      /*Text('Rs. '+
+                    PreSellOutlets[index]['net_amount'].toString() + "",
+                    style: new TextStyle(fontSize: 16))*/
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          );
+                                        },
                                       )),
                                     ],
                                   )),

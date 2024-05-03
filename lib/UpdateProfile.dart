@@ -179,7 +179,7 @@ class _Updateprofile extends State<Updateprofile> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.yellow[800],
+          backgroundColor: Colors.blue[800],
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               color: Colors.white,
@@ -576,7 +576,7 @@ class _Updateprofile extends State<Updateprofile> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  color: Colors.redAccent,
+                                  color: Colors.blue,
                                   child: Text(
                                     'Update Location',
                                     style: TextStyle(color: Colors.white),
