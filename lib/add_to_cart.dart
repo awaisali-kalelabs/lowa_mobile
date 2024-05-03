@@ -45,7 +45,7 @@ class _AddToCart extends State<AddToCart> {
 
   TextEditingController rateController = TextEditingController();
   TextEditingController stockController = TextEditingController();
-  TextEditingController discountController = TextEditingController();
+ // TextEditingController discountController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   List<bool> isSelected = [false, false, false, false, false, false, false];
@@ -83,7 +83,7 @@ class _AddToCart extends State<AddToCart> {
   void initState() {
     //AddToCartReasons=new List();
     AddToCartReason = 0;
-    discountController.text = "0";
+   // discountController.text = "0";
     myFocusNode = FocusNode();
     Future.delayed(const Duration(seconds: 1), () async {
       // myFocusNode.requestFocus();
@@ -118,13 +118,13 @@ class _AddToCart extends State<AddToCart> {
 
           defaultDiscount = 0;
           maximumDiscount = 0;
-          discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
+        //  discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
 
         }else{
 
           defaultDiscount = value['default_discount'];
           maximumDiscount = value['maximum_discount'];
-          discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
+         // discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
 
         }
         print("maximumDiscount : " + maximumDiscount.toString());
@@ -311,7 +311,7 @@ print('Remainder'+Remainder.toString());
         isQuantityNotAdded = false;
         amountController.text = "";
         quantityController.text = "";
-        discountController.text = "";
+        //discountController.text = "";
 
         ProductsPrice = val;
         if (ProductsPrice.isNotEmpty) {
@@ -358,14 +358,14 @@ print('Remainder'+Remainder.toString());
     priceRateAfterDiscount = priceRate;
 
     String errorMessage = "Discount cannot be greater than rate";
-    if(double.parse(discountController.text)>maximumDiscount){
+  /*  if(double.parse(discountController.text)>maximumDiscount){
       errorMessage = "Discount cannot be greater than " + maximumDiscount.toString() + "";
-    }
-    print("check......................................");
-    print("maximumDiscount==> " + maximumDiscount.toString());
-    print("discountController 1==> " + discountController.text.toString());
+    }*/
+  //  print("check......................................");
+   // print("maximumDiscount==> " + maximumDiscount.toString());
+    //print("discountController 1==> " + discountController.text.toString());
 
-    if (double.parse(discountController.text) < priceRate && double.parse(discountController.text)<=maximumDiscount) {
+  /*  if (double.parse(discountController.text) < priceRate && double.parse(discountController.text)<=maximumDiscount) {
       priceRateAfterDiscount = priceRate - double.parse(discountController.text);
       print("discountController==> " + discountController.text.toString());
       print("priceRateAfterDiscount==> " + priceRateAfterDiscount.toString());
@@ -396,7 +396,7 @@ print('Remainder'+Remainder.toString());
         duration: Duration(seconds: 2),
         leftBarIndicatorColor: Colors.blue,
       )..show(context);
-    }
+    }*/
     if (int.parse(quantityController.text) !=
         0) {
       double amount = 0;
@@ -492,9 +492,9 @@ print('Remainder'+Remainder.toString());
                                           print("==========");
                                           quantityController.text=val;
                                           print("priceRate" + priceRate.toString());
-                                          print("discountController" + discountController.text.toString());
+                                        //  print("discountController" + discountController.text.toString());
 
-                                          priceRateAfterDiscount = priceRate - double.parse(discountController.text);
+                                          priceRateAfterDiscount = priceRate;
                                           double price = double.parse(val) *
                                               priceRateAfterDiscount;
                                           amountController.text =
