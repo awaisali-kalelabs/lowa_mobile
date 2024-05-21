@@ -718,7 +718,7 @@ if( globals.IsOutletLocationUpdate == 1){
                                                     child: Column(
                                                       children: <Widget>[
                                                         Image.asset(
-                                                          "assets/images/merchandising.png",
+                                                          "assets/images/updatelocation.png",
                                                           width: 55,
                                                         ),
                                                         Padding(

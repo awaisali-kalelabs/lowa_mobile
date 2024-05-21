@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:intl/intl.dart';
 
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/cupertino.dart';
@@ -482,9 +483,10 @@ class _Updatelocattion extends State<Updatelocattion> {
   }
 
   Future _OutletLocationUpdate(context) async {
+    DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
+    String currDateTime = dateFormat.format(DateTime.now());
 
-
-    String outletRegisterationsParams = "updated_on=" +
+    String outletRegisterationsParams = "timestamp=" +
         globals.getCurrentTimestamp() +
         "&outlet_id=" +
         globals.OutletID.toString() +
@@ -498,8 +500,6 @@ class _Updatelocattion extends State<Updatelocattion> {
         globals.DeviceID +
         "&updated_by=" +
         globals.UserID.toString();
-    print("outletRegisterationsParams:" + outletRegisterationsParams);
-
     print("outletRegisterationsParams:" + outletRegisterationsParams);
 
         /* String orderParam="timestamp="+globa+"&order_no="+AllOrders[i]['id'].toString()+"&outlet_id="+ globals.OutletID.toString()+"&created_on="+AllOrders[i]['created_on'].toString()+"&created_by=100450&uuid=656d30b8182fea88&platform=android&lat="+globals.currentPosition.latitude.toString()+"&lng="+globals.currentPosition.longitude.toString()+"&accuracy=21";
@@ -522,7 +522,7 @@ class _Updatelocattion extends State<Updatelocattion> {
               body: QueryParameters);
 
           var responseBody = json.decode(utf8.decode(response.bodyBytes));
-          print('called4');
+          print('called4' + responseBody.toString());
           if (response.statusCode == 200) {
             if (responseBody["success"] == "true") {
 repo.UpdateOutletLocation(globals.OutletID, NewLatController.text , NewLongController.text , NewAccuracyController.text);
@@ -538,7 +538,6 @@ repo.UpdateOutletLocation(globals.OutletID, NewLatController.text , NewLongContr
           }
         } catch (e) {
           print("Inside Catch");
-
           print("Error: An error has occured: " + e.toString());
         }
 
