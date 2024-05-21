@@ -43,7 +43,7 @@ class Repository {
       // Set the path to the database. Note: Using the `join` function from the
       // `path` package is best practice to ensure the path is correctly
       // constructed for each platform.
-      join(await getDatabasesPath(), 'delivery_managerV63.db'),
+      join(await getDatabasesPath(), 'delivery_managerV68.db'),
       // When the database is first created, create a table to store dogs.
       onUpgrade: _onUpgrade,
       onCreate: (db, version) {
@@ -64,7 +64,7 @@ class Repository {
         db.execute(
             "CREATE TABLE products( product_id INTEGER,product_label TEXT,package_id INTEGER,package_label TEXT,sort_order INTEGER,brand_id INTEGER,brand_label TEXT,unit_per_case INTEGER,lrb_type_id INTEGER);");
         db.execute(
-            "CREATE TABLE pre_sell_outlets2(outlet_id INTEGER,outlet_name TEXT,day_number INTEGER,owner TEXT ,address TEXT,telephone TEXT,nfc_tag_id TEXT, visit_type INTEGER,lat TEXT,lng TEXT,area_label TEXT, sub_area_label TEXT,is_alternate_visible INTEGER,pic_channel_id TEXT, channel_label TEXT, order_created_on_date TEXT, common_outlets_vpo_classifications TEXT , Visit TEXT, purchaser_name TEXT, purchaser_mobile_no TEXT, cache_contact_nic TEXT)");
+            "CREATE TABLE pre_sell_outlets2(outlet_id INTEGER,outlet_name TEXT,day_number INTEGER,owner TEXT ,address TEXT,telephone TEXT,nfc_tag_id TEXT, visit_type INTEGER,lat TEXT,lng TEXT,accuracy TEXT,area_label TEXT, sub_area_label TEXT,is_alternate_visible INTEGER,pic_channel_id TEXT, channel_label TEXT, order_created_on_date TEXT, common_outlets_vpo_classifications TEXT , Visit TEXT, purchaser_name TEXT, purchaser_mobile_no TEXT, cache_contact_nic TEXT,IsGeoFence INTEGER,Radius INTEGER)");
 
         db.execute("CREATE TABLE product_lrb_types(id INTEGER,label TEXT)");
 
@@ -80,7 +80,7 @@ class Repository {
         db.execute(
             "CREATE TABLE outlet_order_items(id INTEGER,source_id INTEGER,order_id INTEGER,product_id INTEGER,discount REAL,quantity INTEGER,amount REAL,created_on TEXT,rate REAL,product_label TEXT, unit_quantity INTEGER, is_promotion INTEGER, promotion_id INTEGER)");
         db.execute(
-            "CREATE TABLE users(user_id INTEGER,display_name TEXT,designation TEXT,distributor_employee_id TEXT,password TEXT, created_on TEXT, department TEXT)");
+            "CREATE TABLE users(user_id INTEGER,display_name TEXT,designation TEXT,distributor_employee_id TEXT,password TEXT, created_on TEXT, department TEXT , IsOutletLocationUpdate INTEGER)");
         db.execute("CREATE TABLE no_order_reasons(id INTEGER,label TEXT)");
         db.execute(
             "CREATE TABLE outlet_no_orders(id INTEGER,outlet_id INTEGER,reason_type_id INTEGER,is_uploaded INTEGER,uuid TEXT,created_on TEXT,lat TEXT,lng TEXT,accuracy TEXT )");
@@ -184,7 +184,17 @@ class Repository {
       //print(error);
     }
   }
+  Future<List<Map<String, dynamic>>>  SelectOutletByID(int outletId) async {
+    await this.initdb();
+    final Database db = await database;
 
+    // Query the table for all The Dogs.
+    List args = new List();
+    args.add(outletId);
+
+    final List<Map> maps =  await db.rawQuery('Select *from  pre_sell_outlets2 where outlet_id=?1 ', args);
+    return maps;
+  }
   Future<void> insertPromotionsProductsFree(promotion_id,package_id,total_units, package_label, brand_id, brand_label, unit_per_case, product_id) async {
     await this.initdb();
     final Database db = await database;
@@ -1933,6 +1943,23 @@ class Repository {
 
 
 
+
+  Future UpdateOutletLocation(int outlet_id, String lat, String lng, String accuracy) async {
+    print("markAttendanceUploaded id" + outlet_id.toString());
+    await this.initdb();
+    final Database db = await database;
+
+    try {
+      await db.rawUpdate(
+          'UPDATE pre_sell_outlets2 SET lat = ?, lng = ?, accuracy = ? WHERE outlet_id = ?',
+          [lat, lng, accuracy, outlet_id]
+      );
+    } catch (error) {
+      print("markAttendanceUploaded ==>> " + error.toString());
+    }
+
+    return true;
+  }
 
   Future markAttendanceUploaded(int id) async {
     print("markAttendanceUploaded id"+id.toString());

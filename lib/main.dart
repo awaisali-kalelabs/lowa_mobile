@@ -327,7 +327,7 @@ class _LoginPageState extends State<LoginPage>
 
     print("Called1111");
 
-    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV5', QueryParameters);
+    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUser', QueryParameters);
      print("Url........." + url.toString());
       var response = await http.get(url, headers: {
         HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
@@ -357,9 +357,11 @@ class _LoginPageState extends State<LoginPage>
             'department': responseBody['Department'],
             'distributor_employee_id': responseBody['DistributorEmployeeId'],
             'password': _password,
-            'created_on': DateTime.now().toString()
+            'created_on': DateTime.now().toString(),
+            'IsOutletLocationUpdate': responseBody['IsOutletLocationUpdate'].toString()
           }));
-
+          globals.IsOutletLocationUpdate = responseBody['IsOutletLocationUpdate'];
+          print("IsOutletLocationUpdate "+globals.IsOutletLocationUpdate.toString());
           print(User.fromJson({
             'user_id': responseBody['UserID'],
             'display_name': responseBody['DisplayName'],
@@ -379,7 +381,7 @@ class _LoginPageState extends State<LoginPage>
           repo.deleteNoOrderReasons();
 
           List ProductGroupRows = responseBody['ProductGroupRows'];
-          print(ProductGroupRows);
+          print("===="+ProductGroupRows.toString());
           if (ProductGroupRows == null) {
             _showDialog("Error", "Product group is not assigned to this user");
           } else {

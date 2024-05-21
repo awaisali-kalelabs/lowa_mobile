@@ -10,7 +10,7 @@ import 'package:order_booker/com/pbc/dao/repository.dart';
 import 'package:order_booker/home.dart';
 import 'package:permission_handler/permission_handler.dart';
 //wildspace1@%88
-String appVersion = "v1.5";
+String appVersion = "v1.7";
 final oCcy = new NumberFormat("#,##0");
 final oCcy1 = new NumberFormat("#,##0.##");
 double maxDiscountPercentage = 0;
@@ -23,6 +23,13 @@ int sparkMobileRequestId = 0;
 //for Item_Quantity check
 int Rate  = 0;
 //
+int IsGeoFence=0;
+String IsGeoFenceLat="";
+String IsGeoFenceLng="";
+int Radius = 0;
+double channellat = 0.0;
+double channellng = 0.0;
+double channelacc=0.0;
 String DeviceID = "";
 int UserID = 0;
 int isLocalLoggedIn = 0;
@@ -37,7 +44,7 @@ String OutletImagePath = "";
 // Channel tagging
 String channelTag="";
 int channelTagId;
-
+int IsOutletLocationUpdate =0 ;
 ////////////////
 int VisitType = 0;
 int DispatchID = 0;

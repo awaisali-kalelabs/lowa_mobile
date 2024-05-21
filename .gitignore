@@ -41,7 +41,6 @@ app.*.symbols
 app.*.map.json
 
 
-/android/
 /ios/
 /web/
 /windows/

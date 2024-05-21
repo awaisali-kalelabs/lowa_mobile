@@ -12,6 +12,7 @@ import 'package:order_booker/shopAction.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'globals.dart' as globals;
+import 'globals.dart';
 import 'home.dart';
 
 // This app is a stateful, it tracks the user's current choice.

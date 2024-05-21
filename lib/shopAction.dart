@@ -16,6 +16,7 @@ import 'package:order_booker/pre_sell_route.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'Outlet_sales_report_select_date.dart';
+import 'UpdateLocation.dart';
 import 'UpdateProfile.dart';
 import 'globals.dart' as globals;
 import 'orders.dart';
@@ -34,6 +35,7 @@ class _ShopAction extends State<ShopAction> {
   Repository repo = new Repository();
   List OutletOrder = new List();
   int IsOrderPlaced = 0;
+  bool updatecheck = false;
 
 
 
@@ -49,9 +51,12 @@ print(globals.PCI_Channel_Lable);
         IsOrderPlaced = value;
       })
     });
-
+if( globals.IsOutletLocationUpdate == 1){
+  updatecheck = true;
+}else{
+  updatecheck = false;
+}
   }
-
   Future GetOutletOrder() async {
     OutletOrder = await repo.getAllOrders(globals.OutletID, 1);
     setState(() {
@@ -78,7 +83,6 @@ print(globals.PCI_Channel_Lable);
     return true;
 
   }
-
 
   void ShowError(context, String message) {
     Flushbar(
@@ -587,49 +591,6 @@ print(globals.PCI_Channel_Lable);
                                                     ],
                                                   ),
                                                 ))),
-                                        /*
-                                        Expanded(
-                                            child: GestureDetector(
-                                                onTap: () {
-                                                  IsOrderPlaced == 1
-                                                      ? ShowError(context,
-                                                          "Order Already Placed")
-                                                      :
-                                                  Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) => OutletClose()),
-                                                    );
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.all(10),
-                                                  child: Column(
-                                                    children: <Widget>[
-                                                      Image.asset(
-                                                        "assets/images/marked_closed.png",
-                                                        width: 55,
-                                                      ),
-                                                      Padding(
-                                                          padding: EdgeInsets
-                                                              .fromLTRB(
-                                                                  0.0,
-                                                                  5.0,
-                                                                  0.0,
-                                                                  0.0),
-                                                          child: Text(
-                                                            'Mark Close',
-                                                            style: TextStyle(
-                                                                fontSize: 12,
-                                                                color: IsOrderPlaced ==
-                                                                        1
-                                                                    ? Colors
-                                                                        .grey
-                                                                    : Colors
-                                                                        .black),
-                                                          )),
-                                                    ],
-                                                  ),
-                                                ))),*/
                                         Expanded(
                                             child:GestureDetector(
                                                 onTap: () {
@@ -662,12 +623,12 @@ print(globals.PCI_Channel_Lable);
                                                 ))),
                                       ],
                                     ),
+
                                     Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      MainAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-
                                         Expanded(
 
                                           child: GestureDetector(
@@ -680,7 +641,7 @@ print(globals.PCI_Channel_Lable);
                                               );
 
                                             },
-                                          //  padding: EdgeInsets.all(10),
+                                            //  padding: EdgeInsets.all(10),
                                             child: Column(
                                               children: <Widget>[
                                                 Image.asset(
@@ -689,8 +650,8 @@ print(globals.PCI_Channel_Lable);
                                                 ),
                                                 Padding(
                                                     padding:
-                                                        EdgeInsets.fromLTRB(
-                                                            0.0, 5.0, 0.0, 0.0),
+                                                    EdgeInsets.fromLTRB(
+                                                        0.0, 5.0, 0.0, 0.0),
                                                     child: GestureDetector(
 
                                                       child: Text(
@@ -704,7 +665,6 @@ print(globals.PCI_Channel_Lable);
                                             ),
                                           ),
                                         ),
-
                                         Expanded(
 
                                           child: GestureDetector(
@@ -741,13 +701,39 @@ print(globals.PCI_Channel_Lable);
                                             ),
                                           ),
                                         ),
-                        
-                                      
-                                        Expanded(
-                                          child: Container(
-                                            padding: EdgeInsets.all(10),
-                                          ),
-                                        )
+                                        Visibility(
+                                          visible: updatecheck,
+                                          child: Expanded(
+                                              child:GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              Updatelocattion()),
+                                                    );
+                                                  },
+                                                  child: Container(
+                                                    padding: EdgeInsets.all(10),
+                                                    child: Column(
+                                                      children: <Widget>[
+                                                        Image.asset(
+                                                          "assets/images/merchandising.png",
+                                                          width: 55,
+                                                        ),
+                                                        Padding(
+                                                            padding: EdgeInsets.fromLTRB(
+                                                                0.0, 5.0, 0.0, 0.0),
+                                                            child: Text(
+                                                              'Update Location',
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors.black),
+                                                            )),
+                                                      ],
+                                                    ),
+                                                  ))),
+                                        ),
                                       ],
                                     ),
 
