@@ -107,7 +107,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+// import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 
 class DailyReports extends StatelessWidget {
@@ -122,9 +122,9 @@ class DailyReports extends StatelessWidget {
        title: Text("pdf view"),
        backgroundColor: Colors.blue,
      ),
-         body:SfPdfViewer.network(pdfUrl,
-         canShowPaginationDialog: true,
-         pageSpacing: 2.0,),
+         // body:SfPdfViewer.network(pdfUrl,
+         // canShowPaginationDialog: true,
+         // pageSpacing: 2.0,),
     );
   }
 }
