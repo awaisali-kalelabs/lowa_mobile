@@ -29,6 +29,7 @@ import 'package:order_booker/spot_sell_route.dart';
 import 'pre_sell_chart.dart';
 import 'pre_sell_route.dart';
 import 'spot_sell_chart.dart';*/
+import 'daily_reports.dart';
 import 'globals.dart' as globals;
 
 // This app is a stateful, it tracks the user's current choice.
@@ -1774,6 +1775,34 @@ class _Home extends State<Home> {
                                                             0.0, 5.0, 0.0, 0.0),
                                                         child: Text(
                                                           'Attendance Sync',
+                                                          style: TextStyle(
+                                                              color: Colors.black),
+                                                        )),
+                                                  ],
+                                                ),
+                                              ))),Expanded(
+                                          child:GestureDetector(
+                                              onTap: () {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                        DailyReports(pdfUrl: "pdf",)),
+                                                );
+                                              },
+                                               child: Container(
+                                                padding: EdgeInsets.all(10),
+                                                child: Column(
+                                                  children: <Widget>[
+                                                    Image.asset(
+                                                      "assets/images/sync.png",
+                                                      width: 55,
+                                                    ),
+                                                    Padding(
+                                                        padding: EdgeInsets.fromLTRB(
+                                                            0.0, 5.0, 0.0, 0.0),
+                                                        child: Text(
+                                                          'Daily reports',
                                                           style: TextStyle(
                                                               color: Colors.black),
                                                         )),
