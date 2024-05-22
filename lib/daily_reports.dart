@@ -94,8 +94,17 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> downloadFile(String fileUrl) async {
     Dio dio = Dio();
     try {
-      var dir = await getApplicationDocumentsDirectory();
-      String savePath = path.join(dir.path, "files", "downloaded_file.xlsx"); // Updated path
+      Directory downloadsDir;
+
+      // Get the downloads directory path
+      if (Platform.isAndroid) {
+        downloadsDir = await getExternalStorageDirectory();
+        downloadsDir = Directory('/storage/emulated/0/Download');
+      } else if (Platform.isIOS) {
+        downloadsDir = await getApplicationDocumentsDirectory(); // iOS does not have a standard Downloads directory, so using the Documents directory
+      }
+
+      String savePath = path.join(downloadsDir.path, "downloaded_file.xlsx");
       await dio.download(fileUrl, savePath);
       print("File downloaded to $savePath");
     } catch (e) {
