@@ -29,18 +29,18 @@ class MyHomePage extends StatelessWidget {
     DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
     String currDateTime = dateFormat.format(DateTime.now());
 
-    String outletRegisterationsParams = "timestamp=" +
+    String ReportParams = "timestamp=" +
         globals.getCurrentTimestamp() +
         "&psr_id=" +
         globals.UserID.toString();
-    print("outletRegisterationsParams:" + outletRegisterationsParams);
+    print("ReportParams:" + ReportParams);
 
     var queryParameters = <String, String>{
-      "SessionID": globals.EncryptSessionID(outletRegisterationsParams),
+      "SessionID": globals.EncryptSessionID(ReportParams),
     };
     print("QueryParameters " + queryParameters.toString());
     var url = Uri.http(
-        globals.ServerURL, '/portal/mobile/MobileFileDownloadCommonFiles');
+        globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
     print("Server url: " + url.toString());
 
     try {
@@ -50,8 +50,14 @@ class MyHomePage extends StatelessWidget {
           },
           body: queryParameters);
 
+      // Log the raw response body
+      print("Response body: ${response.body}");
+      print("Response statusCode: ${response.statusCode}");
+
+      // Decode the response body
       var responseBody = json.decode(utf8.decode(response.bodyBytes));
-      print('called4' + responseBody.toString());
+      print('Decoded response: ' + responseBody.toString());
+
       if (response.statusCode == 200) {
         if (responseBody["success"] == "true") {
           print("trueeeeeee");
@@ -81,7 +87,6 @@ class MyHomePage extends StatelessWidget {
 
     } catch (e) {
       print("Error: $e");
-
     }
   }
 
