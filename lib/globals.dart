@@ -19,6 +19,7 @@ bool isLoggedIn = false;
 String DisplayName = "Islam Danish";
 
 String ServerURL = "3.78.122.135";
+String fileServerURL = "http://3.78.122.135/portal/mobile/MobileFileDownloadCommonFiles";
 int sparkMobileRequestId = 0;
 //for Item_Quantity check
 int Rate  = 0;
