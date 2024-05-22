@@ -24,7 +24,15 @@ class DailyReports extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  bool isFileReady = false;
+  String fileUrl = "";
+
   Future<void> dailyReports(BuildContext context) async {
     DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
     String currDateTime = dateFormat.format(DateTime.now());
@@ -39,8 +47,8 @@ class MyHomePage extends StatelessWidget {
       "SessionID": globals.EncryptSessionID(ReportParams),
     };
     print("QueryParameters " + queryParameters.toString());
-    var url = Uri.http(
-        globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
+    var url =
+        Uri.http(globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
     print("Server url: " + url.toString());
 
     try {
@@ -50,29 +58,85 @@ class MyHomePage extends StatelessWidget {
           },
           body: queryParameters);
 
-      // Log the raw response body
       print("Response body: ${response.body}");
       print("Response statusCode: ${response.statusCode}");
 
-      // Decode the response body
       var responseBody = json.decode(utf8.decode(response.bodyBytes));
       print('Decoded response: ' + responseBody.toString());
 
       if (response.statusCode == 200) {
         if (responseBody["success"] == "true") {
           print("trueeeeeee");
-          String fileUrl = responseBody["file_url"];
-          await downloadFile(fileUrl);
+          fileUrl = responseBody["fileName"];
+          print("fileUrl" + fileUrl);
+          if (fileUrl != null && fileUrl.isNotEmpty) {
+            setState(() {
+              isFileReady = true;
+              this.fileUrl = fileUrl;
+            });
+          } else {
+            showErrorSnackBar(context, "Error: No file to download");
+          }
         } else {
           print("False Response");
           print("Error:" + responseBody["error_code"]);
         }
       } else {
         print("Status code is not 200");
-        print("Error: An error has occurred: " + response.statusCode.toString());
+        print(
+            "Error: An error has occurred: " + response.statusCode.toString());
       }
     } catch (e) {
       print("Inside Catch");
+      print("Error: An error has occurred: " + e.toString());
+    }
+  }
+
+  Future<void> fetchReports(BuildContext context) async {
+    String ReportParams = "file=" + fileUrl;
+    print("ReportParameter:" + ReportParams);
+
+    var queryParameters = <String, String>{
+      "SessionID": globals.EncryptSessionID(ReportParams),
+    };
+    print("QueryParameters " + queryParameters.toString());
+    var url = Uri.http(
+        globals.ServerURL, '/portal/mobile/MobileFileDownloadCommonFiles');
+    print("Servers urlfor File: " + url.toString());
+
+    try {
+      var response = await http.post(url,
+          headers: {
+            HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
+          },
+          body: queryParameters);
+
+      print("Responsed body File: ${response.body}");
+      print("Responsed statusCode File: ${response.statusCode}");
+
+      var responseBody = json.decode(utf8.decode(response.bodyBytes));
+      print('Decodeded response File: ' + responseBody.toString());
+
+      if (response.statusCode == 200) {
+        if (responseBody["success"] == "true") {
+          print("trueeeeeee response");
+          String downloadUrl = responseBody["file_url"];
+          if (downloadUrl != null && downloadUrl.isNotEmpty) {
+            downloadFile(downloadUrl);
+          } else {
+            showErrorSnackBar(context, "Error: No file downloaded");
+          }
+        } else {
+          print("False Responsed");
+          print("Errors:" + responseBody["error_code"]);
+        }
+      } else {
+        print("Status codess is not 200");
+        print(
+            "Error: An error has occurred: " + response.statusCode.toString());
+      }
+    } catch (e) {
+      print("Inside = Catch");
       print("Error: An error has occurred: " + e.toString());
     }
   }
@@ -84,10 +148,16 @@ class MyHomePage extends StatelessWidget {
       String savePath = "${dir.path}/downloaded_file.xlsx";
       await dio.download(fileUrl, savePath);
       print("File downloaded to $savePath");
-
+      showErrorSnackBar(context, "File downloaded to $savePath");
     } catch (e) {
       print("Error: $e");
+      showErrorSnackBar(context, "Error: Failed to download file");
     }
+  }
+
+  void showErrorSnackBar(BuildContext context, String message) {
+    final snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -97,11 +167,27 @@ class MyHomePage extends StatelessWidget {
         title: Text('Flutter File Download'),
       ),
       body: Center(
+//         child: isFileReady
+//             ? ElevatedButton(
+//           onPressed: () {
+//             fetchReports(context);
+//           },
+//           child: Text('Download File'),
+//         )
+//             : ElevatedButton(
+//           onPressed: () async {
+//             await       dailyReports(context);
+// await            fetchReports(context);
+//
+//           },
+//           child: Text('Create File'),
+//         ),
         child: ElevatedButton(
-          onPressed: () {
-            dailyReports(context);
+          onPressed: () async {
+            await dailyReports(context);
+         await fetchReports(context);
           },
-          child: Text('Download File'),
+          child: Text('Create File'),
         ),
       ),
     );
