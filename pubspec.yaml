@@ -59,6 +59,7 @@ dependencies:
   flushbar: ^1.10.4
   flutter_downloader:
   pdf:
+  dio:
 #  syncfusion_flutter_pdfviewer:
 
 dev_dependencies:

@@ -1,130 +1,104 @@
-// import 'dart:async';
-// import 'dart:io';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_downloader/flutter_downloader.dart';
-// import 'package:path_provider/path_provider.dart';
-// import 'package:http/http.dart' as http;
-// import 'package:pdf/pdf.dart';
-// import 'package:pdf/widgets.dart' as pw;
-// import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await FlutterDownloader.initialize();
-//   runApp(DailyReports());
-// }
-//
-// class DailyReports extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Daily Report PDF Downloader',
-//       theme: ThemeData(
-//         primarySwatch: Colors.blue,
-//       ),
-//       home: MyHomePage(),
-//     );
-//   }
-// }
-//
-// class MyHomePage extends StatefulWidget {
-//   @override
-//   _MyHomePageState createState() => _MyHomePageState();
-// }
-//
-// class _MyHomePageState extends State<MyHomePage> {
-//   String _taskId;
-//
-//   Future<void> _downloadFile() async {
-//     final Directory directory = await getExternalStorageDirectory();
-//     final String path = directory.path;
-//     final String url = 'YOUR_BACKEND_ENDPOINT_HERE'; // Replace with your backend endpoint
-//
-//     final response = await http.get(Uri.parse(url));
-//
-//     final File file = File('$path/report.xlsx');
-//     await file.writeAsBytes(response.bodyBytes);
-//
-//     setState(() {
-//       _taskId = null;
-//     });
-//
-//     await _convertToPdf(file);
-//   }
-//
-//   Future<void> _convertToPdf(File excelFile) async {
-//     final pdf = pw.Document();
-//
-//     // Add PDF content here, you can customize according to your needs
-//     pdf.addPage(
-//       pw.Page(
-//         build: (context) {
-//           return pw.Center(
-//             child: pw.Text('Daily Report'),
-//           );
-//         },
-//       ),
-//     );
-//
-//     final Directory directory = await getExternalStorageDirectory();
-//     final String path = directory.path;
-//
-//     final pdfFile = File('$path/report.pdf');
-//     await pdfFile.writeAsBytes(await pdf.save());
-//
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       SnackBar(
-//         content: Text('PDF Generated Successfully'),
-//       ),
-//     );
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Daily Report PDF Downloader'),
-//       ),
-//       body: Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: <Widget>[
-//             if (_taskId != null) CircularProgressIndicator(),
-//             ElevatedButton(
-//               onPressed: _downloadFile,
-//               child: Text('Download Report as PDF'),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-// import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'globals.dart' as globals;
 
+void main() {
+  runApp(DailyReports());
+}
 
 class DailyReports extends StatelessWidget {
-  final String pdfUrl;
-  DailyReports({@required this.pdfUrl});
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter File Download',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MyHomePage(),
+    );
+  }
+}
+
+class MyHomePage extends StatelessWidget {
+  Future<void> dailyReports(BuildContext context) async {
+    DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
+    String currDateTime = dateFormat.format(DateTime.now());
+
+    String outletRegisterationsParams = "timestamp=" +
+        globals.getCurrentTimestamp() +
+        "&psr_id=" +
+        globals.UserID.toString();
+    print("outletRegisterationsParams:" + outletRegisterationsParams);
+
+    var queryParameters = <String, String>{
+      "SessionID": globals.EncryptSessionID(outletRegisterationsParams),
+    };
+    print("QueryParameters " + queryParameters.toString());
+    var url = Uri.http(
+        globals.ServerURL, '/portal/mobile/MobileFileDownloadCommonFiles');
+    print("Server url: " + url.toString());
+
+    try {
+      var response = await http.post(url,
+          headers: {
+            HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
+          },
+          body: queryParameters);
+
+      var responseBody = json.decode(utf8.decode(response.bodyBytes));
+      print('called4' + responseBody.toString());
+      if (response.statusCode == 200) {
+        if (responseBody["success"] == "true") {
+          print("trueeeeeee");
+          String fileUrl = responseBody["file_url"];
+          await downloadFile(fileUrl);
+        } else {
+          print("False Response");
+          print("Error:" + responseBody["error_code"]);
+        }
+      } else {
+        print("Status code is not 200");
+        print("Error: An error has occurred: " + response.statusCode.toString());
+      }
+    } catch (e) {
+      print("Inside Catch");
+      print("Error: An error has occurred: " + e.toString());
+    }
+  }
+
+  Future<void> downloadFile(String fileUrl) async {
+    Dio dio = Dio();
+    try {
+      var dir = await getApplicationDocumentsDirectory();
+      String savePath = "${dir.path}/downloaded_file.xlsx";
+      await dio.download(fileUrl, savePath);
+      print("File downloaded to $savePath");
+
+    } catch (e) {
+      print("Error: $e");
+
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    return  Scaffold(
-     appBar:AppBar(
-       title: Text("pdf view"),
-       backgroundColor: Colors.blue,
-     ),
-         // body:SfPdfViewer.network(pdfUrl,
-         // canShowPaginationDialog: true,
-         // pageSpacing: 2.0,),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Flutter File Download'),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            dailyReports(context);
+          },
+          child: Text('Download File'),
+        ),
+      ),
     );
   }
 }

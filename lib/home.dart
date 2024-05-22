@@ -1787,7 +1787,7 @@ class _Home extends State<Home> {
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (context) =>
-                                                        DailyReports(pdfUrl: "pdf",)),
+                                                        DailyReports()),
                                                 );
                                               },
                                                child: Container(
