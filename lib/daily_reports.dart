@@ -13,7 +13,7 @@ class DailyReports extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter File Download',
+
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -44,6 +44,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool isFileReady = false;
+  bool isLoading = false;
   String fileUrl = "";
 
   Future<void> dailyReports(BuildContext context) async {
@@ -60,13 +61,16 @@ class _MyHomePageState extends State<MyHomePage> {
       "SessionID": globals.EncryptSessionID(reportParams),
     };
     print("QueryParameters " + queryParameters.toString());
-    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
+    var url =
+        Uri.http(globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
     print("Server url: " + url.toString());
 
     try {
-      var response = await http.post(url, headers: {
-        HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
-      }, body: queryParameters);
+      var response = await http.post(url,
+          headers: {
+            HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
+          },
+          body: queryParameters);
 
       print("Response body: ${response.body}");
       print("Response statusCode: ${response.statusCode}");
@@ -93,8 +97,8 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       } else {
         print("Status code is not 200");
-        print("Error: An error has occurred: " +
-            response.statusCode.toString());
+        print(
+            "Error: An error has occurred: " + response.statusCode.toString());
       }
     } catch (e) {
       print("Inside Catch");
@@ -105,20 +109,25 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> downloadFile(String fileUrl) async {
     Dio dio = Dio();
     try {
+      setState(() {
+        isLoading = true;
+      });
+
       Directory downloadsDir;
 
       // Get the downloads directory path
       if (Platform.isAndroid) {
         downloadsDir = Directory('/storage/emulated/0/Download');
       } else if (Platform.isIOS) {
-        downloadsDir = await getApplicationDocumentsDirectory(); // iOS does not have a standard Downloads directory, so using the Documents directory
+        downloadsDir =
+            await getApplicationDocumentsDirectory(); // iOS does not have a standard Downloads directory, so using the Documents directory
       }
 
       String savePath = path.join(downloadsDir.path, "downloaded_file.xlsx");
 
-      String newFileName = "downloaded_file_${DateTime.now().millisecondsSinceEpoch}.xlsx";
-       savePath = path.join(downloadsDir.path, newFileName);
-
+      String newFileName =
+          "downloaded_file_${DateTime.now().millisecondsSinceEpoch}.xlsx";
+      savePath = path.join(downloadsDir.path, newFileName);
 
       await dio.download(fileUrl, savePath);
       print("File downloaded to $savePath");
@@ -126,9 +135,13 @@ class _MyHomePageState extends State<MyHomePage> {
       // Reset the isFileReady state after download is complete
       setState(() {
         isFileReady = false;
+        isLoading = false;
       });
     } catch (e) {
       print("Error: $e");
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -141,15 +154,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Daily Report file'),
+        title: Text('Daily Sales Report'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      Home()),
+              MaterialPageRoute(builder: (context) => Home()),
             );
           },
         ),
@@ -158,23 +169,34 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Tap on button to download orders file",style: TextStyle(fontSize: 16,color: Colors.black87),),
-            SizedBox(height: 20,),
-            isFileReady
-                ? ElevatedButton(
-              onPressed: () async {
-                await downloadFile(
-                    globals.fileServerURL + "?file=" + fileUrl);
-                showErrorSnackBar(context, "File downloaded");
-              },
-              child: Text('Download File'),
-            )
-                : ElevatedButton(
-              onPressed: () async {
-                await dailyReports(context);
-              },
-              child: Text('Create File'),
+            Text(
+              "Tap on button to ${isFileReady ? 'download' : 'create'} file",
+              style: TextStyle(fontSize: 16, color: Colors.black87),
             ),
+            SizedBox(
+              height: 20,
+            ),
+            isLoading
+                ? CircularProgressIndicator()
+                : isFileReady
+                    ? ElevatedButton(
+                        onPressed: () async {
+                          await downloadFile(
+                              globals.fileServerURL + "?file=" + fileUrl);
+                          showErrorSnackBar(context, "File downloaded");
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Home()),
+                          );
+                        },
+                        child: Text('Download File'),
+                      )
+                    : ElevatedButton(
+                        onPressed: () async {
+                          await dailyReports(context);
+                        },
+                        child: Text('Create File'),
+                      ),
           ],
         ),
       ),

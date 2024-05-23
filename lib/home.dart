@@ -70,7 +70,6 @@ class _Home extends State<Home> {
     super.initState();
     globals.stopContinuousLocation();
     _checkTime();
-    _startTimer();
 
     //Navigator.of(context, rootNavigator: true).pop('dialog');
     Repository repo = new Repository();
@@ -184,21 +183,19 @@ class _Home extends State<Home> {
   }
 
   void _checkTime() {
-    DateTime now = DateTime.now();
-    setState(() {
-      if (now.hour == 14 && now.minute >= 00 ) {
-        isAfterFivePM = true;
-      } else {
-        isAfterFivePM = false;
-      }
-    });
-  }
-  void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      _checkTime();
-    });
-  }
+    _timer?.cancel(); // Cancel any existing timer to avoid multiple timers running simultaneously
 
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+      DateTime now = DateTime.now();
+      setState(() {
+        if (now.hour == 15 && now.minute >= 13 && now.minute < 40) {
+          isAfterFivePM = true;
+        } else {
+          isAfterFivePM = false;
+        }
+      });
+    });
+  }
   Widget _getRoutesList(BuildContext context, int index) {
     return Column(
       children: <Widget>[
