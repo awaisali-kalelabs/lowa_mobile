@@ -7,18 +7,30 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'globals.dart' as globals;
-
-void main() {
-  runApp(DailyReports());
-}
+import 'home.dart';
 
 class DailyReports extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter File Download',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            textStyle: TextStyle(fontSize: 18),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+        snackBarTheme: SnackBarThemeData(
+          backgroundColor: Color(0xFF013220),
+          contentTextStyle: TextStyle(color: Colors.white, fontSize: 16),
+          behavior: SnackBarBehavior.floating,
+        ),
       ),
       home: MyHomePage(),
     );
@@ -48,8 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
       "SessionID": globals.EncryptSessionID(reportParams),
     };
     print("QueryParameters " + queryParameters.toString());
-    var url =
-    Uri.http(globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
+    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
     print("Server url: " + url.toString());
 
     try {
@@ -98,7 +109,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
       // Get the downloads directory path
       if (Platform.isAndroid) {
-        downloadsDir = await getExternalStorageDirectory();
         downloadsDir = Directory('/storage/emulated/0/Download');
       } else if (Platform.isIOS) {
         downloadsDir = await getApplicationDocumentsDirectory(); // iOS does not have a standard Downloads directory, so using the Documents directory
@@ -107,6 +117,11 @@ class _MyHomePageState extends State<MyHomePage> {
       String savePath = path.join(downloadsDir.path, "downloaded_file.xlsx");
       await dio.download(fileUrl, savePath);
       print("File downloaded to $savePath");
+
+      // Reset the isFileReady state after download is complete
+      setState(() {
+        isFileReady = false;
+      });
     } catch (e) {
       print("Error: $e");
     }
@@ -121,22 +136,41 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Flutter File Download'),
+        title: Text('Daily Report file'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      Home()),
+            );
+          },
+        ),
       ),
       body: Center(
-        child: isFileReady
-            ? ElevatedButton(
-          onPressed: () async {
-            await downloadFile(
-                globals.fileServerURL + "?file=" + fileUrl);
-          },
-          child: Text('Download File'),
-        )
-            : ElevatedButton(
-          onPressed: () async {
-            await dailyReports(context);
-          },
-          child: Text('Create File'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Tap on button to download orders file",style: TextStyle(fontSize: 16,color: Colors.black87),),
+            SizedBox(height: 20,),
+            isFileReady
+                ? ElevatedButton(
+              onPressed: () async {
+                await downloadFile(
+                    globals.fileServerURL + "?file=" + fileUrl);
+                showErrorSnackBar(context, "File downloaded");
+              },
+              child: Text('Download File'),
+            )
+                : ElevatedButton(
+              onPressed: () async {
+                await dailyReports(context);
+              },
+              child: Text('Create File'),
+            ),
+          ],
         ),
       ),
     );

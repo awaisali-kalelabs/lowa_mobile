@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -15,14 +16,11 @@ import 'package:order_booker/order_report_select_date.dart';
 import 'package:order_booker/outlet_registration.dart';
 import 'package:order_booker/pre_sell_route.dart';
 
-
-
 import 'package:async/async.dart';
 import 'package:order_booker/sales_report_select_date.dart';
 import 'package:order_booker/sales_report_view.dart';
 import 'package:order_booker/stock_report_view.dart';
 import 'package:order_booker/order_sync_report_view.dart';
-
 
 /*import 'package:order_booker/pre_sell_route_offline_deliveries.dart';
 import 'package:order_booker/spot_sell_route.dart';
@@ -57,7 +55,9 @@ class _Home extends State<Home> {
   int totalOutletClosed = 0;
   int pendingVisits = 0;
   int ChartSeries = 0;
-
+  // DateTime now = DateTime.now();
+  bool isAfterFivePM;
+  Timer _timer;
   List<charts.Series<GaugeSegment, String>> series = null;
   List<Map<String, dynamic>> PreSellRoutes;
 
@@ -69,6 +69,8 @@ class _Home extends State<Home> {
   void initState() {
     super.initState();
     globals.stopContinuousLocation();
+    _checkTime();
+    _startTimer();
 
     //Navigator.of(context, rootNavigator: true).pop('dialog');
     Repository repo = new Repository();
@@ -166,15 +168,35 @@ class _Home extends State<Home> {
       }
     });
     PreSellRoutes = new List();
-    if(globals.isLocalLoggedIn!=1){
-      if(globals.isFromLoginRoute==1){
-        globals.isFromLoginRoute=1;
+    if (globals.isLocalLoggedIn != 1) {
+      if (globals.isFromLoginRoute == 1) {
+        globals.isFromLoginRoute = 1;
         syncStockPosition();
       }
 
       _SyncMarkedAttendancePhoto();
     }
+  }
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
+  void _checkTime() {
+    DateTime now = DateTime.now();
+    setState(() {
+      if (now.hour == 14 && now.minute >= 00 ) {
+        isAfterFivePM = true;
+      } else {
+        isAfterFivePM = false;
+      }
+    });
+  }
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      _checkTime();
+    });
   }
 
   Widget _getRoutesList(BuildContext context, int index) {
@@ -223,10 +245,7 @@ class _Home extends State<Home> {
     );
   }
 
-
-
   Future _UploadOutletMarkClosed() async {
-
     String TimeStamp = globals.getCurrentTimestamp();
     print("currDateTime" + TimeStamp);
     int ORDERIDToDelete = 0;
@@ -264,15 +283,15 @@ class _Home extends State<Home> {
           "SessionID": globals.EncryptSessionID(orderParam),
         };
 
-        var url =
-        Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncOutletClosed');
+        var url = Uri.http(
+            globals.ServerURL, '/portal/mobile/MobileSyncOutletClosed');
         print(url);
 
         try {
           var response = await http.post(url,
               headers: {
                 HttpHeaders.contentTypeHeader:
-                'application/x-www-form-urlencoded'
+                    'application/x-www-form-urlencoded'
               },
               body: QueryParameters);
 
@@ -282,7 +301,8 @@ class _Home extends State<Home> {
             if (responseBody["success"] == "true") {
               await repo.markOutletMarkCloseUploaded(ORDERIDToDelete);
             } else {
-              await _showDialog("Error Uploading Closed Outlets", responseBody["error_code"]);
+              await _showDialog(
+                  "Error Uploading Closed Outlets", responseBody["error_code"]);
             }
           } else {
             // If that response was not OK, throw an error.
@@ -290,8 +310,8 @@ class _Home extends State<Home> {
               isUploaded = 0;
               isAnythingUploaded = 1;
             });
-            _showDialog(
-                "Error Uploading Closed Outlets", "An error has occured " + responseBody.statusCode);
+            _showDialog("Error Uploading Closed Outlets",
+                "An error has occured " + responseBody.statusCode);
           }
         } catch (e) {
           setState(() {
@@ -299,26 +319,22 @@ class _Home extends State<Home> {
             isAnythingUploaded = 1;
           });
           //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          _showDialog("Error Uploading Closed Outlets", "Check your internet connection");
+          _showDialog("Error Uploading Closed Outlets",
+              "Check your internet connection");
           break;
         }
         //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
-
       }
     });
     _UploadOutletMarkClosedPhoto();
   }
 
   Future _UploadOutletMarkClosedPhoto() async {
-
-
     List<Map<String, dynamic>> AllOutletsMarkedClose = new List();
     await repo.getAllOutletMarkClose(1).then((val) async {
       if (!mounted) {
-
         setState(() {
           AllOutletsMarkedClose = val;
-
         });
       }
       // else {
@@ -331,15 +347,16 @@ class _Home extends State<Home> {
       print("OutletClosed" + AllOutletsMarkedClose.toString());
 
       for (int i = 0; i < AllOutletsMarkedClose.length; i++) {
-        int  ORDERIDToDelete = AllOutletsMarkedClose[i]['id'];
-        try{
+        int ORDERIDToDelete = AllOutletsMarkedClose[i]['id'];
+        try {
           print(AllOutletsMarkedClose[i]['image_path']);
-          File photoFile=File(AllOutletsMarkedClose[i]['image_path']);
-          var stream =new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
+          File photoFile = File(AllOutletsMarkedClose[i]['image_path']);
+          var stream =
+              new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
           var length = await photoFile.length();
 
-          var url =
-          Uri.http(globals.ServerURL, '/portal/mobile/MobileUploadOutletClosedImage');
+          var url = Uri.http(globals.ServerURL,
+              '/portal/mobile/MobileUploadOutletClosedImage');
           print(url);
 
           String fileName = photoFile.path.split('/').last;
@@ -347,29 +364,25 @@ class _Home extends State<Home> {
           var request = new http.MultipartRequest("POST", url);
           request.fields['value1'] = AllOutletsMarkedClose[i]['id'].toString();
 
-          var multipartFile = new http.MultipartFile('file', stream, length,filename: fileName);
+          var multipartFile = new http.MultipartFile('file', stream, length,
+              filename: fileName);
           // var multipartFile = new http.MultipartFile.fromString("file", photoFile.path);
           request.files.add(multipartFile);
           var response = await request.send();
           print(response.statusCode);
           if (response.statusCode == 200) {
-
             await repo.markOutletMarkCloseUploadedPhoto(ORDERIDToDelete);
-
           } else {
             // If that response was not OK, throw an error.
             print("NOT WORKEDd");
-            _showDialog(
-                "Error", "An error has occured ");
+            _showDialog("Error", "An error has occured ");
           }
-
         } catch (e) {
           //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          print("e.toString()  "+e.toString());
+          print("e.toString()  " + e.toString());
           _showDialog("Error", "Check your internet connection");
         }
         //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
-
       }
     });
   }
@@ -379,19 +392,28 @@ class _Home extends State<Home> {
     DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
     String currDateTime = dateFormat.format(DateTime.now());
 
-
-    String param="timestamp="+currDateTime+"&UserID="+ globals.UserID.toString() +"&DeviceID="+ globals.DeviceID +"&platform=android";
-    var QueryParameters =<String, String> {
-      "SessionID":EncryptSessionID(param) ,
+    String param = "timestamp=" +
+        currDateTime +
+        "&UserID=" +
+        globals.UserID.toString() +
+        "&DeviceID=" +
+        globals.DeviceID +
+        "&platform=android";
+    var QueryParameters = <String, String>{
+      "SessionID": EncryptSessionID(param),
     };
     print("syncStockPosition1");
-    try{
+    try {
       print("Try.........................................");
-      var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileStockPosition', QueryParameters);
+      var url = Uri.http(globals.ServerURL,
+          '/portal/mobile/MobileStockPosition', QueryParameters);
 //      Wave/grain/sales/MobileVFSalesContractExecute
-      var response = await http.get(url, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'});
+      var response = await http.get(url, headers: {
+        HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
+      });
       var responseBody = json.decode(utf8.decode(response.bodyBytes));
-      print("responseBody.................................." + json.encode(responseBody));
+      print("responseBody.................................." +
+          json.encode(responseBody));
       if (response.statusCode == 200) {
         if (responseBody["success"] == "true") {
           print("syncStockPosition2");
@@ -400,30 +422,27 @@ class _Home extends State<Home> {
           await repo.deleteAllStockPosition();
           List stock = responseBody['StockPosition'];
           for (var i = 0; i < stock.length; i++) {
-            repo.insertStockPosition(
-                stock[i]['ProductID'], stock[i]['ClosingUnits'], stock[i]['ClosingRawCases']);
+            repo.insertStockPosition(stock[i]['ProductID'],
+                stock[i]['ClosingUnits'], stock[i]['ClosingRawCases']);
           }
-         // print("responseBody.................................." + json.encode(responseBody));
-
+          // print("responseBody.................................." + json.encode(responseBody));
         } else {
           print(responseBody.toString());
           //_showDialog("Error", responseBody["error_code"]);
           print("syncStockPosition3");
         }
-      }else {
+      } else {
         // If that response was not OK, throw an error.
         print("syncStockPosition4");
         //_showDialog("Error","An error has occured " + responseBody.statusCode);
         print(responseBody.statusCode);
       }
-    }catch(e){
+    } catch (e) {
       //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
       //_showDialog("Error","An error has occured " + e.toString());
       print("syncStockPosition5");
-      print("Error"+e.toString());
+      print("Error" + e.toString());
     }
-
-
   }
 
   Future _SyncMarkedAttendance() async {
@@ -464,21 +483,21 @@ class _Home extends State<Home> {
             AllMarkedAttendances[i]['uuid'] +
             "&DevicePlatformVersion=''" +
             "";
-        ORDERIDToDelete = int.parse(AllMarkedAttendances[i]['mobile_request_id']);
-
+        ORDERIDToDelete =
+            int.parse(AllMarkedAttendances[i]['mobile_request_id']);
 
         var QueryParameters = <String, String>{
           "SessionID": globals.EncryptSessionID(orderParam),
         };
-        var url =
-        Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncMarkAttendanceV3');
+        var url = Uri.http(
+            globals.ServerURL, '/portal/mobile/MobileSyncMarkAttendanceV3');
         print(url);
 
         try {
           var response = await http.post(url,
               headers: {
                 HttpHeaders.contentTypeHeader:
-                'application/x-www-form-urlencoded'
+                    'application/x-www-form-urlencoded'
               },
               body: QueryParameters);
 
@@ -488,19 +507,19 @@ class _Home extends State<Home> {
             if (responseBody["success"] == "true") {
               //   print ("success");
               await repo.markAttendanceUploaded(ORDERIDToDelete);
+            } else {
+              await _showDialog(
+                  "Error Uploading Attendance", responseBody["error_code"]);
             }
-              else {
-              await _showDialog("Error Uploading Attendance", responseBody["error_code"]);
-             }
           }
         } catch (e) {
           //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
 
-          await _showDialog("Error Uploading Attendance","Check your internet connection");
+          await _showDialog(
+              "Error Uploading Attendance", "Check your internet connection");
           break;
         }
         //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
-
       }
     });
   }
@@ -509,25 +528,29 @@ class _Home extends State<Home> {
     List<Map<String, dynamic>> AllMarkedAttendancesPhotos;
     print(" _UploadMarkAttendancePhoto M called");
     AllMarkedAttendancesPhotos = new List();
-     repo.getAllMarkedUploadedAttendances(0).then((val) async {
-       AllMarkedAttendancesPhotos=val;
+    repo.getAllMarkedUploadedAttendances(0).then((val) async {
+      AllMarkedAttendancesPhotos = val;
       for (int i = 0; i < AllMarkedAttendancesPhotos.length; i++) {
-        int  ORDERIDToDelete = int.parse(AllMarkedAttendancesPhotos[i]['mobile_request_id']);
-        try{
+        int ORDERIDToDelete =
+            int.parse(AllMarkedAttendancesPhotos[i]['mobile_request_id']);
+        try {
           print(AllMarkedAttendancesPhotos[i]['image_path']);
-          File photoFile=File(AllMarkedAttendancesPhotos[i]['image_path']);
-          var stream =new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
+          File photoFile = File(AllMarkedAttendancesPhotos[i]['image_path']);
+          var stream =
+              new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
           var length = await photoFile.length();
           //var localUrl = Uri.http(globals.ServerURLLocal,"/nisa_portal/mobile/MobileUploadMarkAttendaceImage");
-          var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileUploadMarkAttendaceImage');
-
+          var url = Uri.http(globals.ServerURL,
+              '/portal/mobile/MobileUploadMarkAttendaceImage');
 
           String fileName = photoFile.path.split('/').last;
 
           var request = new http.MultipartRequest("POST", url);
-          request.fields['value1'] = AllMarkedAttendancesPhotos[i]['mobile_request_id'];
+          request.fields['value1'] =
+              AllMarkedAttendancesPhotos[i]['mobile_request_id'];
 
-          var multipartFile = new http.MultipartFile('file', stream, length,filename: fileName);
+          var multipartFile = new http.MultipartFile('file', stream, length,
+              filename: fileName);
           // var multipartFile = new http.MultipartFile.fromString("file", photoFile.path);
           request.files.add(multipartFile);
           var response = await request.send();
@@ -537,55 +560,53 @@ class _Home extends State<Home> {
             print("MobileUploadMarkAttendaceImage SUCCESS");
             await repo.markAttendanceUploadedPhoto(ORDERIDToDelete);
           }
-
-
         } catch (e) {
           //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          print("e.toString()  "+e.toString());
-
+          print("e.toString()  " + e.toString());
         }
         //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
-
       }
-
-
     });
   }
 
   Future<dynamic> _SyncMerchandisingPhoto() async {
-    List<Map<String, dynamic>>  AllMerchandsingPhotos = new List();
-     repo.getAllMerchandising(0).then((val) async {
+    List<Map<String, dynamic>> AllMerchandsingPhotos = new List();
+    repo.getAllMerchandising(0).then((val) async {
       setState(() {
         AllMerchandsingPhotos = val;
-
       });
 
       for (int i = 0; i < AllMerchandsingPhotos.length; i++) {
-
-
         int ORDERIDToDelete =
-        int.parse(AllMerchandsingPhotos[i]['mobile_request_id']);
+            int.parse(AllMerchandsingPhotos[i]['mobile_request_id']);
         try {
           File photoFile = File(AllMerchandsingPhotos[i]['image']);
 
           var stream =
-          new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
+              new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
           var length = await photoFile.length();
-          var url = Uri.http(globals.ServerURL,'/portal/mobile/MobileUploadOrdersImageV2');
+          var url = Uri.http(
+              globals.ServerURL, '/portal/mobile/MobileUploadOrdersImageV2');
 
           String fileName = photoFile.path.split('/').last;
 
           var request = new http.MultipartRequest("POST", url);
-          request.fields['mobile_timestamp'] =AllMerchandsingPhotos[i]['mobile_timestamp'].toString();
-          request.fields['outletId'] =AllMerchandsingPhotos[i]['outlet_id'].toString();
-          request.fields['lat'] =AllMerchandsingPhotos[i]['lat'].toString();
-          request.fields['lng'] =AllMerchandsingPhotos[i]['lng'].toString();
-          request.fields['accuracy'] =AllMerchandsingPhotos[i]['accuracy'].toString();
-          request.fields['uuid'] =AllMerchandsingPhotos[i]['uuid'].toString();
-          request.fields['typeId'] =AllMerchandsingPhotos[i]['type_id'].toString();
-          request.fields['userId'] =AllMerchandsingPhotos[i]['user_id'].toString();
+          request.fields['mobile_timestamp'] =
+              AllMerchandsingPhotos[i]['mobile_timestamp'].toString();
+          request.fields['outletId'] =
+              AllMerchandsingPhotos[i]['outlet_id'].toString();
+          request.fields['lat'] = AllMerchandsingPhotos[i]['lat'].toString();
+          request.fields['lng'] = AllMerchandsingPhotos[i]['lng'].toString();
+          request.fields['accuracy'] =
+              AllMerchandsingPhotos[i]['accuracy'].toString();
+          request.fields['uuid'] = AllMerchandsingPhotos[i]['uuid'].toString();
+          request.fields['typeId'] =
+              AllMerchandsingPhotos[i]['type_id'].toString();
+          request.fields['userId'] =
+              AllMerchandsingPhotos[i]['user_id'].toString();
 
-          var multipartFile = new http.MultipartFile('file', stream, length,filename: fileName);
+          var multipartFile = new http.MultipartFile('file', stream, length,
+              filename: fileName);
 
           request.files.add(multipartFile);
           var response = await request.send();
@@ -593,20 +614,17 @@ class _Home extends State<Home> {
 
           if (response.statusCode == 200) {
             print("markMerchandisingPhotoUploaded SUCCESS");
-            await repo.markMerchandisingPhotoUploaded(ORDERIDToDelete,AllMerchandsingPhotos[i]['type_id']);
+            await repo.markMerchandisingPhotoUploaded(
+                ORDERIDToDelete, AllMerchandsingPhotos[i]['type_id']);
           }
-
         } catch (e) {
           //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
           print("e.toString()  " + e.toString());
-
         }
         //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
-
       }
     });
   }
-
 
   Future<bool> _onWillPop() async {
     return (await showDialog(
@@ -631,7 +649,6 @@ class _Home extends State<Home> {
         )) ??
         false;
   }
-
 
   String EncryptSessionID(String qry) {
     String ret = "";
@@ -710,14 +727,16 @@ class _Home extends State<Home> {
             if (responseBody["success"] == "true") {
               await repo.markNoOrderUploaded(ORDERIDToDelete);
             } else {
-              await _showDialog("Error Uploading No Order", responseBody["error_code"]);
+              await _showDialog(
+                  "Error Uploading No Order", responseBody["error_code"]);
             }
           } else {
             // If that response was not OK, throw an error.
             setState(() {
               isUploaded = 0;
             });
-            await _showDialog("Error Uploading No Order", "An error has occured " + responseBody.statusCode);
+            await _showDialog("Error Uploading No Order",
+                "An error has occured " + responseBody.statusCode);
           }
         } catch (e) {
           setState(() {
@@ -725,18 +744,19 @@ class _Home extends State<Home> {
             isAnythingUploaded = 1;
           });
           //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          await _showDialog("Error Uploading No Order", "Check your internet connection");
+          await _showDialog(
+              "Error Uploading No Order", "Check your internet connection");
           break;
         }
         //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
-
       }
     });
   }
+
   Future _OutletRegisterationUpload(context) async {
     int ORDERIDToDelete = 0;
     List AllRegisteredOutlets = new List();
-    await repo.getAllRegisteredOutletsByIsUploaded(0,1).then((val) async {
+    await repo.getAllRegisteredOutletsByIsUploaded(0, 1).then((val) async {
       setState(() {
         AllRegisteredOutlets = val;
         print("All Registered Outlets===>> " + AllRegisteredOutlets.toString());
@@ -806,7 +826,7 @@ class _Home extends State<Home> {
           var response = await http.post(url,
               headers: {
                 HttpHeaders.contentTypeHeader:
-                'application/x-www-form-urlencoded'
+                    'application/x-www-form-urlencoded'
               },
               body: QueryParameters);
 
@@ -818,13 +838,13 @@ class _Home extends State<Home> {
               repo.markOutletUploaded(
                   int.tryParse(AllRegisteredOutlets[i]['mobile_request_id']));
               //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-
             } else {
               // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
               setState(() {
                 isUploaded = 0;
               });
-              await _showDialog("Error Uploading Outlet", responseBody["error_code"]);
+              await _showDialog(
+                  "Error Uploading Outlet", responseBody["error_code"]);
               print("Error:" + responseBody["error_code"]);
             }
           } else {
@@ -832,7 +852,8 @@ class _Home extends State<Home> {
             setState(() {
               isUploaded = 0;
             });
-            await  _showDialog("Error Uploading Outlet", "An error has occured: " + responseBody.statusCode);
+            await _showDialog("Error Uploading Outlet",
+                "An error has occured: " + responseBody.statusCode);
             print("Error: An error has occured: " + responseBody.statusCode);
           }
         } catch (e) {
@@ -841,16 +862,18 @@ class _Home extends State<Home> {
             isUploaded = 0;
             isAnythingUploaded = 1;
           });
-          await _showDialog("Error Uploading Outlet", "Check your internet connection");
+          await _showDialog(
+              "Error Uploading Outlet", "Check your internet connection");
           break;
         }
       }
     });
   }
+
   Future _OutletRegisterationUpload2(context) async {
     int ORDERIDToDelete = 0;
     List AllRegisteredOutlets = new List();
-    await repo.getAllRegisteredOutletsByIsUploaded(0,0).then((val) async {
+    await repo.getAllRegisteredOutletsByIsUploaded(0, 0).then((val) async {
       setState(() {
         AllRegisteredOutlets = val;
         print("All Registered Outlets===>> " + AllRegisteredOutlets.toString());
@@ -934,13 +957,13 @@ class _Home extends State<Home> {
               repo.markOutletUploaded(
                   int.tryParse(AllRegisteredOutlets[i]['mobile_request_id']));
               //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-
             } else {
               // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
               setState(() {
                 isUploaded = 0;
               });
-              await _showDialog("Error Uploading Outlet", responseBody["error_code"]);
+              await _showDialog(
+                  "Error Uploading Outlet", responseBody["error_code"]);
               print("Error:" + responseBody["error_code"]);
             }
           } else {
@@ -948,7 +971,8 @@ class _Home extends State<Home> {
             setState(() {
               isUploaded = 0;
             });
-            await  _showDialog("Error Uploading Outlet", "An error has occured: " + responseBody.statusCode);
+            await _showDialog("Error Uploading Outlet",
+                "An error has occured: " + responseBody.statusCode);
             print("Error: An error has occured: " + responseBody.statusCode);
           }
         } catch (e) {
@@ -957,7 +981,8 @@ class _Home extends State<Home> {
             isUploaded = 0;
             isAnythingUploaded = 1;
           });
-          await _showDialog("Error Uploading Outlet", "Check your internet connection");
+          await _showDialog(
+              "Error Uploading Outlet", "Check your internet connection");
           break;
         }
       }
@@ -965,7 +990,6 @@ class _Home extends State<Home> {
   }
 
   Future _UploadOrder(context) async {
-
     DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
     String currDateTime = dateFormat.format(DateTime.now());
     var str = currDateTime.split(".");
@@ -1025,11 +1049,11 @@ class _Home extends State<Home> {
                 "&discount=" +
                 AllOrdersItems[j]['discount'].toString() +
                 "&unit_quantity=" +
-                AllOrdersItems [j]['unit_quantity'].toString() +
+                AllOrdersItems[j]['unit_quantity'].toString() +
                 "&is_promotion=" +
-                AllOrdersItems [j]['is_promotion'].toString() +
+                AllOrdersItems[j]['is_promotion'].toString() +
                 "&promotion_id=" +
-                AllOrdersItems [j]['promotion_id'].toString() +
+                AllOrdersItems[j]['promotion_id'].toString() +
                 "";
           }
         });
@@ -1056,9 +1080,9 @@ class _Home extends State<Home> {
             if (responseBody["success"] == "true") {
               await repo.markOrderUploaded(ORDERIDToDelete);
               //_showDialog("Success","order uploaded. ",1);
-
             } else {
-              await _showDialog("Error Uploading Order", responseBody["error_code"]);
+              await _showDialog(
+                  "Error Uploading Order", responseBody["error_code"]);
             }
           } else {
             // If that response was not OK, throw an error.
@@ -1067,26 +1091,24 @@ class _Home extends State<Home> {
               isAnythingUploaded = 1;
             });
 
-            await _showDialog(
-                "Error Uploading Order", "An error has occured " + responseBody.statusCode);
+            await _showDialog("Error Uploading Order",
+                "An error has occured " + responseBody.statusCode);
           }
         } catch (e) {
-
           setState(() {
             isUploaded = 0;
             isAnythingUploaded = 1;
           });
 
           //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          await _showDialog("Error Uploading Order", "Check your internet connection");
+          await _showDialog(
+              "Error Uploading Order", "Check your internet connection");
           break;
         }
         //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
-
       }
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -1159,21 +1181,17 @@ class _Home extends State<Home> {
                     //  await repo.setVisitType(globals.OutletID, 1);
                     //
                     Dialogs.showLoadingDialog(context, _scaffoldKey2);
-                    _UploadOrder(context).whenComplete(() =>
-                        _UploadNoOrder(context).whenComplete(() =>
-                            _OutletRegisterationUpload(context).whenComplete(() =>
-                                _OutletRegisterationUpload2(context).whenComplete(() =>
-                                _SyncMarkedAttendance().whenComplete(() =>
-                                    _UploadOutletMarkClosed().whenComplete(() =>
-                                        isUploaded==1 && isAnythingUploaded==1 ? _showDialogFinalMessage("Success", "Data Uploaded"):""
-                                ).whenComplete(() =>
-                                    isAnythingUploaded==0? _showDialog("Warning", "There is nothing to upload"):""
-                                    ).whenComplete(() =>(){
-                                    _SyncMarkedAttendancePhoto();
-                                    _SyncMerchandisingPhoto();
-                                    })
-
-                                )))));
+                    _UploadOrder(context).whenComplete(() => _UploadNoOrder(context)
+                        .whenComplete(() => _OutletRegisterationUpload(context)
+                            .whenComplete(() => _OutletRegisterationUpload2(context)
+                                .whenComplete(() => _SyncMarkedAttendance()
+                                    .whenComplete(() => _UploadOutletMarkClosed()
+                                        .whenComplete(() => isUploaded == 1 && isAnythingUploaded == 1 ? _showDialogFinalMessage("Success", "Data Uploaded") : "")
+                                        .whenComplete(() => isAnythingUploaded == 0 ? _showDialog("Warning", "There is nothing to upload") : "")
+                                        .whenComplete(() => () {
+                                              _SyncMarkedAttendancePhoto();
+                                              _SyncMerchandisingPhoto();
+                                            }))))));
                   },
                 ) /*,Divider(
                     height: 1,
@@ -1384,8 +1402,7 @@ class _Home extends State<Home> {
                                         child: Text(
                                           "Activities",
                                           style: TextStyle(
-                                              color: Colors.blue,
-                                              fontSize: 17),
+                                              color: Colors.blue, fontSize: 17),
                                         )),
                                   ),
                                   Container(
@@ -1398,7 +1415,6 @@ class _Home extends State<Home> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-
                                       Expanded(
                                           child: GestureDetector(
                                               onTap: () {
@@ -1419,23 +1435,21 @@ class _Home extends State<Home> {
                                                     ),
                                                     Padding(
                                                       padding:
-                                                      EdgeInsets.fromLTRB(
-                                                          0.0,
-                                                          5.0,
-                                                          0.0,
-                                                          0.0),
+                                                          EdgeInsets.fromLTRB(
+                                                              0.0,
+                                                              5.0,
+                                                              0.0,
+                                                              0.0),
                                                       child: Text(
                                                         'Attendance',
                                                         style: TextStyle(
                                                             color:
-                                                            Colors.black),
+                                                                Colors.black),
                                                       ),
                                                     ),
                                                   ],
                                                 ),
-                                              )
-                                          )
-                                      ),
+                                              ))),
                                       Expanded(
                                           child: GestureDetector(
                                               onTap: () {
@@ -1509,7 +1523,6 @@ class _Home extends State<Home> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-
                                       Expanded(
                                           child: Container(
                                         padding: EdgeInsets.all(10),
@@ -1537,35 +1550,35 @@ class _Home extends State<Home> {
 
                                       Expanded(
                                           child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        OutletRegisteration()),
-                                              );
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.all(10),
-                                              child: Column(
-                                                children: <Widget>[
-                                                  Image.asset(
-                                                    "assets/images/building.png",
-                                                    width: 55,
-                                                  ),
-                                                  Padding(
-                                                    padding: EdgeInsets.fromLTRB(
-                                                        0.0, 5.0, 0.0, 0.0),
-                                                    child: Text(
-                                                      'Outlet Registeration',
-                                                      style: TextStyle(
-                                                          color: Colors.black),
-                                                    ),
-                                                  ),
-                                                ],
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    OutletRegisteration()),
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.all(10),
+                                          child: Column(
+                                            children: <Widget>[
+                                              Image.asset(
+                                                "assets/images/building.png",
+                                                width: 55,
                                               ),
-                                            ),
-                                          ))
+                                              Padding(
+                                                padding: EdgeInsets.fromLTRB(
+                                                    0.0, 5.0, 0.0, 0.0),
+                                                child: Text(
+                                                  'Outlet Registeration',
+                                                  style: TextStyle(
+                                                      color: Colors.black),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ))
                                     ],
                                   ),
                                 ],
@@ -1586,8 +1599,7 @@ class _Home extends State<Home> {
                                         child: Text(
                                           "Reports",
                                           style: TextStyle(
-                                              color: Colors.blue,
-                                              fontSize: 17),
+                                              color: Colors.blue, fontSize: 17),
                                         )),
                                   ),
                                   Container(
@@ -1622,34 +1634,40 @@ class _Home extends State<Home> {
                                         ),
                                       ),
                                       Expanded(
-                                          child:GestureDetector(
+                                          child: GestureDetector(
                                               onTap: () {
                                                 Navigator.pushAndRemoveUntil(
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (context) =>
                                                             StockReportView()),
-                                                    ModalRoute.withName("/stock_report"));
+                                                    ModalRoute.withName(
+                                                        "/stock_report"));
                                               },
                                               child: Container(
-                                        padding: EdgeInsets.all(10),
-                                        child: Column(
-                                          children: <Widget>[
-                                            Image.asset(
-                                              "assets/images/stock.png",
-                                              width: 55,
-                                            ),
-                                            Padding(
-                                                padding: EdgeInsets.fromLTRB(
-                                                    0.0, 5.0, 0.0, 0.0),
-                                                child: Text(
-                                                  'Stock',
-                                                  style: TextStyle(
-                                                      color: Colors.black),
-                                                )),
-                                          ],
-                                        ),
-                                      ))),
+                                                padding: EdgeInsets.all(10),
+                                                child: Column(
+                                                  children: <Widget>[
+                                                    Image.asset(
+                                                      "assets/images/stock.png",
+                                                      width: 55,
+                                                    ),
+                                                    Padding(
+                                                        padding:
+                                                            EdgeInsets.fromLTRB(
+                                                                0.0,
+                                                                5.0,
+                                                                0.0,
+                                                                0.0),
+                                                        child: Text(
+                                                          'Stock',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.black),
+                                                        )),
+                                                  ],
+                                                ),
+                                              ))),
                                     ],
                                   ),
                                   Row(
@@ -1657,81 +1675,93 @@ class _Home extends State<Home> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Expanded(
-                                        child:GestureDetector(
-                                          onTap: () {
-                                            Navigator.pushAndRemoveUntil(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        OrdersReportSelectDate()),
-                                                ModalRoute.withName("/order_report_select_date"));
-                                          },
-                                          child: Container(
-                                          padding: EdgeInsets.all(10),
-                                          child: Column(
-                                            children: <Widget>[
-                                              Image.asset(
-                                                "assets/images/order.png",
-                                                width: 55,
+                                        child: GestureDetector(
+                                            onTap: () {
+                                              Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          OrdersReportSelectDate()),
+                                                  ModalRoute.withName(
+                                                      "/order_report_select_date"));
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.all(10),
+                                              child: Column(
+                                                children: <Widget>[
+                                                  Image.asset(
+                                                    "assets/images/order.png",
+                                                    width: 55,
+                                                  ),
+                                                  Padding(
+                                                      padding:
+                                                          EdgeInsets.fromLTRB(
+                                                              0.0,
+                                                              5.0,
+                                                              0.0,
+                                                              0.0),
+                                                      child: Text(
+                                                        'Orders',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.black),
+                                                      )),
+                                                ],
                                               ),
-                                              Padding(
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      0.0, 5.0, 0.0, 0.0),
-                                                  child: Text(
-                                                    'Orders',
-                                                    style: TextStyle(
-                                                        color: Colors.black),
-                                                  )),
-                                            ],
-                                          ),
-                                        )),
+                                            )),
                                       ),
                                       Expanded(
-                                          child:GestureDetector(
+                                          child: GestureDetector(
                                               onTap: () {
                                                 Navigator.pushAndRemoveUntil(
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (context) =>
                                                             SalesReportSelectDate()),
-                                                    ModalRoute.withName("/sales_report_select_date"));
+                                                    ModalRoute.withName(
+                                                        "/sales_report_select_date"));
                                               },
                                               child: Container(
-                                        padding: EdgeInsets.all(10),
-                                        child: Column(
-                                          children: <Widget>[
-                                            Image.asset(
-                                              "assets/images/sales.png",
-                                              width: 55,
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  0.0, 5.0, 0.0, 0.0),
-                                              child: Text(
-                                                'Sales',
-                                                style: TextStyle(
-                                                    color: Colors.black),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ))),
+                                                padding: EdgeInsets.all(10),
+                                                child: Column(
+                                                  children: <Widget>[
+                                                    Image.asset(
+                                                      "assets/images/sales.png",
+                                                      width: 55,
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          EdgeInsets.fromLTRB(
+                                                              0.0,
+                                                              5.0,
+                                                              0.0,
+                                                              0.0),
+                                                      child: Text(
+                                                        'Sales',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.black),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ))),
                                     ],
                                   ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-
                                       Expanded(
-                                          child:GestureDetector(
+                                          child: GestureDetector(
                                               onTap: () {
                                                 Navigator.pushAndRemoveUntil(
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (context) =>
                                                             OrdersSyncReportView()),
-                                                    ModalRoute.withName("/sync_report"));
+                                                    ModalRoute.withName(
+                                                        "/sync_report"));
                                               },
                                               child: Container(
                                                 padding: EdgeInsets.all(10),
@@ -1742,25 +1772,31 @@ class _Home extends State<Home> {
                                                       width: 55,
                                                     ),
                                                     Padding(
-                                                        padding: EdgeInsets.fromLTRB(
-                                                            0.0, 5.0, 0.0, 0.0),
+                                                        padding:
+                                                            EdgeInsets.fromLTRB(
+                                                                0.0,
+                                                                5.0,
+                                                                0.0,
+                                                                0.0),
                                                         child: Text(
                                                           'Orders Sync',
                                                           style: TextStyle(
-                                                              color: Colors.black),
+                                                              color:
+                                                                  Colors.black),
                                                         )),
                                                   ],
                                                 ),
                                               ))),
                                       Expanded(
-                                          child:GestureDetector(
+                                          child: GestureDetector(
                                               onTap: () {
                                                 Navigator.pushAndRemoveUntil(
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (context) =>
                                                             AttendanceSyncReportView()),
-                                                    ModalRoute.withName("/attendance_sync_report"));
+                                                    ModalRoute.withName(
+                                                        "/attendance_sync_report"));
                                               },
                                               child: Container(
                                                 padding: EdgeInsets.all(10),
@@ -1771,44 +1807,83 @@ class _Home extends State<Home> {
                                                       width: 55,
                                                     ),
                                                     Padding(
-                                                        padding: EdgeInsets.fromLTRB(
-                                                            0.0, 5.0, 0.0, 0.0),
+                                                        padding:
+                                                            EdgeInsets.fromLTRB(
+                                                                0.0,
+                                                                5.0,
+                                                                0.0,
+                                                                0.0),
                                                         child: Text(
                                                           'Attendance Sync',
                                                           style: TextStyle(
-                                                              color: Colors.black),
-                                                        )),
-                                                  ],
-                                                ),
-                                              ))),Expanded(
-                                          child:GestureDetector(
-                                              onTap: () {
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                        DailyReports()),
-                                                );
-                                              },
-                                               child: Container(
-                                                padding: EdgeInsets.all(10),
-                                                child: Column(
-                                                  children: <Widget>[
-                                                    Image.asset(
-                                                      "assets/images/sync.png",
-                                                      width: 55,
-                                                    ),
-                                                    Padding(
-                                                        padding: EdgeInsets.fromLTRB(
-                                                            0.0, 5.0, 0.0, 0.0),
-                                                        child: Text(
-                                                          'Daily reports',
-                                                          style: TextStyle(
-                                                              color: Colors.black),
+                                                              color:
+                                                                  Colors.black),
                                                         )),
                                                   ],
                                                 ),
                                               ))),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    // crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+
+                                    children: [
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: isAfterFivePM
+                                              ? () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          DailyReports(),
+                                                    ),
+                                                  );
+                                                }
+                                              : null, // Disable the onTap function before
+                                          child: Container(
+                                            padding: EdgeInsets.all(10),
+                                            child: Row(
+                                              children: <Widget>[
+                                                // Adding space to the left of the icon
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      left:
+                                                          38), // Adjust the value as needed
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      Image.asset(
+                                                        "assets/images/sync.png",
+                                                        width: 55,
+                                                        color: isAfterFivePM
+                                                            ? null
+                                                            : Colors
+                                                                .grey, // Optionally, change the icon color to indicate it's disabled
+                                                      ),
+                                                      Padding(
+                                                        padding: EdgeInsets.only(
+                                                            top:
+                                                                5.0), // Adjust the top padding to add space between the icon and the text
+                                                        child: Text(
+                                                          'Daily reports',
+                                                          style: TextStyle(
+                                                            color: isAfterFivePM
+                                                                ? Colors.black
+                                                                : Colors
+                                                                    .grey, // Change text color to indicate it's disabled
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -1824,54 +1899,7 @@ class _Home extends State<Home> {
     );
   }
 
-   _showDialog(String Title, String Message) async {
-
-     Navigator.of(context, rootNavigator: true).pop('dialog');
-
-    if (Title == null) {
-      Title = " ";
-    }
-    if (Message == null) {
-      Message = " ";
-    }
-
-    setState(() {
-      //isAnythingUploaded = 0;
-      isUploaded = 0;
-    });
-
-
-    // flutter defined function
-
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return AlertDialog(
-          title: new Text(Title),
-          content: new Text(Message),
-          actions: <Widget>[
-            // usually buttons at the bottom of the dialog
-            new ElevatedButton(
-              child: new Text("Close"),
-              onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop('dialog');
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Home()),
-                    ModalRoute.withName("/home"));
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  _showDialogFinalMessage(String Title, String Message) async {
-
+  _showDialog(String Title, String Message) async {
     Navigator.of(context, rootNavigator: true).pop('dialog');
 
     if (Title == null) {
@@ -1886,6 +1914,47 @@ class _Home extends State<Home> {
       isUploaded = 0;
     });
 
+    // flutter defined function
+
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text(Title),
+          content: new Text(Message),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new ElevatedButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop('dialog');
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => Home()),
+                    ModalRoute.withName("/home"));
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _showDialogFinalMessage(String Title, String Message) async {
+    Navigator.of(context, rootNavigator: true).pop('dialog');
+
+    if (Title == null) {
+      Title = " ";
+    }
+    if (Message == null) {
+      Message = " ";
+    }
+
+    setState(() {
+      //isAnythingUploaded = 0;
+      isUploaded = 0;
+    });
 
     // flutter defined function
 
@@ -1904,9 +1973,7 @@ class _Home extends State<Home> {
                 Navigator.of(context, rootNavigator: true).pop('dialog');
                 Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Home()),
+                    MaterialPageRoute(builder: (context) => Home()),
                     ModalRoute.withName("/home"));
               },
             ),
@@ -1915,8 +1982,9 @@ class _Home extends State<Home> {
       },
     );
   }
+
   Widget chart() {
-    if(PreSellData!=null){
+    if (PreSellData != null) {
       return new charts.PieChart(
           [
             new charts.Series<GaugeSegment, String>(
@@ -1936,7 +2004,7 @@ class _Home extends State<Home> {
                 ),
                 behaviorPosition: charts.BehaviorPosition.bottom,
                 titleOutsideJustification:
-                charts.OutsideJustification.middleDrawArea)
+                    charts.OutsideJustification.middleDrawArea)
           ],
           // Configure the width of the pie slices to 30px. The remaining space in
           // the chart will be left as a hole in the center. Adjust the start
@@ -1946,7 +2014,6 @@ class _Home extends State<Home> {
               startAngle: 4 / 5 * 3.1415926535897932,
               arcLength: 7 / 5 * 3.1415926535897932));
     }
-
   }
 
   void _showLoader() {
