@@ -69,8 +69,10 @@ class _Home extends State<Home> {
   void initState() {
     super.initState();
     globals.stopContinuousLocation();
-    _checkTime();
 
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      _checkTime();
+    });
     //Navigator.of(context, rootNavigator: true).pop('dialog');
     Repository repo = new Repository();
     repo.getTotalOutlets(globals.WeekDay).then((value) {
@@ -176,25 +178,24 @@ class _Home extends State<Home> {
       _SyncMarkedAttendancePhoto();
     }
   }
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
+
 
   void _checkTime() {
-    _timer?.cancel(); // Cancel any existing timer to avoid multiple timers running simultaneously
 
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       DateTime now = DateTime.now();
-      bool newIsAfterFivePM = now.hour == 15 && now.minute >= 13 && now.minute < 57;
+      bool newIsAfterFivePM = now.hour == 16 && now.minute >= 00 && now.minute < 25;
 
       if (newIsAfterFivePM != isAfterFivePM) {
         setState(() {
           isAfterFivePM = newIsAfterFivePM;
         });
       }
-    });
+
+  }
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
   Widget _getRoutesList(BuildContext context, int index) {
     return Column(
