@@ -115,6 +115,11 @@ class _MyHomePageState extends State<MyHomePage> {
       }
 
       String savePath = path.join(downloadsDir.path, "downloaded_file.xlsx");
+
+      String newFileName = "downloaded_file_${DateTime.now().millisecondsSinceEpoch}.xlsx";
+       savePath = path.join(downloadsDir.path, newFileName);
+
+
       await dio.download(fileUrl, savePath);
       print("File downloaded to $savePath");
 
