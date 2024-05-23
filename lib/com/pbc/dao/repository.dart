@@ -43,7 +43,7 @@ class Repository {
       // Set the path to the database. Note: Using the `join` function from the
       // `path` package is best practice to ensure the path is correctly
       // constructed for each platform.
-      join(await getDatabasesPath(), 'delivery_managerV68.db'),
+      join(await getDatabasesPath(), 'delivery_managerV69.db'),
       // When the database is first created, create a table to store dogs.
       onUpgrade: _onUpgrade,
       onCreate: (db, version) {
@@ -54,7 +54,7 @@ class Repository {
         print("CREATE TABLE spot_discount(product_id INTEGER, default_discount real, maximum_discount real)");
 
         db.execute(
-            "CREATE TABLE outlet_orders_images(id INTEGER, file_type_id TEXT, file TEXT,is_uploaded INTEGER DEFAULT 0)");
+            "CREATE TABLE outlet_orders_images(id INTEGER, file_type_id TEXT, file TEXT,is_uploaded INTEGER DEFAULT 0,created_on TEXT)");
         //Created By Irteza
         db.execute(
             "CREATE TABLE outlet_no_orders_images(id INTEGER, file_type_id INTEGER, file TEXT,is_uploaded INTEGER DEFAULT 0)");
@@ -1474,9 +1474,10 @@ class Repository {
 
         args.add(DocumentPicture[i]['id']);
         args.add(DocumentPicture[i]['documentfile'].toString());
+        args.add(DocumentPicture[i]['created_on'].toString());
 
         j = await db.rawInsert(
-            'insert into outlet_orders_images(id  , file) values  (?,?) ',
+            'insert into outlet_orders_images(id  , file , created_on ) values  (?,?,?) ',
             args);
       }
     } catch (error) {

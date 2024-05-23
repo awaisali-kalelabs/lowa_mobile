@@ -106,16 +106,21 @@ class _OutletOrderImage extends State<OutletOrderImage> {
   Repository repo = new Repository();
 
   Future SaveOutletImage() async {
+    var currDate = new DateTime.now();
+    print("currDate :" + currDate.toString());
     if (outletImagePath != "") {
       List imageDetailList = new List();
       int mobileRequestID = orderId;
       imageDetailList.add({
         "id": mobileRequestID,
         "documentfile": outletImagePath,
+        "created_on" : currDate,
       });
+      print("imageDetailList :" + imageDetailList.toString());
 
       // await repo.insertOutletOrderTimestamp(globals.orderId, 3);
       bool result1 = await repo.saveOutletOrderImage(imageDetailList);
+      print("imageDetailList"+result1.toString());
       if (result1 == true) {
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (context) => ShopAction()

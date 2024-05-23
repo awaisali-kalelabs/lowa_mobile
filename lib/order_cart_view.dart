@@ -1113,6 +1113,8 @@ class _OrderCartView extends State<OrderCartView> {
 
       for (int i = 0; i < val.length; i++) {
         int MobileRequestID = int.parse(val[i]['id'].toString());
+        String created_on = val[i]['created_on'].toString();
+        print("created_on == " + created_on.toString());
         try {
           print("AllDocuments.length" + val.length.toString());
           File photoFile = File(val[i]['file']);
@@ -1127,6 +1129,7 @@ class _OrderCartView extends State<OrderCartView> {
 
           var request = new http.MultipartRequest("POST", url);
           request.fields['OrderNo'] = MobileRequestID.toString();
+          request.fields['created_on'] = created_on;
           print("===Hello1===");
           var multipartFile = new http.MultipartFile('file', stream, length,
               filename: "Outlet_" + fileName);
