@@ -13,7 +13,6 @@ class DailyReports extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -45,9 +44,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool isFileReady = false;
   bool isLoading = false;
+  bool isCreatingFile = false; // Add this variable
   String fileUrl = "";
 
   Future<void> dailyReports(BuildContext context) async {
+    setState(() {
+      isCreatingFile = true; // Set loading state
+    });
+
     DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
     String currDateTime = dateFormat.format(DateTime.now());
 
@@ -62,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
     };
     print("QueryParameters " + queryParameters.toString());
     var url =
-        Uri.http(globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
+    Uri.http(globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
     print("Server url: " + url.toString());
 
     try {
@@ -103,6 +107,10 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       print("Inside Catch");
       print("Error: An error has occurred: " + e.toString());
+    } finally {
+      setState(() {
+        isCreatingFile = false; // Reset loading state
+      });
     }
   }
 
@@ -120,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
         downloadsDir = Directory('/storage/emulated/0/Download');
       } else if (Platform.isIOS) {
         downloadsDir =
-            await getApplicationDocumentsDirectory(); // iOS does not have a standard Downloads directory, so using the Documents directory
+        await getApplicationDocumentsDirectory(); // iOS does not have a standard Downloads directory, so using the Documents directory
       }
 
       String savePath = path.join(downloadsDir.path, "downloaded_file.xlsx");
@@ -176,27 +184,27 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               height: 20,
             ),
-            isLoading
+            isLoading || isCreatingFile
                 ? CircularProgressIndicator()
                 : isFileReady
-                    ? ElevatedButton(
-                        onPressed: () async {
-                          await downloadFile(
-                              globals.fileServerURL + "?file=" + fileUrl);
-                          showErrorSnackBar(context, "File downloaded");
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => Home()),
-                          );
-                        },
-                        child: Text('Download File'),
-                      )
-                    : ElevatedButton(
-                        onPressed: () async {
-                          await dailyReports(context);
-                        },
-                        child: Text('Create File'),
-                      ),
+                ? ElevatedButton(
+              onPressed: () async {
+                await downloadFile(
+                    globals.fileServerURL + "?file=" + fileUrl);
+                showErrorSnackBar(context, "File downloaded");
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => Home()),
+                );
+              },
+              child: Text('Download File'),
+            )
+                : ElevatedButton(
+              onPressed: () async {
+                await dailyReports(context);
+              },
+              child: Text('Create File'),
+            ),
           ],
         ),
       ),
