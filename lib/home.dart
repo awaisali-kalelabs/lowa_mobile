@@ -56,7 +56,7 @@ class _Home extends State<Home> {
   int pendingVisits = 0;
   int ChartSeries = 0;
   // DateTime now = DateTime.now();
-  bool isAfterFivePM;
+  bool isAfterFivePM = false;
   Timer _timer;
   List<charts.Series<GaugeSegment, String>> series = null;
   List<Map<String, dynamic>> PreSellRoutes;
@@ -185,15 +185,15 @@ class _Home extends State<Home> {
   void _checkTime() {
     _timer?.cancel(); // Cancel any existing timer to avoid multiple timers running simultaneously
 
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       DateTime now = DateTime.now();
-      setState(() {
-        if (now.hour == 15 && now.minute >= 13 && now.minute < 40) {
-          isAfterFivePM = true;
-        } else {
-          isAfterFivePM = false;
-        }
-      });
+      bool newIsAfterFivePM = now.hour == 15 && now.minute >= 13 && now.minute < 57;
+
+      if (newIsAfterFivePM != isAfterFivePM) {
+        setState(() {
+          isAfterFivePM = newIsAfterFivePM;
+        });
+      }
     });
   }
   Widget _getRoutesList(BuildContext context, int index) {
@@ -1829,8 +1829,8 @@ class _Home extends State<Home> {
                                     children: [
                                       Expanded(
                                         child: GestureDetector(
-                                          onTap: isAfterFivePM
-                                              ? () {
+                                          onTap: isAfterFivePM != null && isAfterFivePM ?
+                                               () {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(

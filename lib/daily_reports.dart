@@ -184,7 +184,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           await downloadFile(
                               globals.fileServerURL + "?file=" + fileUrl);
                           showErrorSnackBar(context, "File downloaded");
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (context) => Home()),
                           );
