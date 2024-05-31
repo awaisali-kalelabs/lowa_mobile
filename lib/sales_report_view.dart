@@ -331,7 +331,7 @@ class _SalesReportView extends State<SalesReportView> {
                                         padding:
                                             EdgeInsets.fromLTRB(5, 5, 5, 5),
                                         child: Text(
-                                          e['ProductLabel'],
+                                          e['ProductLabel'].toString(),
                                           style: TextStyle(
                                               fontSize: 11,
                                               color: Colors.black,
@@ -354,7 +354,7 @@ class _SalesReportView extends State<SalesReportView> {
                                   child: Container(
                                       padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       child: Text(
-                                        e['OrderAmount'],
+                                        e['OrderAmount'].toString(),
                                         style: TextStyle(
                                             fontSize: 11, color: Colors.black),
                                         textAlign: TextAlign.right,
@@ -374,7 +374,7 @@ class _SalesReportView extends State<SalesReportView> {
                                   child: Container(
                                       padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       child: Text(
-                                        e['SalesAmount'],
+                                        e['SalesAmount'].toString(),
                                         style: TextStyle(
                                             fontSize: 11, color: Colors.black),
                                         textAlign: TextAlign.right,
