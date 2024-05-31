@@ -640,7 +640,7 @@ class _OrdersState extends State<Orders> {
                                     child:
                                       Container(
                                         alignment: Alignment.topLeft,
-                                        child: Text("ABC",textAlign: TextAlign.left,style: TextStyle(color: Colors.red),),
+                                        child: Text("ABC",textAlign: TextAlign.left,style: TextStyle(color: Colors.blue),),
                                       ),
                                 ),*/
                                   Container(

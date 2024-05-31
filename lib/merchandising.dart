@@ -316,7 +316,7 @@ class _Merchandising extends State<Merchandising> {
               RawMaterialButton(
                   // fillColor: Colors.teal,
                   elevation: 0,
-                  splashColor: Colors.red[800],
+                  splashColor: Colors.blue[800],
                   textStyle: TextStyle(color: Colors.white),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -339,7 +339,7 @@ class _Merchandising extends State<Merchandising> {
           margin: EdgeInsets.only(top: 10),
           constraints: BoxConstraints.expand(height: 800),
 
-          // color: Colors.red,
+          // color: Colors.blue,
           child: ListView(
             children: [
               Column(

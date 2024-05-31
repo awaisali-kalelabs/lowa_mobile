@@ -375,17 +375,18 @@ class Repository {
     await db.delete('spot_discount');
   }
 
-  Future<Map> getSpotDiscount() async {
+  Future<Map> getSpotDiscount(productId) async {
     // Get a reference to the database.
     await this.initdb();
     final Database db = await database;
 
     // Query the table for all The Dogs.
     List args = new List();
+    args.add(productId);
 
     final List<Map> maps = await db.rawQuery(
-        "select *  from spot_discount ",
-        );
+        "select *  from spot_discount where product_id=?1 ",
+        args);
 
     return maps.isEmpty ? null : maps[0];
 

@@ -37,12 +37,12 @@ class _ChannelTaggingList extends State<ChannelTaggingList> {
     );
     return MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
           appBar: AppBar(
-            backgroundColor: Colors.red[800],
+            backgroundColor: Colors.blue[800],
             leading: Container(
                 padding: EdgeInsets.fromLTRB(0.0, 10.0, 15.0, 0.0),
                 child: IconButton(

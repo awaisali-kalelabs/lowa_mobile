@@ -136,7 +136,7 @@ class _ShopAction_test extends State<ShopAction_test> {
                                      Navigator.of(context).pop();
                                    },
                                  ),
-                                 icon: Icon(Icons.info_outline,color: Colors.red,), // IF YOU WANT TO ADD ICON
+                                 icon: Icon(Icons.info_outline,color: Colors.blue,), // IF YOU WANT TO ADD ICON
                                  yourWidget: Container(
                                    child: Text('This is my first package'),
                                  )

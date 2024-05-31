@@ -120,7 +120,7 @@ class _OrderCartView extends State<OrderCartView> {
         isDiscountAllowed = value;
       });
     });
-    repo.getSpotDiscount().then((value) => {
+    repo.getSpotDiscount(globals.productId).then((value) => {
       setState(() {
         if(value==null){
 

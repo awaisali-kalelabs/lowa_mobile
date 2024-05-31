@@ -383,7 +383,7 @@ class _OutletCloseState extends State<OutletClose> {
           constraints: BoxConstraints.expand(height: 800),
 
 
-          // color: Colors.red,
+          // color: Colors.blue,
           child: Column(
             children: <Widget>[
               Container(

@@ -88,7 +88,7 @@ class _Home extends State<Home> {
           new GaugeSegment(
               'Low', ChartSeries, charts.MaterialPalette.red.shadeDefault),
           new GaugeSegment('Acceptable', (100 - ChartSeries),
-              charts.ColorUtil.fromDartColor(Colors.red[100])),
+              charts.ColorUtil.fromDartColor(Colors.blue[100])),
         ];
       });
     });
@@ -107,7 +107,7 @@ class _Home extends State<Home> {
           new GaugeSegment(
               'Low', ChartSeries, charts.MaterialPalette.red.shadeDefault),
           new GaugeSegment('Acceptable', (100 - ChartSeries),
-              charts.ColorUtil.fromDartColor(Colors.red[100])),
+              charts.ColorUtil.fromDartColor(Colors.blue[100])),
         ];
       });
     });
@@ -126,7 +126,7 @@ class _Home extends State<Home> {
           new GaugeSegment(
               'Low', ChartSeries, charts.MaterialPalette.red.shadeDefault),
           new GaugeSegment('Acceptable', (100 - ChartSeries),
-              charts.ColorUtil.fromDartColor(Colors.red[100])),
+              charts.ColorUtil.fromDartColor(Colors.blue[100])),
         ];
       });
     });
@@ -145,7 +145,7 @@ class _Home extends State<Home> {
           new GaugeSegment(
               'Low', ChartSeries, charts.MaterialPalette.red.shadeDefault),
           new GaugeSegment('Acceptable', (100 - ChartSeries),
-              charts.ColorUtil.fromDartColor(Colors.red[100])),
+              charts.ColorUtil.fromDartColor(Colors.blue[100])),
         ];
       });
     });
@@ -180,18 +180,19 @@ class _Home extends State<Home> {
   }
 
 
+
   void _checkTime() {
+    DateTime now = DateTime.now();
+   // bool newIsAfterFivePM = now.hour >= 17 && now.hour < 24;
+    bool newIsAfterFivePM = now.hour >= 11 && now.hour < 24;
 
-      DateTime now = DateTime.now();
-      bool newIsAfterFivePM = now.hour == 17 && now.minute >= 00 && now.hour < 24;
-
-      if (newIsAfterFivePM != isAfterFivePM) {
-        setState(() {
-          isAfterFivePM = newIsAfterFivePM;
-        });
-      }
-
+    if (newIsAfterFivePM != isAfterFivePM) {
+      setState(() {
+        isAfterFivePM = newIsAfterFivePM;
+      });
+    }
   }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -1232,7 +1233,7 @@ class _Home extends State<Home> {
                         alignment: FractionalOffset.bottomRight,
                         child: Container(
                             height: 57,
-                            //  color: Colors.red,
+                            //  color: Colors.blue,
                             child: Container(
                                 padding: EdgeInsets.all(10),
                                 height: 100,

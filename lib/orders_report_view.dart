@@ -383,7 +383,7 @@ class _OrdersReportView extends State<OrdersReportView> {
 
   Widget itemsList(BuildContext context, int index) {
     return InkWell(
-      splashColor: Colors.red,
+      splashColor: Colors.blue,
       onDoubleTap: null,
       child: Column(
         children: <Widget>[

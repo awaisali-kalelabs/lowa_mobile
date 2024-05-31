@@ -45,7 +45,7 @@ class _AddToCart extends State<AddToCart> {
 
   TextEditingController rateController = TextEditingController();
   TextEditingController stockController = TextEditingController();
- // TextEditingController discountController = TextEditingController();
+  TextEditingController discountController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   List<bool> isSelected = [false, false, false, false, false, false, false];
@@ -59,7 +59,7 @@ class _AddToCart extends State<AddToCart> {
     print(globals.orderId);
     print(globals.ProductID);
     OutletOrder =
-        await repo.getOrderItemInfo(globals.orderId, globals.productId);
+    await repo.getOrderItemInfo(globals.orderId, globals.productId);
 
     OutletOrder = OutletOrder;
     if (OutletOrder.isNotEmpty) {
@@ -83,7 +83,7 @@ class _AddToCart extends State<AddToCart> {
   void initState() {
     //AddToCartReasons=new List();
     AddToCartReason = 0;
-   // discountController.text = "0";
+    discountController.text = "0";
     myFocusNode = FocusNode();
     Future.delayed(const Duration(seconds: 1), () async {
       // myFocusNode.requestFocus();
@@ -112,22 +112,21 @@ class _AddToCart extends State<AddToCart> {
       });
     });
 
-    repo.getSpotDiscount().then((value) => {
+    repo.getSpotDiscount(globals.productId).then((value) => {
       setState(() {
         if(value==null){
 
           defaultDiscount = 0;
           maximumDiscount = 0;
-        //  discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
+          discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
 
         }else{
 
           defaultDiscount = value['default_discount'];
           maximumDiscount = value['maximum_discount'];
-         // discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
+          discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
 
         }
-        print("maximumDiscount : " + maximumDiscount.toString());
 
         print("defaultDiscount : " + defaultDiscount.toString());
       })
@@ -166,9 +165,9 @@ class _AddToCart extends State<AddToCart> {
                     //
 
                     MaterialPageRoute(builder: (context) => ShopAction()
-                        //  MaterialPageRoute(builder: (context) =>ShopAction_test()
+                      //  MaterialPageRoute(builder: (context) =>ShopAction_test()
 
-                        ),
+                    ),
                   );
                 } else {
                   Navigator.of(context).pop();
@@ -195,7 +194,7 @@ class _AddToCart extends State<AddToCart> {
             onChanged: (val) {
               setAddToCartReason(val);
             },
-            activeColor: Colors.blue[200],
+            activeColor: Colors.orange[200],
 
             selected: true,
           ),
@@ -265,12 +264,12 @@ class _AddToCart extends State<AddToCart> {
         int Remainder = 0;
 
         Remainder = (quantityUnits/48).toInt();
-print('Remainder'+Remainder.toString());
+        print('Remainder'+Remainder.toString());
         if(freeUnits % 48 == 0) {
           freeUnits = freeUnits * freeProduct[0]['total_units'];
         }else{
           if(Remainder<2){
-          freeUnits = freeProduct[0]['total_units'];
+            freeUnits = freeProduct[0]['total_units'];
           }else{
             freeUnits = Remainder*4;
           }
@@ -311,7 +310,7 @@ print('Remainder'+Remainder.toString());
         isQuantityNotAdded = false;
         amountController.text = "";
         quantityController.text = "";
-        //discountController.text = "";
+        discountController.text = "";
 
         ProductsPrice = val;
         if (ProductsPrice.isNotEmpty) {
@@ -358,14 +357,14 @@ print('Remainder'+Remainder.toString());
     priceRateAfterDiscount = priceRate;
 
     String errorMessage = "Discount cannot be greater than rate";
-  /*  if(double.parse(discountController.text)>maximumDiscount){
+    if(double.parse(discountController.text)>maximumDiscount){
       errorMessage = "Discount cannot be greater than " + maximumDiscount.toString() + "";
-    }*/
-  //  print("check......................................");
-   // print("maximumDiscount==> " + maximumDiscount.toString());
-    //print("discountController 1==> " + discountController.text.toString());
+    }
+    print("check......................................");
+    print("maximumDiscount==> " + maximumDiscount.toString());
+    print("discountController 1==> " + discountController.text.toString());
 
-  /*  if (double.parse(discountController.text) < priceRate && double.parse(discountController.text)<=maximumDiscount) {
+    if (double.parse(discountController.text) < priceRate && double.parse(discountController.text)<=maximumDiscount) {
       priceRateAfterDiscount = priceRate - double.parse(discountController.text);
       print("discountController==> " + discountController.text.toString());
       print("priceRateAfterDiscount==> " + priceRateAfterDiscount.toString());
@@ -396,7 +395,7 @@ print('Remainder'+Remainder.toString());
         duration: Duration(seconds: 2),
         leftBarIndicatorColor: Colors.blue,
       )..show(context);
-    }*/
+    }
     if (int.parse(quantityController.text) !=
         0) {
       double amount = 0;
@@ -418,7 +417,7 @@ print('Remainder'+Remainder.toString());
       ),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        key: _formkey,
+          key: _formkey,
           appBar: AppBar(
             backgroundColor: Colors.blue[800],
             title: Text(
@@ -449,167 +448,166 @@ print('Remainder'+Remainder.toString());
                   children: <Widget>[
                     Card(
                         child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Colors.white),
-                      padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Colors.white),
+                          padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Expanded(
-                                  child: Container(
-                                    // width: cardWidth,
-                                    padding: EdgeInsets.all(5.0),
-                                    child: TextField(
-                                        controller: stockController,
-                                        keyboardType: TextInputType.number,
+                              Row(
+                                children: [
+                                  Expanded(
+                                      child: Container(
+                                        // width: cardWidth,
+                                        padding: EdgeInsets.all(5.0),
+                                        child: TextField(
+                                            controller: stockController,
+                                            keyboardType: TextInputType.number,
 
-                                        readOnly: true,
-                                        autofocus: false,
-                                        onChanged: (val) {},
-                                        decoration: InputDecoration(
-                                          enabledBorder: const UnderlineInputBorder(
-                                            borderSide: const BorderSide(
-                                                color: Colors.black12, width: 0.0),
-                                          ),
-                                          labelText: 'Available Stock',
-                                        )),
-                                  )),
+                                            readOnly: true,
+                                            autofocus: false,
+                                            onChanged: (val) {},
+                                            decoration: InputDecoration(
+                                              enabledBorder: const UnderlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                    color: Colors.black12, width: 0.0),
+                                              ),
+                                              labelText: 'Available Stock',
+                                            )),
+                                      )),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                      child: Container(
+                                        // width: cardWidth,
+                                        padding: EdgeInsets.all(5.0),
+                                        child: TextField(
+                                            controller: rateController,
+                                            keyboardType: TextInputType.number,
+                                            readOnly: true,
+                                            autofocus: false,
+                                            onChanged: (val) {},
+                                            decoration: InputDecoration(
+                                              enabledBorder: const UnderlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                    color: Colors.black12, width: 0.0),
+                                              ),
+                                              labelText: 'Rate',
+                                            )),
+                                      )),
+
+                                  Expanded(
+                                      child: Container(
+                                        // width: cardWidth,
+                                        padding: EdgeInsets.all(5.0),
+                                        child: TextFormField(
+                                            autofocus: true,
+                                            onChanged: (val) {
+                                              print("==========");
+                                              quantityController.text=val;
+                                              print("priceRate" + priceRate.toString());
+                                              print("discountController" + discountController.text.toString());
+
+                                              priceRateAfterDiscount = priceRate - double.parse(discountController.text);
+                                              double price = double.parse(val) *
+                                                  priceRateAfterDiscount;
+                                              amountController.text =
+                                                  price.toString();
+                                              print("Val"+val);
+                                              print("priceRateAfterDiscount"+priceRateAfterDiscount.toString());
+                                              print("price"+price.toString());
+
+
+                                            },
+                                            validator: (val) {
+                                              if (val == null ||
+                                                  val.isEmpty ||
+                                                  int.parse(val) <= 0) {
+                                                return 'Please enter a valid quantity.';
+                                              }
+                                              return null;
+                                            },
+                                            focusNode: myFocusNode,
+                                            // controller: quantityController,
+                                            keyboardType: TextInputType.number,
+                                            decoration: InputDecoration(
+                                              enabledBorder:
+                                              const UnderlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                    color: Colors.black12,
+                                                    width: 0.0),
+                                              ),
+                                              labelText: 'Quantity *',
+                                            )),
+                                      )),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                      child: Container(
+                                        // width: cardWidth,
+                                        padding: EdgeInsets.all(5.0),
+                                        child: TextFormField(
+                                          //inputFormatters: [DecimalTextInputFormatter(decimalRange: 2)],
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                            ],
+
+                                            enabled: isDiscountAllowed,
+                                            enableInteractiveSelection: isDiscountAllowed,
+                                            controller: discountController,
+                                            keyboardType: TextInputType.number,
+                                            autofocus: false,
+                                            onChanged: (val) {
+                                              //ToReset Value to intital
+                                              onDiscountChange(val);
+                                            },
+                                            decoration: InputDecoration(
+                                              enabledBorder: const UnderlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                    color: Colors.black12, width: 0.0),
+                                              ),
+                                              labelText: 'Discount',
+                                            )),
+                                      )),
+                                  Expanded(
+                                      child: Container(
+                                        // width: cardWidth,
+                                        padding: EdgeInsets.all(5.0),
+                                        child: TextField(
+                                            autofocus: false,
+                                            readOnly: true,
+                                            onChanged: (val) {},
+                                            keyboardType: TextInputType.number,
+                                            controller: amountController,
+                                            decoration: InputDecoration(
+                                              enabledBorder: const UnderlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                    color: Colors.black12, width: 0.0),
+                                              ),
+                                              labelText: 'Amount',
+                                            )),
+                                      )),
+                                ],
+                              )
                             ],
                           ),
-                          Row(
-                            children: [
-                              Expanded(
-                                  child: Container(
-                                    // width: cardWidth,
-                                    padding: EdgeInsets.all(5.0),
-                                    child: TextFormField(
-                                        autofocus: true,
-                                        onChanged: (val) {
-                                          print("==========");
-                                          quantityController.text=val;
-                                          print("priceRate" + priceRate.toString());
-                                        //  print("discountController" + discountController.text.toString());
-
-                                          priceRateAfterDiscount = priceRate;
-                                          double price = double.parse(val) *
-                                              priceRateAfterDiscount;
-                                          amountController.text =
-                                              price.toString();
-                                          print("Val"+val);
-                                          print("priceRateAfterDiscount"+priceRateAfterDiscount.toString());
-                                          print("price"+price.toString());
-
-
-                                        },
-                                        validator: (val) {
-                                          if (val == null ||
-                                              val.isEmpty ||
-                                              int.parse(val) <= 0) {
-                                            return 'Please enter a valid quantity.';
-                                          }
-                                          return null;
-                                        },
-                                        focusNode: myFocusNode,
-                                        // controller: quantityController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: InputDecoration(
-                                          enabledBorder:
-                                          const UnderlineInputBorder(
-                                            borderSide: const BorderSide(
-                                                color: Colors.black12,
-                                                width: 0.0),
-                                          ),
-                                          labelText: 'Quantity *',
-                                        )),
-                                  )),
-                              Expanded(
-                                  child: Container(
-                                // width: cardWidth,
-                                padding: EdgeInsets.all(5.0),
-                                child: TextField(
-                                    controller: rateController,
-                                    keyboardType: TextInputType.number,
-                                    readOnly: true,
-                                    autofocus: false,
-                                    onChanged: (val) {},
-                                    decoration: InputDecoration(
-                                      enabledBorder: const UnderlineInputBorder(
-                                        borderSide: const BorderSide(
-                                            color: Colors.black12, width: 0.0),
-                                      ),
-                                      labelText: 'Rate',
-                                    )),
-                              )),
-
-
-                            ],
-                          ),
-                          Row(
-                            children: [
-                             /* Expanded(
-                                  child: Container(
-                                    // width: cardWidth,
-                                    padding: EdgeInsets.all(5.0),
-                                    child: TextFormField(
-                                      //inputFormatters: [DecimalTextInputFormatter(decimalRange: 2)],
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                                        ],
-
-                                        enabled: isDiscountAllowed,
-                                        enableInteractiveSelection: isDiscountAllowed,
-                                        controller: discountController,
-                                        keyboardType: TextInputType.number,
-                                        autofocus: false,
-                                        onChanged: (val) {
-                                          //ToReset Value to intital
-                                          onDiscountChange(val);
-                                        },
-                                        decoration: InputDecoration(
-                                          enabledBorder: const UnderlineInputBorder(
-                                            borderSide: const BorderSide(
-                                                color: Colors.black12, width: 0.0),
-                                          ),
-                                          labelText: 'Discount',
-                                        )),
-                                  )),*/
-                              Expanded(
-                                  child: Container(
-                                    // width: cardWidth,
-                                    padding: EdgeInsets.all(5.0),
-                                    child: TextField(
-                                        autofocus: false,
-                                        readOnly: true,
-                                        onChanged: (val) {},
-                                        keyboardType: TextInputType.number,
-                                        controller: amountController,
-                                        decoration: InputDecoration(
-                                          enabledBorder: const UnderlineInputBorder(
-                                            borderSide: const BorderSide(
-                                                color: Colors.black12, width: 0.0),
-                                          ),
-                                          labelText: 'Amount',
-                                        )),
-                                  )),
-                            ],
-                          )
-                        ],
-                      ),
-                    )),
+                        )),
                     Expanded(
                       child: Align(
                           alignment: FractionalOffset.bottomCenter,
                           child: Container(
                             color: Colors.blue,
                             height: 57,
-                            //  color: Colors.red,
+                            //  color: Colors.blue,
                             child: InkWell(
                               onTap: () {
-                              /*  if (_formKey.currentState.validate()) {
+                                if (_formKey.currentState.validate()) {
                                   double Discount = 0;
                                   if (discountController.text == "") {
                                     Discount = 0;
@@ -624,29 +622,27 @@ print('Remainder'+Remainder.toString());
                                   if (Discount < priceRate && Discount <= maximumDiscount) {
 
                                     DateFormat dateFormat =
-                                        DateFormat("dd/MM/yyyy HH:mm:ss");
+                                    DateFormat("dd/MM/yyyy HH:mm:ss");
                                     String currDateTime =
-                                        dateFormat.format(DateTime.now());
+                                    dateFormat.format(DateTime.now());
                                     var str = currDateTime.split(".");
 
 
-                                    addItemOrder(
-                                        globals.orderId,
-                                        globals.productId,
-                                        Discount,
-                                        int.parse(quantityController.text)
-                                        , double.parse(amountController.text),
-                                        str[0],
-                                        double.parse(rateController.text),
-                                        globals.productLabel);
-                                    *//*
+                                    addItemOrder(globals.orderId, globals.productId, Discount, int.parse(quantityController.text), double.parse(amountController.text), str[0], double.parse(rateController.text), globals.productLabel);
+                                    Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                Orders(outletId: globals.OutletID)),
+                                        ModalRoute.withName("/Orders"));
+                                    /*
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => Orders(
                                               outletId: globals.OutletID)),
                                     );
-                                    *//*
+                                    */
                                   } else {
                                     Flushbar(
                                       messageText: Column(
@@ -671,53 +667,6 @@ print('Remainder'+Remainder.toString());
                                       leftBarIndicatorColor: Colors.blue,
                                     )..show(context);
                                   }
-                                }*/
-                                DateFormat dateFormat =
-                                DateFormat("dd/MM/yyyy HH:mm:ss");
-                                String currDateTime =
-                                dateFormat.format(DateTime.now());
-                                var str = currDateTime.split(".");
-
-
-                                addItemOrder(
-                                    globals.orderId,
-                                    globals.productId,
-                                    0,
-                                    int.parse(quantityController.text)
-                                    , double.parse(amountController.text),
-                                    str[0],
-                                    double.parse(rateController.text),
-                                    globals.productLabel);
-                                if(rateController != 0 || rateController != null){
-                                  Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              Orders(outletId: globals.OutletID)),
-                                      ModalRoute.withName("/Orders"));
-                                }else{
-                                  Flushbar(
-                                    messageText: Column(
-                                      children: <Widget>[
-                                        Text(
-                                          "SKU Amount is 0",
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    backgroundGradient:
-                                    LinearGradient(colors: [Colors.black, Colors.black]),
-                                    icon: Icon(
-                                      Icons.notifications_active,
-                                      size: 30.0,
-                                      color: Colors.blue[800],
-                                    ),
-                                    duration: Duration(seconds: 2),
-                                    leftBarIndicatorColor: Colors.blue[800],
-                                  )..show(context);
                                 }
                               },
                               child: Row(
@@ -732,7 +681,7 @@ print('Remainder'+Remainder.toString());
                               ),
                             ),
                           ) //Your widget here,
-                          ),
+                      ),
                     ),
                   ],
                 ),

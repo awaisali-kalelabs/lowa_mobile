@@ -177,10 +177,10 @@ class _NoOrder extends State<NoOrder> {
             icon: Icon(
               Icons.notifications_active,
               size: 30.0,
-              color: Colors.red[800],
+              color: Colors.blue[800],
             ),
             duration: Duration(seconds: 2),
-            leftBarIndicatorColor: Colors.red[800],
+            leftBarIndicatorColor: Colors.blue[800],
           )
             ..show(context);
         }
