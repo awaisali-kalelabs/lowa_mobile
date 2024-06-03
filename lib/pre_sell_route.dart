@@ -493,7 +493,8 @@ class _PreSellRoute extends State<PreSellRoute> {
                                                         //
                                                         MaterialPageRoute(
                                                             builder: (context) =>
-                                                                OutletOrderImage(outletId: globals.OutletID)));
+                                                                // OutletOrderImage(outletId: globals.OutletID)));
+                                                    ShopAction()));
                                                   },
                                                   trailing: Container(
                                                     width: 110,
