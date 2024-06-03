@@ -184,6 +184,7 @@ class _OrderCartView extends State<OrderCartView> {
 
     return distanceInMeters;
   }
+/*
   onDiscountChange(val){
 
     if(val==null){
@@ -235,6 +236,7 @@ class _OrderCartView extends State<OrderCartView> {
       )..show(context);
     }
   }
+*/
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
   @override
   Widget build(BuildContext context) {
@@ -611,7 +613,7 @@ class _OrderCartView extends State<OrderCartView> {
                                                 autofocus: false,
                                                 onChanged: (val) {
                                                   //ToReset Value to initial
-                                                  onDiscountChange(val);
+                                              //    onDiscountChange(val);
                                                 },
                                                 decoration: InputDecoration(
                                                   enabledBorder: OutlineInputBorder(
@@ -1043,6 +1045,7 @@ class _OrderCartView extends State<OrderCartView> {
             print("ITEMS" + AllOrdersItems.toString());
           });
           */
+          print("orderParam 1 :" + orderParam.toString());
           String orderItemParam = "";
           for (int j = 0; j < AllOrdersItems.length; j++) {
             orderParam += "&product_id=" +

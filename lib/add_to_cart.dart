@@ -124,6 +124,7 @@ class _AddToCart extends State<AddToCart> {
 
           defaultDiscount = value['default_discount'];
           maximumDiscount = value['maximum_discount'];
+          defaultDiscount = value['default_discount'];
           discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
 
         }
@@ -204,6 +205,7 @@ class _AddToCart extends State<AddToCart> {
   }
 
   double cardWidth = 0.0;
+  double priceRateCal = 0.0;
   double priceRateAfterDiscount = 0.0;
   double priceRate = 0.0;
 
@@ -314,6 +316,7 @@ class _AddToCart extends State<AddToCart> {
 
         ProductsPrice = val;
         if (ProductsPrice.isNotEmpty) {
+          print(      "raw_case" +  ( priceRateAfterDiscount = ProductsPrice[0]["raw_case"]).toString());
           priceRateAfterDiscount = ProductsPrice[0]["raw_case"];
           priceRate = ProductsPrice[0]["raw_case"];
           /*if(globals.maxDiscountPercentage>0 && priceRate>0){
@@ -355,17 +358,24 @@ class _AddToCart extends State<AddToCart> {
       val="0";
     }
     priceRateAfterDiscount = priceRate;
-
+    print("Parse discountController"+double.parse(discountController.text).toString());
+    print("Parse discountController"+maximumDiscount.toString());
     String errorMessage = "Discount cannot be greater than rate";
     if(double.parse(discountController.text)>maximumDiscount){
       errorMessage = "Discount cannot be greater than " + maximumDiscount.toString() + "";
     }
+    if(double.parse(discountController.text)<defaultDiscount){
+      errorMessage = "Discount cannot be less than " + defaultDiscount.toString() + "";
+    }
+
     print("check......................................");
     print("maximumDiscount==> " + maximumDiscount.toString());
     print("discountController 1==> " + discountController.text.toString());
 
-    if (double.parse(discountController.text) < priceRate && double.parse(discountController.text)<=maximumDiscount) {
-      priceRateAfterDiscount = priceRate - double.parse(discountController.text);
+    if (double.parse(discountController.text) < priceRate && double.parse(discountController.text)<=maximumDiscount && double.parse(discountController.text) >= defaultDiscount ) {
+     // priceRateAfterDiscount = priceRate - double.parse(discountController.text);
+      priceRateCal = priceRate * double.parse(discountController.text)/100;
+      priceRateAfterDiscount = priceRate - priceRateCal;
       print("discountController==> " + discountController.text.toString());
       print("priceRateAfterDiscount==> " + priceRateAfterDiscount.toString());
 
@@ -507,14 +517,14 @@ class _AddToCart extends State<AddToCart> {
                                         child: TextFormField(
                                             autofocus: true,
                                             onChanged: (val) {
-                                              print("==========");
+                                              print("productId"+globals.productId.toString());
+                                              print("=========="+val.toString());
                                               quantityController.text=val;
                                               print("priceRate" + priceRate.toString());
                                               print("discountController" + discountController.text.toString());
-
-                                              priceRateAfterDiscount = priceRate - double.parse(discountController.text);
-                                              double price = double.parse(val) *
-                                                  priceRateAfterDiscount;
+                                              priceRateCal = priceRate * double.parse(discountController.text)/100;
+                                              priceRateAfterDiscount = priceRate - priceRateCal;
+                                              double price = double.parse(val) * priceRateAfterDiscount;
                                               amountController.text =
                                                   price.toString();
                                               print("Val"+val);
@@ -619,7 +629,14 @@ class _AddToCart extends State<AddToCart> {
                                   if(Discount>maximumDiscount){
                                     errorMessage = "Discount cannot be greater than " + maximumDiscount.toString() + "";
                                   }
-                                  if (Discount < priceRate && Discount <= maximumDiscount) {
+                                  print("defaultDiscount==>"+defaultDiscount.toString());
+                                  print("Discount==>"+Discount.toString());
+                                  if(Discount<defaultDiscount){
+                                    errorMessage = "Discount cannot be less than " + defaultDiscount.toString() + "";
+                                  }
+                                  //defaultDiscount
+                                  if (Discount < priceRate && Discount <= maximumDiscount && Discount >= defaultDiscount) {
+                                    globals.AfterSpotDsicount = priceRateAfterDiscount;
 
                                     DateFormat dateFormat =
                                     DateFormat("dd/MM/yyyy HH:mm:ss");

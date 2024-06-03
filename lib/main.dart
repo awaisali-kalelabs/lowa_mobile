@@ -507,7 +507,7 @@ class _LoginPageState extends State<LoginPage>
                     UserFeatures.fromJson(user_features_rows[i]));
               }
             }
-
+            print("spotDiscount .............."+responseBody['spotDiscount'].toString());
             List discount_rows = responseBody['spotDiscount'];
             if(discount_rows!=null){
               for (var i = 0; i < discount_rows.length; i++) {
