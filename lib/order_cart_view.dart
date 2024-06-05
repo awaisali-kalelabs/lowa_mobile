@@ -598,7 +598,7 @@ class _OrderCartView extends State<OrderCartView> {
                                             ))),
 
                                       ],),
-                                    Row(
+                                   /* Row(
                                       children :[
                                         Expanded(
                                             child: Container(
@@ -625,7 +625,7 @@ class _OrderCartView extends State<OrderCartView> {
 
                                             )),
                                       ]
-                                    )
+                                    )*/
 
                                   ],
                                 ))),
@@ -1082,11 +1082,12 @@ class _OrderCartView extends State<OrderCartView> {
 
           var responseBody = json.decode(utf8.decode(response.bodyBytes));
           print('called4');
+          print("bhai :"+response.statusCode.toString());
           if (response.statusCode == 200) {
           //  print();
             if (responseBody["success"] == "true") {
               await repo.markOrderUploaded(ORDERIDToDelete);
-              //_showDialog("Success","order uploaded. ",1);
+              _showDialog("Success","order uploaded. ",1);
 
             } else {
               _showDialog("Error", responseBody["error_code"], 0);
