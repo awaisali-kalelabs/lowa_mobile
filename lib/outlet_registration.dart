@@ -35,8 +35,11 @@ class _OutletRegisteration extends State<OutletRegisteration> {
   int _selectedArea;
   int _selectedSubArea;
   int _selectedChannelArea;
+  int _selectedOutletChannel;
 
   final TextEditingController _ChanneltypeAheadController =
+  TextEditingController();
+  final TextEditingController _OutletChanneltypeAheadController =
   TextEditingController();
   final TextEditingController _AreatypeAheadController =
   TextEditingController();
@@ -46,6 +49,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
 
   Repository repo = new Repository();
   List<Map<String, dynamic>> PCIChannels;
+  List<Map<String, dynamic>> OutletChannel;
   List<Map<String, dynamic>> OutletAreas;
   List<Map<String, dynamic>> ProductsCatgories;
   List<Map<String, dynamic>> ProductsPrice;
@@ -78,6 +82,12 @@ class _OutletRegisteration extends State<OutletRegisteration> {
     repo.getPCIChannels().then((val) {
       setState(() {
         PCIChannels = val;
+      });
+    });
+    OutletChannel = new List();
+    repo.getOutletChannel().then((val) {
+      setState(() {
+        OutletChannel = val;
       });
     });
 
@@ -222,6 +232,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
 
 
   final focus = FocusNode();
+  final focus2 = FocusNode();
   double dynamicheight = 1.6;
 
   Widget build(BuildContext context) {
@@ -347,6 +358,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                     'created_by': globals.UserID,
                     'is_uploaded': 0,
                     'is_new' :1,
+                    'outletchannel' :_selectedOutletChannel
                   });
                   _UploadDocuments();
                   _registerOutlet(context, args);
@@ -488,9 +500,46 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                                   )),
                               Container(
                                 // width: cardWidth,
+
+                                  padding: EdgeInsets.all(5.0),
+                                  child: TypeAheadFormField(
+                                    textFieldConfiguration: TextFieldConfiguration(
+                                      decoration: InputDecoration(
+                                        enabledBorder: const UnderlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              color: Colors.black12, width: 0.0),
+                                        ),
+                                        labelText: 'Outlet Channel',
+                                      ),
+                                      controller: this._OutletChanneltypeAheadController,
+                                    ),
+                                    suggestionsCallback: (pattern) async {
+                                      return await repo.getChannel(
+                                          "%" + pattern + "%");
+                                    },
+                                    itemBuilder: (context, suggestion) {
+                                      return ListTile(
+                                        leading: Text(
+                                          '${suggestion['label']}',
+                                        ),
+                                      );
+                                    },
+                                    onSuggestionSelected: (suggestion) {
+                                      this._OutletChanneltypeAheadController.text =
+                                      suggestion['label'];
+                                      this._selectedOutletChannel = suggestion['id'];
+                                      FocusScope.of(context).requestFocus(focus2);
+                                    },
+                                    validator: (value) => value.isEmpty
+                                        ? 'Please select Outlet channel'
+                                        : null,
+                                    onSaved: (value) => () {},
+                                  )),
+                              Container(
+                                // width: cardWidth,
                                   padding: EdgeInsets.all(5.0),
                                   child: TextFormField(
-                                    focusNode: focus,
+                                    focusNode: focus2,
                                     decoration: InputDecoration(
                                       enabledBorder: const UnderlineInputBorder(
                                         borderSide: const BorderSide(
@@ -953,6 +1002,8 @@ class _OutletRegisteration extends State<OutletRegisteration> {
             AllRegisteredOutlets[i]['created_on'] +
             "&created_by=" +
             AllRegisteredOutlets[i]['created_by'].toString() +
+              "&OutletChannel=" +
+            AllRegisteredOutlets[i]['outletchannel'].toString() +
             "&uuid=" +
             globals.DeviceID +
             "&version=" +
@@ -969,7 +1020,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
         //var localUrl="http://192.168.10.37:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
         // var localUrl="http://192.168.30.125:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
         var url = Uri.http(
-            globals.ServerURL, '/portal/mobile/MobileSyncOutletRegistration');
+            globals.ServerURL, '/portal/mobile/MobileSyncOutletRegistration2');
 
 
         try {
@@ -983,7 +1034,10 @@ class _OutletRegisteration extends State<OutletRegisteration> {
           var responseBody = json.decode(utf8.decode(response.bodyBytes));
           print('called4');
           if (response.statusCode == 200) {
+            print("inside 200");
             if (responseBody["success"] == "true") {
+              print("inside success");
+
               print("Saved");
               repo.markOutletUploaded(
                   int.tryParse(AllRegisteredOutlets[i]['mobile_request_id']));

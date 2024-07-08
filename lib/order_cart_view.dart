@@ -120,7 +120,7 @@ class _OrderCartView extends State<OrderCartView> {
         isDiscountAllowed = value;
       });
     });
-    repo.getSpotDiscount(globals.productId).then((value) => {
+   /* repo.getSpotDiscount(globals.productId).then((value) => {
       setState(() {
         if(value==null){
 
@@ -140,7 +140,7 @@ class _OrderCartView extends State<OrderCartView> {
         print("defaultDiscount : " + defaultDiscount.toString());
         print("maximumDiscount : " + maximumDiscount.toString());
       })
-    });
+    });*/
     _getLocation();
   }
   double _latitude = 0.0;

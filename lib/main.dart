@@ -27,6 +27,7 @@ import 'package:order_booker/home.dart';
 import 'package:order_booker/order_cart_view.dart';
 import 'package:splashscreen/splashscreen.dart';
 
+import 'com/pbc/model/OutletChannel.dart';
 import 'delayed_animation.dart';
 import 'globals.dart' as globals;
 
@@ -316,8 +317,8 @@ class _LoginPageState extends State<LoginPage>
         "&DeviceID=" +
         globals.DeviceID +
         "&DeviceToken=123" +
-    "&AppVersion=" +
-        globals.appVersion.toString();
+        "&AppVersion=" +
+        globals.appVersion;
 
     var QueryParameters = <String, String>{
       "SessionID": EncryptSessionID(param),
@@ -326,8 +327,8 @@ class _LoginPageState extends State<LoginPage>
 
 
     print("Called1111");
-
-    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUser', QueryParameters);
+    print("param"+param);
+    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV3', QueryParameters);
      print("Url........." + url.toString());
       var response = await http.get(url, headers: {
         HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
@@ -345,7 +346,7 @@ class _LoginPageState extends State<LoginPage>
           print("globals.maxDiscountPercentage"+globals.maxDiscountPercentage.toString());
           print("globals.distributorId"+globals.distributorId.toString());
           Repository repo = new Repository();
-
+          print(responseBody['OutletChannel'].toString());
           await repo.initdb();
 
 
@@ -463,7 +464,7 @@ class _LoginPageState extends State<LoginPage>
             await repo.deletePromotionsActive();
             await repo.deletePromotionsProducts();
             await repo.deletePromotionsProductsFree();
-
+            await repo.deleteAllOutletChannel();
             print("8.1");
             List outlet_product_alternative_prices_rows =
                 responseBody['PriceListRows'];
@@ -507,11 +508,20 @@ class _LoginPageState extends State<LoginPage>
                     UserFeatures.fromJson(user_features_rows[i]));
               }
             }
+            print("12");
+            List Channel_Outlets = responseBody['OutletChannel'];
+            if(user_features_rows!=null){
+              for (var i = 0; i < Channel_Outlets.length; i++) {
+                await repo.insertChannel(
+                    OutletChannel.fromJson(Channel_Outlets[i]));
+              }
+            }
             print("spotDiscount .............."+responseBody['spotDiscount'].toString());
             List discount_rows = responseBody['spotDiscount'];
+           // globals.ChannelIDCHECK = discount_rows['ChannelID'];
             if(discount_rows!=null){
               for (var i = 0; i < discount_rows.length; i++) {
-                await repo.insertSpotDiscount(discount_rows[i]['ProductID'], discount_rows[i]['DefaultDiscount'], discount_rows[i]['MaximumDiscount']);
+                await repo.insertSpotDiscount(discount_rows[i]['ProductID'], discount_rows[i]['DefaultDiscount'], discount_rows[i]['MaximumDiscount'],discount_rows[i]['ChannelID']);
               }
             }
 

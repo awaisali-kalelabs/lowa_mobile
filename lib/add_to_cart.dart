@@ -112,7 +112,7 @@ class _AddToCart extends State<AddToCart> {
       });
     });
 
-    repo.getSpotDiscount(globals.productId).then((value) => {
+    repo.getSpotDiscount(globals.productId,globals.Channel_ID).then((value) => {
       setState(() {
         if(value==null){
 

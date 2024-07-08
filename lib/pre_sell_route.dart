@@ -480,6 +480,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                                                     globals.Lng = double.parse(PreSellOutlets[index]['lng']);
                                                     globals.VisitType = int.parse(PreSellOutlets[index]['visit_type'].toString());
                                                     globals.PCI_Channel_ID = PreSellOutlets[index]['pic_channel_id'];
+                                                    globals.Channel_ID = PreSellOutlets[index]['channel_id'];
                                                     globals.PCI_Channel_Lable = PreSellOutlets[index]['channel_label'].toString();
                                                     globals.order_created_on_date = PreSellOutlets[index]['order_created_on_date'];
                                                     globals.common_outlets_vpo_classifications= PreSellOutlets[index]['common_outlets_vpo_classifications'];
@@ -487,7 +488,7 @@ class _PreSellRoute extends State<PreSellRoute> {
 
                                                     await repo.deleteAllIncompleteOrder(PreSellOutlets[index]['outlet_id']);
                                                     globals.OutletIdforupdate = PreSellOutlets[index]['outlet_id'];
-
+                                                    print( "Channel Id :"+globals.PCI_Channel_ID);
                                                     Navigator.push(
                                                         context,
                                                         //

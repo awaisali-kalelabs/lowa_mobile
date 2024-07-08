@@ -15,6 +15,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../globals.dart' as globals;
+import '../model/OutletChannel.dart';
 
 class Repository {
   var database;
@@ -43,7 +44,7 @@ class Repository {
       // Set the path to the database. Note: Using the `join` function from the
       // `path` package is best practice to ensure the path is correctly
       // constructed for each platform.
-      join(await getDatabasesPath(), 'delivery_managerV69.db'),
+      join(await getDatabasesPath(), 'delivery_managerV76.db'),
       // When the database is first created, create a table to store dogs.
       onUpgrade: _onUpgrade,
       onCreate: (db, version) {
@@ -51,7 +52,7 @@ class Repository {
         /* db.execute(
             "CREATE TABLE products_old( category_id INTEGER,category_label TEXT,sap_code INTEGER,product_id INTEGER,package_id INTEGER,package_label TEXT,package_sort_order INTEGER,liquid_in_ml  INTEGER,conversion_rate_in_ml  TEXT,brand_id INTEGER,brand_label TEXT,unit_per_sku INTEGER,is_visible INTEGER,type_id INTEGER,ssrb_type_id INTEGER,lrb_type_id INTEGER,is_other_brand INTEGER);"
         );*/
-        print("CREATE TABLE spot_discount(product_id INTEGER, default_discount real, maximum_discount real)");
+        print("CREATE TABLE spot_discount(product_id INTEGER, default_discount real, maximum_discount real,ChannelID INTEGER)");
 
         db.execute(
             "CREATE TABLE outlet_orders_images(id INTEGER, file_type_id TEXT, file TEXT,is_uploaded INTEGER DEFAULT 0,created_on TEXT)");
@@ -64,7 +65,7 @@ class Repository {
         db.execute(
             "CREATE TABLE products( product_id INTEGER,product_label TEXT,package_id INTEGER,package_label TEXT,sort_order INTEGER,brand_id INTEGER,brand_label TEXT,unit_per_case INTEGER,lrb_type_id INTEGER);");
         db.execute(
-            "CREATE TABLE pre_sell_outlets2(outlet_id INTEGER,outlet_name TEXT,day_number INTEGER,owner TEXT ,address TEXT,telephone TEXT,nfc_tag_id TEXT, visit_type INTEGER,lat TEXT,lng TEXT,accuracy TEXT,area_label TEXT, sub_area_label TEXT,is_alternate_visible INTEGER,pic_channel_id TEXT, channel_label TEXT, order_created_on_date TEXT, common_outlets_vpo_classifications TEXT , Visit TEXT, purchaser_name TEXT, purchaser_mobile_no TEXT, cache_contact_nic TEXT,IsGeoFence INTEGER,Radius INTEGER)");
+            "CREATE TABLE pre_sell_outlets2(outlet_id INTEGER,outlet_name TEXT,day_number INTEGER,owner TEXT ,address TEXT,telephone TEXT,nfc_tag_id TEXT, visit_type INTEGER,lat TEXT,lng TEXT,accuracy TEXT,area_label TEXT, sub_area_label TEXT,is_alternate_visible INTEGER,pic_channel_id TEXT, channel_label TEXT, order_created_on_date TEXT, common_outlets_vpo_classifications TEXT , Visit TEXT, purchaser_name TEXT, purchaser_mobile_no TEXT, cache_contact_nic TEXT,IsGeoFence INTEGER,Radius INTEGER,channel_id INTEGER,channel_name TEXT)");
 
         db.execute("CREATE TABLE product_lrb_types(id INTEGER,label TEXT)");
 
@@ -98,7 +99,7 @@ class Repository {
             "CREATE TABLE pci_sub_channel(id INTEGER,label TEXT,parent_channel_id INTEGER)");
 
         db.execute(
-            "CREATE TABLE registered_outlets(id_for_update INTEGER,outlet_name TEXT,mobile_request_id TEXT,mobile_timestamp TEXT, channel_id INTEGER,area_label TEXT,sub_area_label TEXT,address TEXT, owner_name TEXT,owner_cnic TEXT, owner_mobile_no TEXT,purchaser_name TEXT,purchaser_mobile_no TEXT, is_owner_purchaser INTEGER, lat REAL, lng REAL, accuracy INTEGER, created_on TEXT,created_by INTEGER,is_uploaded INTEGER,is_new INTEGER )");
+            "CREATE TABLE registered_outlets(id_for_update INTEGER,outlet_name TEXT,mobile_request_id TEXT,mobile_timestamp TEXT, channel_id INTEGER,area_label TEXT,sub_area_label TEXT,address TEXT, owner_name TEXT,owner_cnic TEXT, owner_mobile_no TEXT,purchaser_name TEXT,purchaser_mobile_no TEXT, is_owner_purchaser INTEGER, lat REAL, lng REAL, accuracy INTEGER, created_on TEXT,created_by INTEGER,is_uploaded INTEGER,is_new INTEGER,outletchannel INTEGER )");
 
 
         db.execute(
@@ -112,6 +113,8 @@ class Repository {
         );
         db.execute(
             "CREATE TABLE user_features(id INTEGER )");
+        db.execute(
+            "CREATE TABLE Outlets_channel (id INTEGER ,label TEXT)");
 
         db.execute(
 
@@ -121,7 +124,7 @@ class Repository {
         db.execute(
             "CREATE TABLE outlet_mark_close(id INTEGER ,outlet_id INTEGER,image_path TEXT,is_uploaded INTEGER,is_photo_uploaded INTEGER,uuid TEXT,created_on TEXT,lat TEXT,lng TEXT,accuracy TEXT )");
 
-        db.execute("CREATE TABLE spot_discount(product_id INTEGER, default_discount real, maximum_discount real)");
+        db.execute("CREATE TABLE spot_discount(product_id INTEGER, default_discount real, maximum_discount real,ChannelID INTEGER)");
 
         print("CREATE TABLE spot_discount(product_id INTEGER, default_discount real, maximum_discount real)");
 
@@ -360,11 +363,11 @@ class Repository {
       //print(error);
     }
   }
-  Future<void> insertSpotDiscount(product_id,default_discount, maximum_discount) async {
+  Future<void> insertSpotDiscount(product_id,default_discount, maximum_discount,ChannelID) async {
     await this.initdb();
     final Database db = await database;
     try {
-      await db.rawInsert("insert into spot_discount(product_id,default_discount, maximum_discount) values  (?,?, ?) ", [product_id,default_discount, maximum_discount]);
+      await db.rawInsert("insert into spot_discount(product_id,default_discount, maximum_discount,ChannelID) values  (?,?,?,?) ", [product_id,default_discount, maximum_discount,ChannelID]);
     } catch (error) {
       //print(error);
     }
@@ -375,7 +378,7 @@ class Repository {
     await db.delete('spot_discount');
   }
 
-  Future<Map> getSpotDiscount(productId) async {
+/*  Future<Map> getSpotDiscount(productId,ChannelID) async {
     // Get a reference to the database.
     await this.initdb();
     final Database db = await database;
@@ -383,14 +386,52 @@ class Repository {
     // Query the table for all The Dogs.
     List args = new List();
     args.add(productId);
+    args.add(ChannelID);
 
     final List<Map> maps = await db.rawQuery(
-        "select *  from spot_discount where product_id=?1 ",
+        "select *  from spot_discount where product_id=?1 and ChannelID=?2",
         args);
 
     return maps.isEmpty ? null : maps[0];
 
+  }*/
+  Future<Map> getSpotDiscount(productId, ChannelID) async {
+    // Get a reference to the database.
+    await this.initdb();
+    final Database db = await database;
+
+    // Query to get the ChannelID for the given product_id
+    final List<Map> initialQuery = await db.rawQuery(
+        "select ChannelID from spot_discount where product_id = ?",
+        [productId]
+    );
+
+    if (initialQuery.isEmpty) {
+      return null;
+    }
+
+    final int localChannelID = initialQuery[0]['ChannelID'];
+
+    List<Map> maps;
+
+    if (localChannelID == 0) {
+      maps = await db.rawQuery(
+          "select * from spot_discount where product_id = ?",
+          [productId]
+      );
+      print("localChannelID is 0");
+    } else {
+      maps = await db.rawQuery(
+          "select * from spot_discount where product_id = ? and ChannelID = ?",
+          [productId, ChannelID]
+      );
+      print("localChannelID is not 0");
+
+    }
+
+    return maps.isEmpty ? null : maps[0];
   }
+
 
 
   Future markOutletMarkCloseUploaded(int id) async {
@@ -424,10 +465,14 @@ class Repository {
     return maps;
   }
 
-
+//
   Future<void> deleteAllUserFeatures() async {
     final Database db = await database;
     await db.delete('user_features');
+  }
+  Future<void> deleteAllOutletChannel() async {
+    final Database db = await database;
+    await db.delete('Outlets_channel');
   }
 
 
@@ -450,6 +495,19 @@ class Repository {
       await db.insert(
         'user_features',
         userFeature.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (error) {
+      print("ERROR in inserting UserFeatures : "+error);
+      //print(error);
+    }
+  }
+  Future<void> insertChannel(OutletChannel outletchannel) async {
+    final Database db = await database;
+    try {
+      await db.insert(
+        'Outlets_channel',
+        outletchannel.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     } catch (error) {
@@ -1775,11 +1833,12 @@ class Repository {
       args.add(formFields[i]['created_by']);
       args.add(formFields[i]['is_uploaded']);
       args.add(formFields[i]['is_new']);
+      args.add(formFields[i]['outletchannel']);
 
       //"CREATE TABLE (outlet_name TEXT,mobile_request_id TEXT,mobile_timestamp TEXT, channel_id INTEGER,sub_area_id INTEGER,address TEXT, owner_name TEXT,owner_cnic TEXT, owner_mobile_no TEXT,purchaser_name TEXT,purchaser_mobile_no TEXT, is_owner_purchaser INTGER, lat REAL, lng REAL, accuracy INTEGER, created_on TEXT,created_by INTEGER)"
 
       await db.rawInsert(
-          'insert into registered_outlets (id_for_update,outlet_name ,mobile_request_id ,mobile_timestamp,channel_id ,area_label,sub_area_label ,address,owner_name,owner_cnic,owner_mobile_no,purchaser_name,purchaser_mobile_no,is_owner_purchaser,lat,lng,accuracy,created_on,created_by,is_uploaded,is_new) values  (?,?,?,DATETIME("now","5 hours"),?,?,?,?,?,?,?,?,?,?,?,?,?,DATETIME("now","5 hours"),?,?,?) ',
+          'insert into registered_outlets (id_for_update,outlet_name ,mobile_request_id ,mobile_timestamp,channel_id ,area_label,sub_area_label ,address,owner_name,owner_cnic,owner_mobile_no,purchaser_name,purchaser_mobile_no,is_owner_purchaser,lat,lng,accuracy,created_on,created_by,is_uploaded,is_new,outletchannel) values  (?,?,?,DATETIME("now","5 hours"),?,?,?,?,?,?,?,?,?,?,?,?,?,DATETIME("now","5 hours"),?,?,?,?) ',
           args);
     }
 
@@ -1805,6 +1864,14 @@ class Repository {
     final Database db = await database;
 
     final List<Map> maps = await db.rawQuery("select *  from pci_sub_channel");
+
+    return maps;
+  }
+  Future<List<Map<String, dynamic>>> getOutletChannel() async {
+    await this.initdb();
+    final Database db = await database;
+
+    final List<Map> maps = await db.rawQuery("select *  from Outlets_channel");
 
     return maps;
   }
@@ -1844,7 +1911,29 @@ class Repository {
     });
 */
   }
+  Future<List> getChannel(String query) async {
+    await initdb();
+    final Database db = await database;
+    // await Future.delayed(Duration(seconds: 1));
 
+    List args = new List();
+    args.add(query);
+    //print("QUERY"+query);
+
+    final List maps = await db.rawQuery(
+        "select id,label  from Outlets_channel where label like ?1", args);
+
+    //print('pci_sub_channel: ');
+
+    //print(maps);
+    return maps;
+
+    /*
+    return List.generate(3, (index) {
+      return {'name': query + index.toString(), 'price': Random().nextInt(100)};
+    });
+*/
+  }
   Future<List> getAreaSuggestions(String query) async {
     await initdb();
     final Database db = await database;
