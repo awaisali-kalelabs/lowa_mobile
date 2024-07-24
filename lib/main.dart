@@ -333,7 +333,7 @@ class _LoginPageState extends State<LoginPage>
       var response = await http.get(url, headers: {
         HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
       });
-      var responseBody = json.decode(utf8.decode(response.bodyBytes));
+      var responseBody = json.decode(latin1.decode(response.bodyBytes));
     print(responseBody.toString());
 
     if (response.statusCode == 200) {

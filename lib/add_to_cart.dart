@@ -631,9 +631,10 @@ class _AddToCart extends State<AddToCart> {
                                   }
                                   print("defaultDiscount==>"+defaultDiscount.toString());
                                   print("Discount==>"+Discount.toString());
-                                  if(Discount<defaultDiscount){
-                                    errorMessage = "Discount cannot be less than " + defaultDiscount.toString() + "";
+                                  if ( Discount < defaultDiscount) {
+                                    errorMessage = "Discount cannot be less than " + defaultDiscount.toString();
                                   }
+
                                   //defaultDiscount
                                   if (Discount < priceRate && Discount <= maximumDiscount && Discount >= defaultDiscount) {
                                     globals.AfterSpotDsicount = priceRateAfterDiscount;

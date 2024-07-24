@@ -74,6 +74,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
   // double lng = 0.0;
   // double Accuracy=0.0;
 
+
   @override
   void initState() {
     super.initState();

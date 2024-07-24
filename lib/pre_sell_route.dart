@@ -488,7 +488,7 @@ class _PreSellRoute extends State<PreSellRoute> {
 
                                                     await repo.deleteAllIncompleteOrder(PreSellOutlets[index]['outlet_id']);
                                                     globals.OutletIdforupdate = PreSellOutlets[index]['outlet_id'];
-                                                    print( "Channel Id :"+globals.PCI_Channel_ID);
+                                                  //  print( "Channel Id :"+globals.PCI_Channel_ID);
                                                     Navigator.push(
                                                         context,
                                                         //
