@@ -51,8 +51,7 @@ class _OrderCartView extends State<OrderCartView> {
   double priceRate = 0.0;
   double maximumDiscount = 0;
   double defaultDiscount = 0;
-  int DiscountID = 0;
-
+  int DiscountIDmain = 0;
   _OrderCartView(int OrderId) {
     this.OrderId = OrderId;
   }
@@ -1030,9 +1029,7 @@ class _OrderCartView extends State<OrderCartView> {
         "&version=" +
             appVersion +
             "&Spot_Discount=" +
-            discountController.text +
-      "&Spot_Discount_ID=" +
-            DiscountID.toString();
+            discountController.text ;
 
         ORDERIDToDelete = AllOrders[i]['id'];
         await repo
@@ -1060,6 +1057,12 @@ class _OrderCartView extends State<OrderCartView> {
                 AllOrdersItems [j]['is_promotion'].toString() +
                 "&promotion_id=" +
                 AllOrdersItems [j]['promotion_id'].toString() +
+                "&Spot_Discount_ID=" +
+                AllOrdersItems [j]['DiscountID'].toString() +
+                "&defaultDiscount=" +
+                AllOrdersItems [j]['defaultDiscount'].toString() +
+                "&maximumDiscount=" +
+                AllOrdersItems [j]['maximumDiscount'].toString() +
                 "";
           }
         });
@@ -1069,7 +1072,7 @@ class _OrderCartView extends State<OrderCartView> {
         };
 
         var url =
-        Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncOrdersV10');
+        Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncOrdersV12');
         print(url);
 
         try {

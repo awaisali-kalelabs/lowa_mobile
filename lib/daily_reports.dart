@@ -58,7 +58,9 @@ class _MyHomePageState extends State<MyHomePage> {
     String reportParams = "timestamp=" +
         globals.getCurrentTimestamp() +
         "&psr_id=" +
-        globals.UserID.toString();
+        globals.UserID.toString() +
+    "&pjpid=" +
+    globals.pjpid.toString();
     print("ReportParams:" + reportParams);
 
     var queryParameters = <String, String>{
@@ -131,10 +133,10 @@ class _MyHomePageState extends State<MyHomePage> {
         await getApplicationDocumentsDirectory(); // iOS does not have a standard Downloads directory, so using the Documents directory
       }
 
-      String savePath = path.join(downloadsDir.path, "downloaded_file.xlsx");
+      String savePath = path.join(downloadsDir.path, "downloaded_file.pdf");
 
       String newFileName =
-          "psr_daily_sales_report_${globals.UserID}_${DateTime.now().millisecondsSinceEpoch}.xlsx";
+          "psr_daily_sales_report_${globals.UserID}_${DateTime.now().millisecondsSinceEpoch}.pdf";
       savePath = path.join(downloadsDir.path, newFileName);
 
       await dio.download(fileUrl, savePath);

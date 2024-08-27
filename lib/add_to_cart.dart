@@ -51,6 +51,8 @@ class _AddToCart extends State<AddToCart> {
   List<bool> isSelected = [false, false, false, false, false, false, false];
   double maximumDiscount = 0;
   double defaultDiscount = 0;
+  int DiscountID = 0;
+
   final _formkey = GlobalKey<FormState>();
   List<Map<String, dynamic>> AddToCartReasons;
 
@@ -115,13 +117,13 @@ class _AddToCart extends State<AddToCart> {
     repo.getSpotDiscount(globals.productId,globals.Channel_ID).then((value) => {
       setState(() {
         if(value==null){
-
+          DiscountID = 0;
           defaultDiscount = 0;
           maximumDiscount = 0;
           discountController.text = defaultDiscount==null ? "0": defaultDiscount.toString();
 
         }else{
-
+          DiscountID = value['DiscountID'];
           defaultDiscount = value['default_discount'];
           maximumDiscount = value['maximum_discount'];
           defaultDiscount = value['default_discount'];
@@ -130,6 +132,7 @@ class _AddToCart extends State<AddToCart> {
         }
 
         print("defaultDiscount : " + defaultDiscount.toString());
+        print("DiscountID : " + DiscountID.toString());
       })
     });
 
@@ -233,7 +236,10 @@ class _AddToCart extends State<AddToCart> {
       'is_promotion': 0,
       'promotion_id': 0,
       'id': sourceId,
-      'source_id': 0
+      'source_id': 0,
+      'DiscountID' : DiscountID,
+      'defaultDiscount' : defaultDiscount,
+      'maximumDiscount' : maximumDiscount
 
     });
     int isNewEntry  = await  repo.addItemToCurrentOrder(orderId, Items, 0);
@@ -293,8 +299,10 @@ class _AddToCart extends State<AddToCart> {
           'is_promotion': 1,
           'promotion_id': promotionId,
           'id': globals.getUniqueMobileId(),
-          'source_id':sourceId
-
+          'source_id':sourceId,
+          'DiscountID':DiscountID,
+          'defaultDiscount' : defaultDiscount,
+          'maximumDiscount' : maximumDiscount
         });
         repo.addItemToCurrentOrder(orderId, Items, isNewEntry);
 

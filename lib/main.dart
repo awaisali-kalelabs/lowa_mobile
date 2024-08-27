@@ -23,10 +23,13 @@ import 'package:order_booker/com/pbc/model/product_sub_categories.dart';
 import 'package:order_booker/com/pbc/model/products.dart';
 import 'package:order_booker/com/pbc/model/user.dart';
 import 'package:order_booker/com/pbc/model/user_features.dart';
+/*
 import 'package:order_booker/home.dart';
+*/
 import 'package:order_booker/order_cart_view.dart';
 import 'package:splashscreen/splashscreen.dart';
 
+import 'SelectPJP.dart';
 import 'com/pbc/model/OutletChannel.dart';
 import 'delayed_animation.dart';
 import 'globals.dart' as globals;
@@ -106,7 +109,7 @@ class _LoginPageState extends State<LoginPage>
   bool _isLoading = false;
   final formKey = new GlobalKey<FormState>();
   final scaffoldKey = new GlobalKey<ScaffoldState>();
-
+  List<dynamic>  PJPList = [];
   final int delayedAmount = 500;
   FocusNode myFocusNode = new FocusNode();
   TextEditingController numberController = new TextEditingController();
@@ -163,7 +166,7 @@ class _LoginPageState extends State<LoginPage>
             //Navigator.pop(context);
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => Home()),
+              MaterialPageRoute(builder: (context) => AreaSelectionScreen(pjpList: PJPList,)),
             );
           }
         }
@@ -241,7 +244,7 @@ class _LoginPageState extends State<LoginPage>
         Navigator.pop(context);
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => Home()),
+          MaterialPageRoute(builder: (context) => AreaSelectionScreen(pjpList: PJPList,)),
         );
       } else {
         _showDialog("Error", "Invalid user id or password");
@@ -328,7 +331,7 @@ class _LoginPageState extends State<LoginPage>
 
     print("Called1111");
     print("param"+param);
-    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV3', QueryParameters);
+    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV5', QueryParameters);
      print("Url........." + url.toString());
       var response = await http.get(url, headers: {
         HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
@@ -341,14 +344,17 @@ class _LoginPageState extends State<LoginPage>
         if (responseBody["success"] == "true") {
           globals.DisplayName = responseBody['DisplayName'];
           globals.UserID = int.tryParse(_userid);
+          globals.pjpid = responseBody['BeatPlanID'];
           globals.maxDiscountPercentage = double.tryParse(responseBody['maximum_discount_percentage'].toString()) ;
           globals.distributorId = int.tryParse(responseBody['distributor_id'].toString());
           print("globals.maxDiscountPercentage"+globals.maxDiscountPercentage.toString());
           print("globals.distributorId"+globals.distributorId.toString());
+          print("globals.pjpid :"+globals.pjpid.toString());
           Repository repo = new Repository();
           print(responseBody['OutletChannel'].toString());
           await repo.initdb();
-
+          print("PJPList : "+responseBody['PJPList'].toString());
+          PJPList = responseBody['PJPList'];
 
           repo.deleteUsers();
           repo.insertUser(User.fromJson({
@@ -406,7 +412,7 @@ class _LoginPageState extends State<LoginPage>
                   no_order_reasons[i]['ID'], no_order_reasons[i]['Label']);
             }
             print("5");
-            for (var i = 0; i < pre_sell_outlets_rows.length; i++) {
+           /* for (var i = 0; i < pre_sell_outlets_rows.length; i++) {
               pre_sell_outlets_rows[i]['visit_type'] =
                   await repo.getVisitType(pre_sell_outlets_rows[i]['OutletID']);
 
@@ -422,7 +428,7 @@ class _LoginPageState extends State<LoginPage>
 
               await repo.insertPreSellOutlet(
                   PreSellOutlets.fromJson(pre_sell_outlets_rows[i]));
-            }
+            }*/
 
 
             List product_lrb_types_rows = responseBody['ProductLrbTypes'];
@@ -521,7 +527,7 @@ class _LoginPageState extends State<LoginPage>
            // globals.ChannelIDCHECK = discount_rows['ChannelID'];
             if(discount_rows!=null){
               for (var i = 0; i < discount_rows.length; i++) {
-                await repo.insertSpotDiscount(discount_rows[i]['ProductID'], discount_rows[i]['DefaultDiscount'], discount_rows[i]['MaximumDiscount'],discount_rows[i]['ChannelID']);
+                await repo.insertSpotDiscount(discount_rows[i]['DiscountID'],discount_rows[i]['ProductID'], discount_rows[i]['DefaultDiscount'], discount_rows[i]['MaximumDiscount'],discount_rows[i]['ChannelID']);
               }
             }
 

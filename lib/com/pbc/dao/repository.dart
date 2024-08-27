@@ -44,7 +44,7 @@ class Repository {
       // Set the path to the database. Note: Using the `join` function from the
       // `path` package is best practice to ensure the path is correctly
       // constructed for each platform.
-      join(await getDatabasesPath(), 'delivery_managerV76.db'),
+      join(await getDatabasesPath(), 'delivery_managerV88.db'),
       // When the database is first created, create a table to store dogs.
       onUpgrade: _onUpgrade,
       onCreate: (db, version) {
@@ -79,7 +79,7 @@ class Repository {
             "CREATE TABLE outlet_orders(id INTEGER,outlet_id INTEGER,is_completed INTEGER,is_uploaded INTEGER,total_amount REAL,uuid TEXT,created_on TEXT,lat TEXT,lng TEXT,accuracy TEXT)");
 
         db.execute(
-            "CREATE TABLE outlet_order_items(id INTEGER,source_id INTEGER,order_id INTEGER,product_id INTEGER,discount REAL,quantity INTEGER,amount REAL,created_on TEXT,rate REAL,product_label TEXT, unit_quantity INTEGER, is_promotion INTEGER, promotion_id INTEGER)");
+            "CREATE TABLE outlet_order_items(id INTEGER,source_id INTEGER,order_id INTEGER,product_id INTEGER,discount REAL,quantity INTEGER,amount REAL,created_on TEXT,rate REAL,product_label TEXT, unit_quantity INTEGER, is_promotion INTEGER, promotion_id INTEGER,DiscountID INTEGER,defaultDiscount INTEGER,maximumDiscount INTEGER)");
         db.execute(
             "CREATE TABLE users(user_id INTEGER,display_name TEXT,designation TEXT,distributor_employee_id TEXT,password TEXT, created_on TEXT, department TEXT , IsOutletLocationUpdate INTEGER)");
         db.execute("CREATE TABLE no_order_reasons(id INTEGER,label TEXT)");
@@ -124,7 +124,7 @@ class Repository {
         db.execute(
             "CREATE TABLE outlet_mark_close(id INTEGER ,outlet_id INTEGER,image_path TEXT,is_uploaded INTEGER,is_photo_uploaded INTEGER,uuid TEXT,created_on TEXT,lat TEXT,lng TEXT,accuracy TEXT )");
 
-        db.execute("CREATE TABLE spot_discount(product_id INTEGER, default_discount real, maximum_discount real,ChannelID INTEGER)");
+        db.execute("CREATE TABLE spot_discount(DiscountID,product_id INTEGER, default_discount real, maximum_discount real,ChannelID INTEGER)");
 
         print("CREATE TABLE spot_discount(product_id INTEGER, default_discount real, maximum_discount real)");
 
@@ -363,11 +363,11 @@ class Repository {
       //print(error);
     }
   }
-  Future<void> insertSpotDiscount(product_id,default_discount, maximum_discount,ChannelID) async {
+  Future<void> insertSpotDiscount(DiscountID,product_id,default_discount, maximum_discount,ChannelID) async {
     await this.initdb();
     final Database db = await database;
     try {
-      await db.rawInsert("insert into spot_discount(product_id,default_discount, maximum_discount,ChannelID) values  (?,?,?,?) ", [product_id,default_discount, maximum_discount,ChannelID]);
+      await db.rawInsert("insert into spot_discount(DiscountID,product_id,default_discount, maximum_discount,ChannelID) values  (?,?,?,?,?) ", [DiscountID,product_id,default_discount, maximum_discount,ChannelID]);
     } catch (error) {
       //print(error);
     }
@@ -1153,7 +1153,7 @@ class Repository {
     return maps;
   }
 
-  Future addItemToCurrentOrderV0(int orderId, List item) async {
+  /*Future addItemToCurrentOrderV0(int orderId, List item) async {
     await this.initdb();
     final Database db = await database;
 //print("ORDER ID"+orderId.toString());
@@ -1209,7 +1209,7 @@ class Repository {
         'update outlet_orders set is_completed=0,total_amount=?2 where id=?1 ',
         args);
     return true;
-  }
+  }*/
 
   Future<int> addItemToCurrentOrder( int orderId, List item, isForcedNewEntry) async {
     await this.initdb();
@@ -1234,6 +1234,9 @@ class Repository {
       args.add(item[i]['promotion_id']);
       args.add(item[i]['id']);
       args.add(item[i]['source_id']);
+      args.add(item[i]['DiscountID']);
+      args.add(item[i]['defaultDiscount']);
+      args.add(item[i]['maximumDiscount']);
 
       totalAmount += Amount;
 
@@ -1246,13 +1249,13 @@ class Repository {
       if(isForcedNewEntry==1){
         await db.rawInsert(
             'insert into outlet_order_items (order_id ,product_id ,discount,quantity ,amount ,created_on,rate,'
-                'product_label, unit_quantity, is_promotion, promotion_id, id, source_id) values  (?,?,?,?,?,?,?,?,?,?,?,?,?) ',
+                'product_label, unit_quantity, is_promotion, promotion_id, id, source_id,DiscountID,defaultDiscount,maximumDiscount) values  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ',
             args);
       }else if (maps.isEmpty) {
         isNewEntry =1;
         await db.rawInsert(
             'insert into outlet_order_items (order_id ,product_id ,discount,quantity ,amount ,created_on,rate,'
-                'product_label, unit_quantity, is_promotion, promotion_id,id,source_id) values  (?,?,?,?,?,?,?,?,?,?,?,?,?) ',
+                'product_label, unit_quantity, is_promotion, promotion_id,id,source_id,DiscountID,defaultDiscount,maximumDiscount) values  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ',
             args);
       } else {
         List args2 = new List();
