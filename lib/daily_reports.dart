@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'globals.dart' as globals;
 import 'home.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class DailyReports extends StatelessWidget {
   @override
@@ -44,12 +45,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool isFileReady = false;
   bool isLoading = false;
-  bool isCreatingFile = false; // Add this variable
+  bool isCreatingFile = false;
   String fileUrl = "";
 
   Future<void> dailyReports(BuildContext context) async {
     setState(() {
-      isCreatingFile = true; // Set loading state
+      isCreatingFile = true;
     });
 
     DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
@@ -59,16 +60,15 @@ class _MyHomePageState extends State<MyHomePage> {
         globals.getCurrentTimestamp() +
         "&psr_id=" +
         globals.UserID.toString() +
-    "&pjpid=" +
-    globals.pjpid.toString();
+        "&pjpid=" +
+        globals.pjpid.toString();
     print("ReportParams:" + reportParams);
 
     var queryParameters = <String, String>{
       "SessionID": globals.EncryptSessionID(reportParams),
     };
     print("QueryParameters " + queryParameters.toString());
-    var url =
-    Uri.http(globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
+    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
     print("Server url: " + url.toString());
 
     try {
@@ -86,7 +86,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
       if (response.statusCode == 200) {
         if (responseBody["success"] == "true") {
-          print("trueeeeeee");
           fileUrl = responseBody["fileName"];
           print("fileUrl" + fileUrl);
           if (fileUrl != null && fileUrl.isNotEmpty) {
@@ -111,13 +110,20 @@ class _MyHomePageState extends State<MyHomePage> {
       print("Error: An error has occurred: " + e.toString());
     } finally {
       setState(() {
-        isCreatingFile = false; // Reset loading state
+        isCreatingFile = false;
       });
     }
   }
 
   Future<void> downloadFile(String fileUrl) async {
     Dio dio = Dio();
+
+    // Request storage permissions
+    if (!(await _requestPermission(Permission.storage))) {
+      showErrorSnackBar(context, "Storage permission denied");
+      return;
+    }
+
     try {
       setState(() {
         isLoading = true;
@@ -125,24 +131,28 @@ class _MyHomePageState extends State<MyHomePage> {
 
       Directory downloadsDir;
 
-      // Get the downloads directory path
+      // Get the correct download directory based on the platform
       if (Platform.isAndroid) {
         downloadsDir = Directory('/storage/emulated/0/Download');
       } else if (Platform.isIOS) {
-        downloadsDir =
-        await getApplicationDocumentsDirectory(); // iOS does not have a standard Downloads directory, so using the Documents directory
+        downloadsDir = await getApplicationDocumentsDirectory();
+      } else {
+        throw Exception("Unsupported platform");
       }
 
-      String savePath = path.join(downloadsDir.path, "downloaded_file.pdf");
+      if (downloadsDir == null) {
+        throw Exception("Could not find the download directory");
+      }
 
       String newFileName =
           "psr_daily_sales_report_${globals.UserID}_${DateTime.now().millisecondsSinceEpoch}.pdf";
-      savePath = path.join(downloadsDir.path, newFileName);
+      String savePath = path.join(downloadsDir.path, newFileName);
 
       await dio.download(fileUrl, savePath);
       print("File downloaded to $savePath");
 
-      // Reset the isFileReady state after download is complete
+      showErrorSnackBar(context, "File downloaded successfully to $savePath");
+
       setState(() {
         isFileReady = false;
         isLoading = false;
@@ -152,6 +162,16 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         isLoading = false;
       });
+      showErrorSnackBar(context, "Download failed: $e");
+    }
+  }
+
+  Future<bool> _requestPermission(Permission permission) async {
+    if (await permission.isGranted) {
+      return true;
+    } else {
+      var result = await permission.request();
+      return result == PermissionStatus.granted;
     }
   }
 
@@ -183,9 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
               "Tap on button to ${isFileReady ? 'download' : 'create'} file",
               style: TextStyle(fontSize: 16, color: Colors.black87),
             ),
-            SizedBox(
-              height: 20,
-            ),
+            SizedBox(height: 20),
             isLoading || isCreatingFile
                 ? CircularProgressIndicator()
                 : isFileReady
@@ -193,7 +211,6 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () async {
                 await downloadFile(
                     globals.fileServerURL + "?file=" + fileUrl);
-                showErrorSnackBar(context, "File downloaded");
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => Home()),
