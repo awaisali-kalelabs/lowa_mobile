@@ -79,6 +79,7 @@ class _OrdersSyncReportView extends State<OrdersSyncReportView> {
     super.dispose();
   }
 
+/*
   void getSyncPosition() async {
     //signupProgressDialog.show();
     globals.LoadingDialogs.showLoadingDialog(context, _scaffoldKey2);
@@ -133,6 +134,7 @@ class _OrdersSyncReportView extends State<OrdersSyncReportView> {
       print(e.toString());
     }
   }
+*/
 
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
   @override
@@ -479,25 +481,6 @@ class _OrdersSyncReportView extends State<OrdersSyncReportView> {
 }
 
 //old working function
-Future<void> uploadOrder222(String orderParam) async {
-  print("orderParam:" + orderParam);
-  var QueryParameters = <String, String>{
-    "SessionID": EncryptSessionID(orderParam),
-  };
-  //globals.ServerURL = "192.168.30.125:8080";
-  var url = Uri.http(globals.ServerURL,
-      '/portal/mobile/MobileSyncOrdersV9', QueryParameters);
-//      Wave/grain/sales/MobileVFSyncContractExecute
-  print(url);
-  var response = await http.get(url, headers: {
-    HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
-  });
-  print(response);
-  var responseBody = json.decode(utf8.decode(response.bodyBytes));
-  print('called4');
-  //  print(responseBody);
-  if (responseBody["success"] == "true") {}
-}
 
 String EncryptSessionID(String qry) {
   String ret = "";

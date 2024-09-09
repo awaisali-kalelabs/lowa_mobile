@@ -29,13 +29,10 @@ import 'package:order_booker/home.dart';
 import 'package:order_booker/order_cart_view.dart';
 import 'package:splashscreen/splashscreen.dart';
 
-import 'SelectPJP.dart';
 import 'com/pbc/model/OutletChannel.dart';
 import 'delayed_animation.dart';
 import 'globals.dart' as globals;
-/*
 import 'home.dart';
-*/
 
 void main() async {
   HttpOverrides.global = new MyHttpOverrides();
@@ -169,7 +166,7 @@ class _LoginPageState extends State<LoginPage>
             //Navigator.pop(context);
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) =>AreaSelectionScreen(pjpList: PJPList)),
+              MaterialPageRoute(builder: (context) =>Home()),
             );
           }
         }
@@ -247,7 +244,7 @@ class _LoginPageState extends State<LoginPage>
         Navigator.pop(context);
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>AreaSelectionScreen(pjpList: PJPList)),
+          MaterialPageRoute(builder: (context) =>Home()),
         );
       } else {
         _showDialog("Error", "Invalid user id or password");
@@ -334,7 +331,7 @@ class _LoginPageState extends State<LoginPage>
 
     print("Called1111");
     print("param"+param);
-    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV5', QueryParameters);
+    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateUserV4', QueryParameters);
     print("Url........." + url.toString());
     var response = await http.get(url, headers: {
       HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
@@ -402,7 +399,7 @@ class _LoginPageState extends State<LoginPage>
           }
 
 
-          // List pre_sell_outlets_rows = responseBody['BeatPlanRows'];
+          List pre_sell_outlets_rows = responseBody['BeatPlanRows'];
           print("..........................................");
           print(responseBody['BeatPlanRows']);
           print("..........................................");
@@ -415,23 +412,23 @@ class _LoginPageState extends State<LoginPage>
                 no_order_reasons[i]['ID'], no_order_reasons[i]['Label']);
           }
           print("5");
-/*            for (var i = 0; i < pre_sell_outlets_rows.length; i++) {
-              pre_sell_outlets_rows[i]['visit_type'] =
-                  await repo.getVisitType(pre_sell_outlets_rows[i]['OutletID']);
+          for (var i = 0; i < pre_sell_outlets_rows.length; i++) {
+            pre_sell_outlets_rows[i]['visit_type'] =
+            await repo.getVisitType(pre_sell_outlets_rows[i]['OutletID']);
 
-              //alternate week day logic starts
+            //alternate week day logic starts
 
-              int isVisible = 0;
-              if(globals.isOutletAllowed(pre_sell_outlets_rows[i]['IsAlternative'])){
-                isVisible = 1;
-              }
-              pre_sell_outlets_rows[i]['is_alternate_visible'] = isVisible;
+            int isVisible = 0;
+            if(globals.isOutletAllowed(pre_sell_outlets_rows[i]['IsAlternative'])){
+              isVisible = 1;
+            }
+            pre_sell_outlets_rows[i]['is_alternate_visible'] = isVisible;
 
-              //alternate week day logic ends
+            //alternate week day logic ends
 
-              await repo.insertPreSellOutlet(
-                  PreSellOutlets.fromJson(pre_sell_outlets_rows[i]));
-            }*/
+            await repo.insertPreSellOutlet(
+                PreSellOutlets.fromJson(pre_sell_outlets_rows[i]));
+          }
 
 
           List product_lrb_types_rows = responseBody['ProductLrbTypes'];

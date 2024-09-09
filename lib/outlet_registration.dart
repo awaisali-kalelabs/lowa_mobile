@@ -261,7 +261,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                   style: TextStyle(
                     color: Colors.white,
                   )),
-              onPressed: () {
+              onPressed: () async {
                 SaveOutletImage();
                 print("globals.currentPosition:"+globals.currentPosition.toString());
                 if(globals.currentPosition==null){
@@ -361,8 +361,10 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                     'is_new' :1,
                     'outletchannel' :_selectedOutletChannel
                   });
-                  _UploadDocuments();
-                  _registerOutlet(context, args);
+                  await _UploadDocuments();
+                  await _registerOutlet(context, args);
+                  await  _OutletRegisterationUpload(context);
+                  print("_OutletRegisterationUpload function called");
                 } else {}
               },
             ),
@@ -947,11 +949,12 @@ class _OutletRegisteration extends State<OutletRegisteration> {
     Dialogs.showLoadingDialog(context, _keyLoader);
     await repo.registerOutlet(Items);
     Navigator.of(context,rootNavigator: true).pop();
-    _OutletRegisterationUpload(context);
+
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => Home()));
   }
 
   Future _OutletRegisterationUpload(context) async {
+    print("============Selected PJP============"+globals.selectedPJP);
     int ORDERIDToDelete = 0;
     List AllRegisteredOutlets = new List();
     await repo.getAllRegisteredOutletsByIsUploaded(0,1).then((val) async {
@@ -1009,7 +1012,9 @@ class _OutletRegisteration extends State<OutletRegisteration> {
             globals.DeviceID +
             "&version=" +
             globals.appVersion +
-            "&platform=android";
+            "&platform=android" +
+            "&PJP=" +
+      globals.selectedPJP;
         print("outletRegisterationsParams:" + outletRegisterationsParams);
 
         /* String orderParam="timestamp="+globa+"&order_no="+AllOrders[i]['id'].toString()+"&outlet_id="+ globals.OutletID.toString()+"&created_on="+AllOrders[i]['created_on'].toString()+"&created_by=100450&uuid=656d30b8182fea88&platform=android&lat="+globals.currentPosition.latitude.toString()+"&lng="+globals.currentPosition.longitude.toString()+"&accuracy=21";
@@ -1021,7 +1026,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
         //var localUrl="http://192.168.10.37:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
         // var localUrl="http://192.168.30.125:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
         var url = Uri.http(
-            globals.ServerURL, '/portal/mobile/MobileSyncOutletRegistration2');
+            globals.ServerURL, '/portal/mobile/MobileSyncOutletRegistration3');
 
 
         try {

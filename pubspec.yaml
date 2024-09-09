@@ -37,7 +37,7 @@ dependencies:
   url_launcher: 6.0.7
   avatar_glow: ^1.1.0
   loading_indicator: ^1.0.0
-  permission_handler: ^10.0.0
+  permission_handler:
   flutter_launcher_icons: ^0.7.3
   sqflite: ^1.1.6
   http: ^0.13.3
@@ -63,6 +63,7 @@ dependencies:
   flutter_downloader:
   pdf:
   dio:
+  media_scanner: ^2.1.0
 #  syncfusion_flutter_pdfviewer:
 
 dev_dependencies:

@@ -10,7 +10,7 @@ import 'package:order_booker/com/pbc/dao/repository.dart';
 import 'package:order_booker/home.dart';
 import 'package:permission_handler/permission_handler.dart';
 //wildspace1@%88
-String appVersion = "v2.8";
+String appVersion = "v3.1";
 final oCcy = new NumberFormat("#,##0");
 final oCcy1 = new NumberFormat("#,##0.##");
 double maxDiscountPercentage = 0;
@@ -25,7 +25,7 @@ int sparkMobileRequestId = 0;
 int Rate  = 0;
 //
 int pjpid=0;
-
+String selectedPJP;
 double AfterSpotDsicount = 0.0;
 int IsGeoFence=0;
 String IsGeoFenceLat="";

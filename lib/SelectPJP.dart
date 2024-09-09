@@ -20,7 +20,8 @@ class AreaSelectionScreen extends StatefulWidget {
 }
 
 class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
-  String _selectedPJP;
+  final _formKey = GlobalKey<FormState>();
+
   Future<bool> SaveCashSaleOrder() async {
     Repository repo = new Repository();
     await repo.initdb();
@@ -33,7 +34,7 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
         "&LoginUsername=" +
         globals.UserID.toString() +
         "&PJPID=" +
-        _selectedPJP;
+        globals.selectedPJP;
 
     var QueryParameters = <String, String>{
       "SessionID": EncryptSessionID(param),
@@ -103,7 +104,6 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,81 +112,89 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Please select your PJP:',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _selectedPJP,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'PJP',
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Please select your PJP:',
+                style: TextStyle(fontSize: 18),
               ),
-              items: widget.pjpList.map((pjp) {
-                return DropdownMenuItem<String>(
-                  value: pjp['PJPID'].toString(),
-                  child: Text('${pjp['PJPID']} - ${pjp['PJPName']}'),
-                );
-              }).toList(),
-              onChanged: (String newValue) {
-                setState(() {
-                  _selectedPJP = newValue;
-                });
-              },
-              hint: Text('Select PJP'),
-            ),
-            SizedBox(height: 20),
-            if (_selectedPJP != null)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  // SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () async {
-                      // Show the loading dialog
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false, // Prevents closing the dialog by tapping outside
-                        builder: (BuildContext context) {
-                          return Center(
-                            child: CircularProgressIndicator(), // Loading indicator
+              SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: globals.selectedPJP ,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'PJP',
+                ),
+                items: (widget.pjpList ?? []).map((pjp) {
+                  return DropdownMenuItem<String>(
+                    value: pjp['PJPID'].toString() ?? "",
+                    child: Text('${pjp['PJPID']} - ${pjp['PJPName']}'),
+                  );
+                }).toList(),
+                onChanged: (String newValue) {
+                  setState(() {
+                    globals.selectedPJP = newValue;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'No PJP assigned';
+                  }
+                  return null; // No error
+                },
+                hint: Text('Select PJP'),
+              ),
+              SizedBox(height: 20),
+              if (globals.selectedPJP != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        // Validate the form
+                        if (_formKey.currentState.validate()) {
+                          // Show the loading dialog
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false, // Prevents closing the dialog by tapping outside
+                            builder: (BuildContext context) {
+                              return Center(
+                                child: CircularProgressIndicator(), // Loading indicator
+                              );
+                            },
                           );
-                        },
-                      );
 
-                      // Perform the action (saving the order)
-                      await SaveCashSaleOrder();
+                          // Perform the action (saving the order)
+                          await SaveCashSaleOrder();
 
-                      // Close the loading dialog
-                      Navigator.of(context).pop();
+                          // Close the loading dialog
+                          Navigator.of(context).pop();
 
-                      // Navigate to the Home screen
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Home()),
-                      );
+                          // Navigate to the Home screen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Home()),
+                          );
 
-                      print('Proceed button pressed');
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min, // To keep the button size minimal to the content
-                      children: [
-                        Text('Proceed'),
-                        SizedBox(width: 8),
-                        Icon(Icons.arrow_forward), // Replace with any icon you prefer
-                      ],
+                          print('Proceed button pressed');
+                        }
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min, // To keep the button size minimal to the content
+                        children: [
+                          Text('Proceed'),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_forward), // Replace with any icon you prefer
+                        ],
+                      ),
                     ),
-                  ),
-
-
-                ],
-              ),
-          ],
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );

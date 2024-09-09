@@ -49,51 +49,39 @@ class _MyHomePageState extends State<MyHomePage> {
   String fileUrl = "";
 
   Future<void> checkPermissions() async {
-    if (Platform.isAndroid) {
-      // First, check for MANAGE_EXTERNAL_STORAGE permission
-      var status = await Permission.manageExternalStorage.status;
-
-      if (status.isDenied || status.isRestricted) {
-        // Request MANAGE_EXTERNAL_STORAGE permission if it's not granted
-        status = await Permission.manageExternalStorage.request();
-        if (status.isGranted) {
-          print("Manage External Storage permission granted.");
-        } else {
-          print("Manage External Storage permission denied.");
+    // Check for storage permission
+    print("inside permission function");
+    await Permission.storage.status;
+    await Permission.manageExternalStorage.status;
+/*
+    var storageStatus = await Permission.storage.status;
+*/
+/*    if (!storageStatus.isGranted) {
+      storageStatus = await Permission.storage.request();
+      if (!storageStatus.isGranted) {
+        // Provide feedback to the user about permission denial
+        showErrorSnackBar(context, "Storage permission denied. Please enable it in settings==============.");
+        throw Exception("Storage permission denied");
+      }
+    }else{*/
+    // Check for manage external storage permission (Android 11+if (Platform.isAndroid) {
+/*
+      var manageExternalStorageStatus = await Permission.manageExternalStorage.status;
+*/
+    /* if (!manageExternalStorageStatus.isGranted) {
+        manageExternalStorageStatus = await Permission.manageExternalStorage.request();
+        if (!manageExternalStorageStatus.isGranted) {
+          // Provide feedback to the user about permission denial
+          showErrorSnackBar(context, "Manage External Storage permission denied. Please enable it in settings.");
           throw Exception("Manage External Storage permission denied");
         }
-      } else {
-        print("Manage External Storage permission already granted.");
-      }
+      }*/
+    //}
 
-      // Check if MANAGE_EXTERNAL_STORAGE was not granted, then check for STORAGE permission
-      if (!status.isGranted) {
-        status = await Permission.storage.status;
-        if (status.isDenied || status.isRestricted) {
-          status = await Permission.storage.request();
-          if (status.isGranted) {
-            print("Storage permission granted.");
-          } else {
-            print("Storage permission denied.");
-            throw Exception("Storage permission denied");
-          }
-        } else {
-          print("Storage permission already granted.");
-        }
-      }
-    }
+
+
   }
 
-  Future<String> getDownloadDirectory() async {
-    if (Platform.isAndroid) {
-      // For Android 10 and above, use the app-specific directory
-      return (await getExternalStorageDirectory()).path;
-    } else if (Platform.isIOS) {
-      // For iOS, use the application documents directory
-      return (await getApplicationDocumentsDirectory()).path;
-    }
-    throw UnsupportedError('Unsupported platform');
-  }
 
   Future<void> dailyReports(BuildContext context) async {
     setState(() {
@@ -115,8 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
       "SessionID": globals.EncryptSessionID(reportParams),
     };
     print("QueryParameters " + queryParameters.toString());
-    var url =
-    Uri.http(globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
+    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileDailyPSRReport');
     print("Server url: " + url.toString());
 
     try {
@@ -170,28 +157,19 @@ class _MyHomePageState extends State<MyHomePage> {
         isLoading = true;
       });
 
-      await checkPermissions(); // Ensure permissions are granted
-      Directory downloadsDir;
+      // Check for permissions
+      await checkPermissions();
 
-      // Get the correct download directory based on the platform
-      if (Platform.isAndroid) {
-        downloadsDir = Directory('/storage/emulated/0/Download');
-      } else if (Platform.isIOS) {
-        downloadsDir = await getApplicationDocumentsDirectory();
-      } else {
-        throw Exception("Unsupported platform");
-      }
-
-      if (downloadsDir == null) {
-        throw Exception("Could not find the download directory");
-      }
+      Directory downloadsDir = Directory('/storage/emulated/0/Download');
 
       String newFileName =
           "psr_daily_sales_report_${globals.UserID}_${DateTime.now().millisecondsSinceEpoch}.pdf";
       String savePath = path.join(downloadsDir.path, newFileName);
+
       await dio.download(fileUrl, savePath);
       print("File downloaded to $savePath");
 
+      // Reset the isFileReady state after download is complete
       setState(() {
         isFileReady = false;
         isLoading = false;
@@ -205,7 +183,6 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
   }
-
 
   void showErrorSnackBar(BuildContext context, String message) {
     final snackBar = SnackBar(content: Text(message));

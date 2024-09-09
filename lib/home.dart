@@ -182,10 +182,15 @@ class _Home extends State<Home> {
 
 
   void _checkTime() {
-
+    bool newIsAfterFivePM = false;
     DateTime now = DateTime.now();
-   // bool newIsAfterFivePM = now.hour >= 12 && now.hour < 24;
-    bool newIsAfterFivePM = now.hour >= 16 && now.hour < 22;
+    if(globals.UserID==2762){
+       newIsAfterFivePM = now.hour >= 8 && now.hour < 24;
+
+    }else{
+       newIsAfterFivePM = now.hour >= 16 && now.hour < 22;
+    }
+//
 
     //bool newIsAfterFivePM = now.hour >= 11 && now.hour < 24;
 
