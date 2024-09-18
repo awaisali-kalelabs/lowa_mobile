@@ -64,6 +64,7 @@ dependencies:
   pdf:
   dio:
   media_scanner: ^2.1.0
+  shared_preferences: ^2.0.9
 #  syncfusion_flutter_pdfviewer:
 
 dev_dependencies:

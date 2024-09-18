@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
-
 import 'package:another_flushbar/flushbar.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:device_info/device_info.dart';
@@ -27,17 +26,23 @@ import 'package:order_booker/com/pbc/model/user_features.dart';
 import 'package:order_booker/home.dart';
 */
 import 'package:order_booker/order_cart_view.dart';
+import 'package:order_booker/shared_pref.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:splashscreen/splashscreen.dart';
 
 import 'SelectPJP.dart';
 import 'com/pbc/model/OutletChannel.dart';
+import 'com/pbc/model/PJP.dart';
 import 'delayed_animation.dart';
 import 'globals.dart' as globals;
+import 'home.dart';
 /*
 import 'home.dart';
 */
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   HttpOverrides.global = new MyHttpOverrides();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     systemNavigationBarColor: Colors.blue[800], // navigation bar color
@@ -45,6 +50,55 @@ void main() async {
   ));
   runApp(MyApp());
 }
+
+Future<void> checkLoginStatus(BuildContext context) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String userid = prefs.getString(SharedPrefConstant.userId);
+  String password = prefs.getString(SharedPrefConstant.password);
+  String loginDate = prefs.getString(SharedPrefConstant.loginDate);
+
+  // DateTime date = new DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  // var currentDate = date.toIso8601String();
+
+  if (userid != null && password != null && loginDate != null) {
+    DateTime savedLoginDate = DateTime.parse(loginDate);
+    //Duration difference = DateTime.now().difference(savedLoginDate);
+    var now = DateTime.now();
+    var formatter = DateFormat('yyyy-MM-dd');
+    String currentDate = formatter.format(now);
+    if (currentDate==loginDate) {
+      // User is still logged in within 24 hours, proceed to the app's main screen
+      navigateToMainScreen(context);
+    }
+    else {
+      // Login has expired after 24 hours, clear the login data and show the login screen
+      await prefs.clear();
+      navigateToLoginScreen(context);
+    }
+  } else {
+    // No login data found, show the login screen
+    print("==========");
+    navigateToLoginScreen(context);
+  }
+}
+
+void navigateToMainScreen(BuildContext context) {
+  // Navigator.pushAndRemoveUntil(
+  //   context,
+  //   MaterialPageRoute(builder: (context) =>Home()),
+  // );
+  Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context) =>Home()), (route) => false);
+}
+
+void navigateToLoginScreen(BuildContext context) {
+  // Navigator.push(
+  //   context,
+  //   MaterialPageRoute(builder: (context) =>LoginPage()),
+  // );
+
+  Navigator.pushAndRemoveUntil(context,  MaterialPageRoute(builder: (context) =>LoginPage()), (route) => false);
+}
+
 
 class MyBehavior extends ScrollBehavior {
   @override
@@ -60,8 +114,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
   @override
   Widget build(BuildContext context) {
+
+
     return new MaterialApp(
       title: 'Theia',
       debugShowCheckedModeBanner: false,
@@ -70,30 +127,63 @@ class _MyAppState extends State<MyApp> {
           fontFamily: 'Nunito',
           primaryTextTheme:
           TextTheme(headline6: TextStyle(color: Colors.white))),
-      initialRoute: "/",
-      home: SplashScreen(
-          seconds: 5,
-          routeName: "/",
-          navigateAfterSeconds: new LoginPage(),
-          /*title: new Text('Welcome In SplashScreen',
-          style: new TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20.0
-          ),),*/
-          //image: new Image.asset('images/Dewallett.png'),
-          title: Text("Theia",
+      // initialRoute: "/",
+      home: SplashScreenNew(),
+      // home: SplashScreen(
+      //     seconds: 5,
+      //     routeName: "/",
+      //   //  navigateAfterSeconds: new LoginPage(),
+      //     /*title: new Text('Welcome In SplashScreen',
+      //     style: new TextStyle(
+      //         fontWeight: FontWeight.bold,
+      //         fontSize: 20.0
+      //     ),),*/
+      //     //image: new Image.asset('images/Dewallett.png'),
+      //     title: Text("Theia",
+      //         style: TextStyle(
+      //             fontSize: 44,
+      //             color: Colors.white,
+      //             fontWeight: FontWeight.bold)),
+      //     backgroundColor: Colors.blue[800],
+      //     styleTextUnderTheLoader: new TextStyle(),
+      //     photoSize: 100.0,
+      //     // onClick: ()=>print("Flutter Egypt"),
+      //     loaderColor: Colors.white),
+    );
+  }
+}
+
+
+class SplashScreenNew extends StatelessWidget {
+  // const SplashScreenNew({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Future.delayed(Duration(seconds: 3),(){
+    //   checkLoginStatus(context);
+    // });
+    checkLoginStatus(context);
+    return  Scaffold(
+      backgroundColor: Colors.blue[800],
+      body: Column(
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height*0.4,),
+          Text("Theia",
               style: TextStyle(
                   fontSize: 44,
                   color: Colors.white,
                   fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.blue[800],
-          styleTextUnderTheLoader: new TextStyle(),
-          photoSize: 100.0,
-          // onClick: ()=>print("Flutter Egypt"),
-          loaderColor: Colors.white),
+          SizedBox(height: MediaQuery.of(context).size.height*0.2,),
+          Center(child: CircularProgressIndicator(color: Colors.white,))
+        ],
+      ),
     );
   }
 }
+
+
+
+
 class MyHttpOverrides extends HttpOverrides{
   @override
   HttpClient createHttpClient(SecurityContext context){
@@ -138,6 +228,7 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Future _onTapDown() async {
+
     if (_userid.isNotEmpty) {
       if (_password.isNotEmpty) {
         Dialogs.showLoadingDialog(context, _keyLoader);
@@ -159,20 +250,20 @@ class _LoginPageState extends State<LoginPage>
         print("param:" + param);
         formData.addAll({"SessionID": EncryptSessionID(param)});
 
-        if (LoginType) {
-          await localLogin(int.parse(_userid), _password);
-        } else {
-          if (await SaveCashSaleOrder()) {
-            globals.isLocalLoggedIn = 0;
-            //danish
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            //Navigator.pop(context);
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) =>AreaSelectionScreen(pjpList: PJPList)),
-            );
-          }
+        //  if (LoginType) {
+        //   await localLogin(int.parse(_userid), _password);
+        // } else {
+        if (await SaveCashSaleOrder()) {
+          globals.isLocalLoggedIn = 0;
+          //danish
+          Navigator.of(context, rootNavigator: true).pop('dialog');
+          //Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) =>AreaSelectionScreen(pjpList: PJPList)),
+          );
         }
+        // }
       } else {
         Flushbar(
           messageText: Column(
@@ -230,7 +321,7 @@ class _LoginPageState extends State<LoginPage>
     await repo.initdb();
 
     List<Map> result = await repo.getUser(UserID, Password);
-    print('test:' + result.toString());
+    print("result :"+result.toString());
     if (result.length > 0) {
       DateTime created_on = DateTime.parse(result[0]['created_on']);
       DateTime current_time = DateTime.now();
@@ -250,9 +341,11 @@ class _LoginPageState extends State<LoginPage>
           MaterialPageRoute(builder: (context) =>AreaSelectionScreen(pjpList: PJPList)),
         );
       } else {
+        print("inside 1st else");
         _showDialog("Error", "Invalid user id or password");
       }
     } else {
+      print("inside 2nd else");
       _showDialog("Error", "Invalid user id or password");
     }
   }
@@ -350,6 +443,20 @@ class _LoginPageState extends State<LoginPage>
         globals.pjpid = responseBody['BeatPlanID'];
         globals.maxDiscountPercentage = double.tryParse(responseBody['maximum_discount_percentage'].toString()) ;
         globals.distributorId = int.tryParse(responseBody['distributor_id'].toString());
+
+        // Save session data locally
+        var now = DateTime.now();
+        var formatter = DateFormat('yyyy-MM-dd');
+        String formattedDate = formatter.format(now);
+        //  DateTime date = new DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString(SharedPrefConstant.userId, _userid);
+        await prefs.setString(SharedPrefConstant.password, _password);
+        await prefs.setString(SharedPrefConstant.loginDate, formattedDate);
+
+
+        print("prefs"+prefs.toString());
         print("globals.maxDiscountPercentage"+globals.maxDiscountPercentage.toString());
         print("globals.distributorId"+globals.distributorId.toString());
         print("globals.pjpid :"+globals.pjpid.toString());
@@ -357,7 +464,7 @@ class _LoginPageState extends State<LoginPage>
         print(responseBody['OutletChannel'].toString());
         await repo.initdb();
         print("PJPList : "+responseBody['PJPList'].toString());
-        PJPList = responseBody['PJPList'];
+
 
         repo.deleteUsers();
         repo.insertUser(User.fromJson({
@@ -370,6 +477,11 @@ class _LoginPageState extends State<LoginPage>
           'created_on': DateTime.now().toString(),
           'IsOutletLocationUpdate': responseBody['IsOutletLocationUpdate'].toString()
         }));
+        /*     repo.insertPJP(PJP.fromJson({
+          'PJPID': responseBody['PJPID'],
+          'PJPName': responseBody['PJPName'],
+        }));*/
+
         globals.IsOutletLocationUpdate = responseBody['IsOutletLocationUpdate'];
         print("IsOutletLocationUpdate "+globals.IsOutletLocationUpdate.toString());
         print(User.fromJson({
@@ -474,6 +586,7 @@ class _LoginPageState extends State<LoginPage>
           await repo.deletePromotionsProducts();
           await repo.deletePromotionsProductsFree();
           await repo.deleteAllOutletChannel();
+          // await repo.deletePJP();
           print("8.1");
           List outlet_product_alternative_prices_rows =
           responseBody['PriceListRows'];
@@ -523,6 +636,13 @@ class _LoginPageState extends State<LoginPage>
             for (var i = 0; i < Channel_Outlets.length; i++) {
               await repo.insertChannel(
                   OutletChannel.fromJson(Channel_Outlets[i]));
+            }
+          }
+          PJPList = responseBody['PJPList'];
+          if(PJPList!=null){
+            for (var i = 0; i < PJPList.length; i++) {
+              await repo.insertPJP(
+                  PJP.fromJson(PJPList[i]));
             }
           }
           print("spotDiscount .............."+responseBody['spotDiscount'].toString());
@@ -595,6 +715,14 @@ class _LoginPageState extends State<LoginPage>
       _showDialog("Error", "Check your internet connection:" + e.toString());
     }*/
     return callreturn;
+  }
+
+  void navigateToMainScreen() {
+    // Navigate to your main app screen
+  }
+
+  void navigateToLoginScreen() {
+    // Navigate to the login screen
   }
 
   Repository repo = new Repository();
@@ -866,7 +994,7 @@ class _LoginPageState extends State<LoginPage>
                                                       SizedBox(
                                                         height: 10.0,
                                                       ),
-                                                      DelayedAimation(
+                                                      /*DelayedAimation(
                                                         child: CheckboxListTile(
                                                           checkColor:
                                                           Colors.white,
@@ -885,7 +1013,7 @@ class _LoginPageState extends State<LoginPage>
                                                         ),
                                                         delay:
                                                         delayedAmount + 500,
-                                                      ),
+                                                      ),*/
                                                       SizedBox(
                                                         height: 10.0,
                                                       ),

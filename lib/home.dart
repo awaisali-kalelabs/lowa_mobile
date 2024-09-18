@@ -69,13 +69,19 @@ class _Home extends State<Home> {
   void initState() {
     super.initState();
     globals.stopContinuousLocation();
+    print("Inside Init of Home");
+    print("PJP : "+   globals.selectedPJP.toString());
+    var currDate = new DateTime.now();
+    int weekDay = currDate.weekday;
 
+    globals.WeekDay = globals.getPBCDayNumber(weekDay);
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       _checkTime();
     });
     //Navigator.of(context, rootNavigator: true).pop('dialog');
     Repository repo = new Repository();
     repo.getTotalOutlets(globals.WeekDay).then((value) {
+      print("getTotalOutlets");
       setState(() {
         totalOutlets = value[0]['totalOutlets'];
         if (totalOutlets != 0) {
@@ -1119,6 +1125,7 @@ class _Home extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+
     return new WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(

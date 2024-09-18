@@ -16,6 +16,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../../globals.dart' as globals;
 import '../model/OutletChannel.dart';
+import '../model/PJP.dart';
 
 class Repository {
   var database;
@@ -44,7 +45,7 @@ class Repository {
       // Set the path to the database. Note: Using the `join` function from the
       // `path` package is best practice to ensure the path is correctly
       // constructed for each platform.
-      join(await getDatabasesPath(), 'delivery_managerV88.db'),
+      join(await getDatabasesPath(), 'delivery_managerV89.db'),
       // When the database is first created, create a table to store dogs.
       onUpgrade: _onUpgrade,
       onCreate: (db, version) {
@@ -57,6 +58,8 @@ class Repository {
         db.execute(
             "CREATE TABLE outlet_orders_images(id INTEGER, file_type_id TEXT, file TEXT,is_uploaded INTEGER DEFAULT 0,created_on TEXT)");
         //Created By Irteza
+        db.execute(
+            "CREATE TABLE selected_pjp(PJPID TEXT,PJPName TEXT)");
         db.execute(
             "CREATE TABLE outlet_no_orders_images(id INTEGER, file_type_id INTEGER, file TEXT,is_uploaded INTEGER DEFAULT 0)");
         db.execute(
@@ -140,6 +143,7 @@ class Repository {
             "CREATE TABLE promotions_products_free(promotion_id INTEGER,package_id INTEGER,total_units INTEGER, package_label TEXT, brand_id INTEGER, brand_label TEXT, unit_per_case INTEGER, product_id INTEGER)");
 
 
+
 //added by farhan after danish code ENDS
 
         //print("db created");
@@ -152,12 +156,12 @@ class Repository {
   }
 
   void _onUpgrade(Database db, int oldVersion, int newVersion) {
-    if (oldVersion < newVersion) {
+/*    if (oldVersion < newVersion) {
       db.execute("ALTER TABLE registered_outlets ADD COLUMN area_label text;");
       db.execute(
           "ALTER TABLE registered_outlets ADD COLUMN sub_area_label text;");
       print("haseeb called1");
-    }
+    }*/
     print("haseeb called");
   }
 
@@ -1441,6 +1445,10 @@ class Repository {
     final Database db = await database;
     await db.delete('users');
   }
+  Future<void> deletePJP() async {
+    final Database db = await database;
+    await db.delete('selected_pjp');
+  }
 
   Future<void> insertUser(User user) async {
     // Get a reference to the database.
@@ -1458,6 +1466,19 @@ class Repository {
   }
 
 
+  Future<void> insertPJP(PJP pjp) async {
+    final Database db = await database;
+    try {
+      await db.insert(
+        'selected_pjp',
+        pjp.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (error) {
+      print("ERROR in inserting PJP : "+error.toString());
+      //print(error);
+    }
+  }
   Future<int> isVisitExists(outletId) async {
     await this.initdb();
     final Database db = await database;

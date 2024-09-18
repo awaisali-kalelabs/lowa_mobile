@@ -954,7 +954,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
   }
 
   Future _OutletRegisterationUpload(context) async {
-    print("============Selected PJP============"+globals.selectedPJP);
+    print("============Selected PJP============"+globals.selectedPJP.toString());
     int ORDERIDToDelete = 0;
     List AllRegisteredOutlets = new List();
     await repo.getAllRegisteredOutletsByIsUploaded(0,1).then((val) async {
