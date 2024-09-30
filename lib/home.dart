@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:new_version_plus/new_version_plus.dart';
 import 'package:order_booker/attendance.dart';
 import 'package:order_booker/attendance_sync_report_view.dart';
 import 'package:order_booker/com/pbc/dao/repository.dart';
@@ -27,6 +29,7 @@ import 'package:order_booker/spot_sell_route.dart';
 import 'pre_sell_chart.dart';
 import 'pre_sell_route.dart';
 import 'spot_sell_chart.dart';*/
+import 'SelectPJP.dart';
 import 'daily_reports.dart';
 import 'globals.dart' as globals;
 
@@ -39,9 +42,11 @@ class Home extends StatefulWidget {
 class _Home extends State<Home> {
   /*Repository repo=new Repository();*/
   final GlobalKey<ScaffoldState> _scaffoldKey1 = new GlobalKey<ScaffoldState>();
-  final GlobalKey<ScaffoldState> _scaffoldKey2 = new GlobalKey<ScaffoldState>();
   List<String> Routes;
   double delivered = 0;
+  final newVersionPlus = NewVersionPlus(
+    androidId: 'com.pbc.order_booker',
+  );
 
   List<Map<String, dynamic>> AllOrders;
   List<Map<String, dynamic>> AllOrdersItems;
@@ -55,6 +60,7 @@ class _Home extends State<Home> {
   int totalOutletClosed = 0;
   int pendingVisits = 0;
   int ChartSeries = 0;
+
   // DateTime now = DateTime.now();
   bool isAfterFivePM = false;
   Timer _timer;
@@ -65,12 +71,26 @@ class _Home extends State<Home> {
   double totalAmount = 0.0;
   int isUploaded = 1;
   int isAnythingUploaded = 0;
+
   @override
-  void initState() {
+  Future<void> initState() {
     super.initState();
+    String DeviceID;
+   //checkForNewVersion()
+    _getDeviceId().then((val) {
+      setState(() {
+        DeviceID = val;
+        globals.DeviceID = DeviceID;
+      });
+    });
+    // globals.DeviceID = DeviceID;
+    print("Device IDs" + globals.DeviceID.toString());
     globals.stopContinuousLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showPJPDialog(context); // Assuming you're using GetX for context
+    });
     print("Inside Init of Home");
-    print("PJP : "+   globals.selectedPJP.toString());
+    print("PJP : " + globals.selectedPJP.toString());
     var currDate = new DateTime.now();
     int weekDay = currDate.weekday;
 
@@ -78,10 +98,13 @@ class _Home extends State<Home> {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       _checkTime();
     });
-    //Navigator.of(context, rootNavigator: true).pop('dialog');
     Repository repo = new Repository();
-    repo.getTotalOutlets(globals.WeekDay).then((value) {
-      print("getTotalOutlets");
+    fetchPJP();
+    saveUser();
+    print(globals.WeekDay);
+    print("isAlternative :" + globals.isAlternative.toString());
+    repo.getTotalOutlets(globals.WeekDay, globals.selectedPJP).then((value) {
+      print("getTotalOutlets" + value.toString());
       setState(() {
         totalOutlets = value[0]['totalOutlets'];
         if (totalOutlets != 0) {
@@ -98,7 +121,8 @@ class _Home extends State<Home> {
         ];
       });
     });
-    repo.getTotalOrders().then((value) {
+    print("After getTotalOutlets");
+    repo.getTotalOrders(globals.selectedPJP).then((value) {
       setState(() {
         totalOrders = value;
         totalVisits = totalOrders + totalNoOrders + totalOutletClosed;
@@ -117,7 +141,9 @@ class _Home extends State<Home> {
         ];
       });
     });
-    repo.getTotalNoOrders().then((value) {
+    print("After getTotalOrders");
+
+    repo.getTotalNoOrders(globals.selectedPJP).then((value) {
       setState(() {
         totalNoOrders = value;
         totalVisits = totalOrders + totalNoOrders + totalOutletClosed;
@@ -136,6 +162,8 @@ class _Home extends State<Home> {
         ];
       });
     });
+    print("After getTotalNoOrders");
+
     repo.getTotalOutletClosed().then((value) {
       setState(() {
         totalOutletClosed = value;
@@ -155,11 +183,13 @@ class _Home extends State<Home> {
         ];
       });
     });
+    print("After getTotalOutletClosed");
+
     AllOrders = new List();
     repo.getAllOrders(globals.OutletID, 0).then((val) async {
-      setState(() {
-        AllOrders = val;
-      });
+      // setState(() {
+      AllOrders = val;
+      // });
 
       AllOrdersItems = new List();
       for (int i = 0; i < AllOrders.length; i++) {
@@ -174,6 +204,8 @@ class _Home extends State<Home> {
         });
       }
     });
+    print("After getAllOrders");
+
     PreSellRoutes = new List();
     if (globals.isLocalLoggedIn != 1) {
       if (globals.isFromLoginRoute == 1) {
@@ -185,16 +217,113 @@ class _Home extends State<Home> {
     }
   }
 
+  // @override
+  // void didChangeDependencies() {
+  //   // TODO: implement didChangeDependencies
+  //   super.didChangeDependencies();
+  //
+  // }
 
+  void checkForNewVersion(BuildContext context) async {
+    await newVersionPlus.getVersionStatus().then((value) {
+      // print(value!.storeVersion.toString());
+      print('value.localVersion ${value.localVersion}');
+      print('value.storeVersion ${value.storeVersion}');
+      print(' update ${value.canUpdate}');
+      if (value.canUpdate) {
+        newVersionPlus.showUpdateDialog(
+            context: context,
+
+            //   launchModeVersion: LaunchModeVersion.external,
+            versionStatus: value,
+            allowDismissal: false,
+            dialogTitle: 'Update Available',
+            dialogText:
+                'Please update your app to get latest features and best experience',
+            updateButtonText: 'Update',
+            dismissButtonText: 'Later',
+            dismissAction: () {
+              Navigator.pop(context);
+            });
+      }
+    }).catchError((e) {
+      print('update error ${e.toString()}');
+    });
+  }
+
+  Future<String> _getDeviceId() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidDeviceInfo = await deviceInfo.androidInfo;
+    return androidDeviceInfo.androidId;
+  }
+
+  void showPJPDialog(BuildContext context) {
+    // Check if selectedPJP is null or empty
+    if (globals.selectedPJP == null || globals.selectedPJP.isEmpty) {
+      // Show dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('No PJP Selected'),
+            content: Text('Please select a PJP to continue.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AreaSelectionScreen()),
+                  );
+                },
+                child: Text('Select PJP'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> fetchPJP() async {
+    List<Map<String, dynamic>> fetchedPJPs = await repo.getSelectedPJPs();
+    if (fetchedPJPs.isNotEmpty) {
+      String fetchedPJP = fetchedPJPs[0]
+          ['PJPID']; // Assuming you want the first PJPID from the list
+      print("fetchedPJP :" + fetchedPJP.toString());
+      globals.selectedPJP = fetchedPJP;
+    } else {
+      print('No selected PJPs found');
+    }
+  }
+
+  Future<void> saveUser() async {
+    try {
+      List<Map<String, dynamic>> fetchedUser = await repo.getUserAgain();
+
+      if (fetchedUser.isNotEmpty) {
+        String userName = fetchedUser[0]['display_name'];
+        int userID = fetchedUser[0]['user_id'];
+
+        print("UserName: $userName");
+
+        globals.DisplayName = userName;
+        globals.UserID = userID;
+      } else {
+        print('No user found');
+      }
+    } catch (e) {
+      print('Error saving user: $e');
+    }
+  }
 
   void _checkTime() {
     bool newIsAfterFivePM = false;
     DateTime now = DateTime.now();
-    if(globals.UserID==2762){
-       newIsAfterFivePM = now.hour >= 8 && now.hour < 24;
-
-    }else{
-       newIsAfterFivePM = now.hour >= 16 && now.hour < 22;
+    if (globals.UserID == 2762) {
+      newIsAfterFivePM = now.hour >= 8 && now.hour < 24;
+    } else {
+      newIsAfterFivePM = now.hour >= 16 && now.hour < 22;
     }
 //
 
@@ -211,51 +340,6 @@ class _Home extends State<Home> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
-  }
-  Widget _getRoutesList(BuildContext context, int index) {
-    return Column(
-      children: <Widget>[
-        index == 0 ? Container() : Divider(),
-        ListTile(
-          onTap: () {
-            globals.DispatchID = PreSellRoutes[index]['dispatch_id'];
-            /*Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => PreSellRoute(PreSellRoutes[index]['dispatch_id'])),
-          );*/
-          },
-          leading: Padding(
-              padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-              child: Icon(Icons.arrow_forward_ios)),
-          trailing: CircularProgressIndicator(
-            // value: 0.7, delivered_outlets
-            value: (PreSellRoutes[index]['delivered_outlets'] != null
-                ? (PreSellRoutes[index]['delivered_outlets'] != 0
-                    ? PreSellRoutes[index]['delivered_outlets'] /
-                        PreSellRoutes[index]['outlets']
-                    : 0)
-                : 0),
-            backgroundColor: Colors.grey,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-          ),
-          title: Text(
-              PreSellRoutes[index]['vehicle_no'] +
-                  " | " +
-                  PreSellRoutes[index]['created_on'],
-              style: new TextStyle(fontSize: 16)),
-          subtitle: Text(
-              'Dispatch# ' +
-                  PreSellRoutes[index]['dispatch_id'].toString() +
-                  "\n" +
-                  PreSellRoutes[index]['outlets'].toString() +
-                  ' Outlets, ' +
-                  PreSellRoutes[index]['raw_cases'].toString() +
-                  ' Cases',
-              style: new TextStyle(fontSize: 16)),
-        )
-      ],
-    );
   }
 
   Future _UploadOutletMarkClosed() async {
@@ -1089,6 +1173,7 @@ class _Home extends State<Home> {
 
           var responseBody = json.decode(utf8.decode(response.bodyBytes));
           print('called4');
+          print(response.statusCode);
           if (response.statusCode == 200) {
             if (responseBody["success"] == "true") {
               await repo.markOrderUploaded(ORDERIDToDelete);
@@ -1125,7 +1210,7 @@ class _Home extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-
+    checkForNewVersion(context);
     return new WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -1159,42 +1244,13 @@ class _Home extends State<Home> {
                   ),
                   title: Text('Upload Data'),
                   onTap: () async {
-                    /*
-                      if(globals.isDataUploading==0){
-                        _showLoader();
-                        Map<String,dynamic> Response =await globals.makeDelivery();
-                        _showDialog(Response['success']==1?"Success":"Error",""+ Response['message']);
-                      }else{
-                        _showDialog("Error","Another process is already uploading data, please wait " + globals.isDataUploading.toString());
-                      }
-                      */
-                    /* if(globals.isDataUploading==0){
-                        try{
-                          _showLoader();
-                          Map<String,dynamic> Response =await globals.makeDelivery();
-                          if(Response['success']==0){
-                            _showDialog("Error",Response['message']);
-                          }else{
-                            _showDialog("Success", Response['message']);
-                          }
-                        }catch(e){
-                          globals.isDataUploading=0;
-                          _showDialog("Error","Cant upload, Check your internet connection!\n"+e.toString());
-
-                        }
-                      }else{
-                        _showDialog("Error","Another process is already uploading data, please wait " + globals.isDataUploading.toString());
-                      }*/
                     if (globals.isImageUploading == 0) {
                       print("uploading file");
                       globals.asyncFileUpload();
                     } else {
                       print("waiting......");
                     }
-                    //   await repo.completeOrder(globals.OutletID);
-                    //  await repo.setVisitType(globals.OutletID, 1);
-                    //
-                    Dialogs.showLoadingDialog(context, _scaffoldKey2);
+                    //Dialogs.showLoadingDialog(context, _scaffoldKey2);
                     _UploadOrder(context).whenComplete(() => _UploadNoOrder(context)
                         .whenComplete(() => _OutletRegisterationUpload(context)
                             .whenComplete(() => _OutletRegisterationUpload2(context)
@@ -1207,23 +1263,7 @@ class _Home extends State<Home> {
                                               _SyncMerchandisingPhoto();
                                             }))))));
                   },
-                ) /*,Divider(
-                    height: 1,
-                    color: Colors.grey,
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.view_list),
-                    title: Text('Offline Orders'),
-                      onTap: ()  {
-                       /* Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => PreSellRouteOfflineDeliveries()),
-                        )
-                        ;*/
-                      }
-                  )*/
-                ,
+                ),
                 Divider(
                   height: 1,
                   color: Colors.grey,
@@ -1263,31 +1303,29 @@ class _Home extends State<Home> {
           appBar: AppBar(
             backgroundColor: Colors.blue[800],
             actions: <Widget>[
-              new Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
-                /*  child: CircleAvatar(
-                backgroundImage: AssetImage("assets/images/avatar.jpg"),
-              ),*/
-              )
-            ],
-            title: Text(
-              globals.DisplayName,
-              style: TextStyle(fontSize: 16),
-            ), /*
-            leading:
-              // action biutton
-              IconButton(
-                icon: Icon(Icons.menu),
+              TextButton.icon(
+                icon: Icon(Icons.published_with_changes_sharp,
+                    color: Colors.white),
+                // Ensure the icon color matches the AppBar
+                label: Text(
+                  'Change PJP',
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white), // Adjust font size and color
+                ),
                 onPressed: () async {
-                  _scaffoldKey.currentState.openDrawer();
-                  /*
-                  _showLoader();
-                  Map<String,dynamic> Response =await globals.makeDelivery();
-                  _showDialog(Response['success']==1?"Success":"Error",""+ Response['message']);
-                  */
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AreaSelectionScreen()),
+                  );
                 },
               ),
-*/
+            ],
+            title: Text(
+              globals.DisplayName ?? "",
+              style: TextStyle(fontSize: 16),
+            ),
           ),
           body: ListView(
               scrollDirection: Axis.vertical,
@@ -1301,225 +1339,252 @@ class _Home extends State<Home> {
                     children: <Widget>[
                       Column(
                         children: [
-                      Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.circular(15.0),
-                        ),
-                        child: Padding(
-                            padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
-                            child: Align(
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  "Today",
-                                  style: TextStyle(
-                                      color: Colors.blue, fontSize: 18,fontWeight: FontWeight.bold),
-                                ))),
-                      ),
-                     /*     Divider(
-                        height: 1,
-                        color: Colors.grey,
-                      ),*/
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(
-                              child: Container(
-                                  width: 180,
-                                  height: 235,
-                                  child: Card(
-                                    elevation: 4,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(15.0),
-                                    ),
-                                    child: Column(
-                                      children: <Widget>[
-                                        ListTile(
-                                          trailing: Text(
-                                              totalOutlets.toString(),
-                                              style: new TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.black)),
-                                          title: Text(
-                                            'Total\nOutlets',
-                                            style: new TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.blue),
-                                          ),
-                                          //leading: Text('Sussan Road',
-                                          //    style: new TextStyle( fontSize: 16)),
-                                        ),
-                                        Divider(
-                                          height: 1,
-                                          color: Colors.grey,
-                                        ),
-                                        ListTile(
-                                          trailing: Text(
-                                              totalVisits.toString(),
-                                              style: new TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.black)),
-                                          title: Text('Total\nVisits',
-                                              style: new TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.blue)),
-                                          //leading: Text('Sussan Road',
-                                          //    style: new TextStyle( fontSize: 16)),
-                                        ),
-                                        Divider(
-                                          height: 1,
-                                          color: Colors.grey,
-                                        ),
-                                        ListTile(
-                                          trailing: Text(
-                                              pendingVisits.toString(),
-                                              style: new TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.black)),
-                                          title: Text('Pending\nVisits',
-                                              style: new TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.blue)),
-                                          //leading: Text('Sussan Road',
-                                          //    style: new TextStyle( fontSize: 16)),
-                                        ),
-                                        Divider(
-                                          height: 1,
-                                          color: Colors.grey,
-                                        ),
-                                        ListTile(
-                                          trailing: Text(
-                                              totalOrders.toString(),
-                                              style: new TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.black)),
-                                          title: Text('Total\nOrders',
-                                              style: new TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.blue)),
-                                          //leading: Text('Sussan Road',
-                                          //    style: new TextStyle( fontSize: 16)),
-                                        ),
-                                      ],
-                                    ),
-                                  ))),
-                          Expanded(
-                              child:
-                                  Container(height: 180, child: chart())),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 12.0,
+                          Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                            child: Padding(
+                                padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
+                                child: Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text(
+                                      "Today",
+                                      style: TextStyle(
+                                          color: Colors.blue,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                    ))),
                           ),
-                          Container(
-                              child: Card(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Expanded(
+                                  child: Container(
+                                      width: 180,
+                                      height: 235,
+                                      child: Card(
+                                        elevation: 4,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(15.0),
+                                        ),
+                                        child: Column(
+                                          children: <Widget>[
+                                            ListTile(
+                                              trailing: Text(
+                                                  totalOutlets.toString(),
+                                                  style: new TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.black)),
+                                              title: Text(
+                                                'Total\nOutlets',
+                                                style: new TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.blue),
+                                              ),
+                                              //leading: Text('Sussan Road',
+                                              //    style: new TextStyle( fontSize: 16)),
+                                            ),
+                                            Divider(
+                                              height: 1,
+                                              color: Colors.grey,
+                                            ),
+                                            ListTile(
+                                              trailing: Text(
+                                                  totalVisits.toString(),
+                                                  style: new TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.black)),
+                                              title: Text('Total\nVisits',
+                                                  style: new TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.blue)),
+                                              //leading: Text('Sussan Road',
+                                              //    style: new TextStyle( fontSize: 16)),
+                                            ),
+                                            Divider(
+                                              height: 1,
+                                              color: Colors.grey,
+                                            ),
+                                            ListTile(
+                                              trailing: Text(
+                                                  pendingVisits.toString(),
+                                                  style: new TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.black)),
+                                              title: Text('Pending\nVisits',
+                                                  style: new TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.blue)),
+                                              //leading: Text('Sussan Road',
+                                              //    style: new TextStyle( fontSize: 16)),
+                                            ),
+                                            Divider(
+                                              height: 1,
+                                              color: Colors.grey,
+                                            ),
+                                            ListTile(
+                                              trailing: Text(
+                                                  totalOrders.toString(),
+                                                  style: new TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.black)),
+                                              title: Text('Total\nOrders',
+                                                  style: new TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.blue)),
+                                              //leading: Text('Sussan Road',
+                                              //    style: new TextStyle( fontSize: 16)),
+                                            ),
+                                          ],
+                                        ),
+                                      ))),
+                              Expanded(
+                                  child:
+                                      Container(height: 180, child: chart())),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              SizedBox(
+                                height: 12.0,
+                              ),
+                              Container(
+                                  child: Card(
                                 elevation: 4,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
                                 child: Column(
-                            mainAxisAlignment:
-                                  MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                                Container(
-                                  padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
-                                  child: Align(
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        "Activities",
-                                        style: TextStyle(
-                                            color: Colors.blue, fontSize: 17, fontWeight: FontWeight.bold),
-                                      )),
-                                ),
-                                Container(
-                                  child: Divider(
-                                    height: 1,
-                                    color: Colors.blue,
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Expanded(
-                                        child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        Attendance()),
-                                              );
-                                            },
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Container(
+                                      padding:
+                                          EdgeInsets.fromLTRB(10, 10, 0, 10),
+                                      child: Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Text(
+                                            "Activities",
+                                            style: TextStyle(
+                                                color: Colors.blue,
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.bold),
+                                          )),
+                                    ),
+                                    Container(
+                                      child: Divider(
+                                        height: 1,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Expanded(
+                                            child: GestureDetector(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            Attendance()),
+                                                  );
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      Image.asset(
+                                                        "assets/images/calendar.png",
+                                                        width: 55,
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.fromLTRB(
+                                                                0.0,
+                                                                5.0,
+                                                                0.0,
+                                                                0.0),
+                                                        child: Text(
+                                                          'Attendance',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.black),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ))),
+                                        Expanded(
+                                            child: GestureDetector(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            PreSellRoute(2222)),
+                                                  );
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      Image.asset(
+                                                        "assets/images/place.png",
+                                                        width: 55,
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.fromLTRB(
+                                                                0.0,
+                                                                5.0,
+                                                                0.0,
+                                                                0.0),
+                                                        child: Text(
+                                                          'Visit',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.black),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )))
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Expanded(
                                             child: Container(
-                                              padding: EdgeInsets.all(10),
-                                              child: Column(
-                                                children: <Widget>[
-                                                  Image.asset(
-                                                    "assets/images/calendar.png",
-                                                    width: 55,
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        EdgeInsets.fromLTRB(
-                                                            0.0,
-                                                            5.0,
-                                                            0.0,
-                                                            0.0),
-                                                    child: Text(
-                                                      'Attendance',
-                                                      style: TextStyle(
-                                                          color:
-                                                              Colors.black),
-                                                    ),
-                                                  ),
-                                                ],
+                                          padding: EdgeInsets.all(10),
+                                          child: Column(
+                                            children: <Widget>[
+                                              Image.asset(
+                                                "assets/images/complain.png",
+                                                width: 55,
                                               ),
-                                            ))),
-                                    Expanded(
-                                        child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        PreSellRoute(2222)),
-                                              );
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.all(10),
-                                              child: Column(
-                                                children: <Widget>[
-                                                  Image.asset(
-                                                    "assets/images/place.png",
-                                                    width: 55,
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        EdgeInsets.fromLTRB(
-                                                            0.0,
-                                                            5.0,
-                                                            0.0,
-                                                            0.0),
-                                                    child: Text(
-                                                      'Visit',
-                                                      style: TextStyle(
-                                                          color:
-                                                              Colors.black),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ))),
-/*
-                                    Expande
-                                        child: GestureDetector(
+                                              Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      0.0, 5.0, 0.0, 0.0),
+                                                  child: Text(
+                                                    'Complaint',
+                                                    style: TextStyle(
+                                                        color: Colors.black),
+                                                  )),
+                                            ],
+                                          ),
+                                        )),
+                                        Expanded(
+                                            child: GestureDetector(
                                           onTap: () {
                                             Navigator.push(
                                               context,
@@ -1548,387 +1613,336 @@ class _Home extends State<Home> {
                                               ],
                                             ),
                                           ),
-                                        )),*/
+                                        ))
+                                      ],
+                                    ),
                                   ],
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Expanded(
-                                        child: Container(
-                                      padding: EdgeInsets.all(10),
-                                      child: Column(
-                                        children: <Widget>[
-                                          Image.asset(
-                                            "assets/images/complain.png",
-                                            width: 55,
-                                          ),
-                                          Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  0.0, 5.0, 0.0, 0.0),
-                                              child: Text(
-                                                'Complaint',
-                                                style: TextStyle(
-                                                    color: Colors.black),
-                                              )),
-                                        ],
-                                      ),
-                                    )),
-/*
-                                    Expanded(child: Container(
-                                      padding: EdgeInsets.all(10))
-                                    ),*/
-
-                                    Expanded(
-                                        child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  OutletRegisteration()),
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.all(10),
-                                        child: Column(
-                                          children: <Widget>[
-                                            Image.asset(
-                                              "assets/images/building.png",
-                                              width: 55,
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  0.0, 5.0, 0.0, 0.0),
-                                              child: Text(
-                                                'Outlet Registeration',
-                                                style: TextStyle(
-                                                    color: Colors.black),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ))
-                                  ],
-                                ),
-                            ],
-                          ),
                               )),
-                          SizedBox(
-                            height: 12.0,
-                          ),
-                          Container(
-                              child: Card(
+                              SizedBox(
+                                height: 12.0,
+                              ),
+                              Container(
+                                  child: Card(
                                 elevation: 4,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
                                 child: Column(
-                            mainAxisAlignment:
-                                  MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                                Container(
-                                  padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
-                                  child: Align(
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        "Reports",
-                                        style: TextStyle(
-                                            color: Colors.blue, fontSize: 17 , fontWeight: FontWeight.bold),
-                                      )),
-                                ),
-                                Container(
-                                  child: Divider(
-                                    height: 1,
-                                    color: Colors.blue,
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        padding: EdgeInsets.all(10),
-                                        child: Column(
-                                          children: <Widget>[
-                                            Image.asset(
-                                              "assets/images/performance.png",
-                                              width: 55,
-                                            ),
-                                            Padding(
-                                                padding: EdgeInsets.fromLTRB(
-                                                    0.0, 5.0, 0.0, 0.0),
-                                                child: Text(
-                                                  'Performance',
-                                                  style: TextStyle(
-                                                      color: Colors.black),
-                                                )),
-                                          ],
-                                        ),
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Container(
+                                      padding:
+                                          EdgeInsets.fromLTRB(10, 10, 0, 10),
+                                      child: Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Text(
+                                            "Reports",
+                                            style: TextStyle(
+                                                color: Colors.blue,
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.bold),
+                                          )),
+                                    ),
+                                    Container(
+                                      child: Divider(
+                                        height: 1,
+                                        color: Colors.blue,
                                       ),
                                     ),
-                                    Expanded(
-                                        child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          StockReportView()),
-                                                  ModalRoute.withName(
-                                                      "/stock_report"));
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.all(10),
-                                              child: Column(
-                                                children: <Widget>[
-                                                  Image.asset(
-                                                    "assets/images/stock.png",
-                                                    width: 55,
-                                                  ),
-                                                  Padding(
-                                                      padding:
-                                                          EdgeInsets.fromLTRB(
-                                                              0.0,
-                                                              5.0,
-                                                              0.0,
-                                                              0.0),
-                                                      child: Text(
-                                                        'Stock',
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.black),
-                                                      )),
-                                                ],
-                                              ),
-                                            ))),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Expanded(
-                                      child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.pushAndRemoveUntil(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        OrdersReportSelectDate()),
-                                                ModalRoute.withName(
-                                                    "/order_report_select_date"));
-                                          },
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Expanded(
                                           child: Container(
                                             padding: EdgeInsets.all(10),
                                             child: Column(
                                               children: <Widget>[
                                                 Image.asset(
-                                                  "assets/images/order.png",
+                                                  "assets/images/performance.png",
                                                   width: 55,
                                                 ),
                                                 Padding(
                                                     padding:
                                                         EdgeInsets.fromLTRB(
-                                                            0.0,
-                                                            5.0,
-                                                            0.0,
-                                                            0.0),
+                                                            0.0, 5.0, 0.0, 0.0),
                                                     child: Text(
-                                                      'Orders',
+                                                      'Performance',
                                                       style: TextStyle(
-                                                          color:
-                                                              Colors.black),
+                                                          color: Colors.black),
                                                     )),
                                               ],
                                             ),
-                                          )),
+                                          ),
+                                        ),
+                                        Expanded(
+                                            child: GestureDetector(
+                                                onTap: () {
+                                                  Navigator.pushAndRemoveUntil(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              StockReportView()),
+                                                      ModalRoute.withName(
+                                                          "/stock_report"));
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      Image.asset(
+                                                        "assets/images/stock.png",
+                                                        width: 55,
+                                                      ),
+                                                      Padding(
+                                                          padding: EdgeInsets
+                                                              .fromLTRB(
+                                                                  0.0,
+                                                                  5.0,
+                                                                  0.0,
+                                                                  0.0),
+                                                          child: Text(
+                                                            'Stock',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black),
+                                                          )),
+                                                    ],
+                                                  ),
+                                                ))),
+                                      ],
                                     ),
-                                    Expanded(
-                                        child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          SalesReportSelectDate()),
-                                                  ModalRoute.withName(
-                                                      "/sales_report_select_date"));
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.all(10),
-                                              child: Column(
-                                                children: <Widget>[
-                                                  Image.asset(
-                                                    "assets/images/sales.png",
-                                                    width: 55,
-                                                  ),
-                                                  Padding(
-                                                    padding:
-                                                        EdgeInsets.fromLTRB(
-                                                            0.0,
-                                                            5.0,
-                                                            0.0,
-                                                            0.0),
-                                                    child: Text(
-                                                      'Sales',
-                                                      style: TextStyle(
-                                                          color:
-                                                              Colors.black),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ))),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Expanded(
-                                        child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          OrdersSyncReportView()),
-                                                  ModalRoute.withName(
-                                                      "/sync_report"));
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.all(10),
-                                              child: Column(
-                                                children: <Widget>[
-                                                  Image.asset(
-                                                    "assets/images/sync.png",
-                                                    width: 55,
-                                                  ),
-                                                  Padding(
-                                                      padding:
-                                                          EdgeInsets.fromLTRB(
-                                                              0.0,
-                                                              5.0,
-                                                              0.0,
-                                                              0.0),
-                                                      child: Text(
-                                                        'Orders Sync',
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.black),
-                                                      )),
-                                                ],
-                                              ),
-                                            ))),
-                                    Expanded(
-                                        child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          AttendanceSyncReportView()),
-                                                  ModalRoute.withName(
-                                                      "/attendance_sync_report"));
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.all(10),
-                                              child: Column(
-                                                children: <Widget>[
-                                                  Image.asset(
-                                                    "assets/images/sync.png",
-                                                    width: 55,
-                                                  ),
-                                                  Padding(
-                                                      padding:
-                                                          EdgeInsets.fromLTRB(
-                                                              0.0,
-                                                              5.0,
-                                                              0.0,
-                                                              0.0),
-                                                      child: Text(
-                                                        'Attendance Sync',
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.black),
-                                                      )),
-                                                ],
-                                              ),
-                                            ))),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  // crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-
-                                  children: [
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: isAfterFivePM != null && isAfterFivePM ?
-                                             () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        DailyReports(),
-                                                  ),
-                                                );
-                                              }
-                                            : null, // Disable the onTap function before
-                                        child: Container(
-                                          padding: EdgeInsets.all(10),
-                                          child: Row(
-                                            children: <Widget>[
-                                              // Adding space to the left of the icon
-                                              Padding(
-                                                padding: EdgeInsets.only(
-                                                    left:
-                                                        38), // Adjust the value as needed
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Expanded(
+                                          child: GestureDetector(
+                                              onTap: () {
+                                                Navigator.pushAndRemoveUntil(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            OrdersReportSelectDate()),
+                                                    ModalRoute.withName(
+                                                        "/order_report_select_date"));
+                                              },
+                                              child: Container(
+                                                padding: EdgeInsets.all(10),
                                                 child: Column(
                                                   children: <Widget>[
                                                     Image.asset(
-                                                      "assets/images/sync.png",
+                                                      "assets/images/order.png",
                                                       width: 55,
-                                                      color: isAfterFivePM
-                                                          ? null
-                                                          : Colors
-                                                              .grey, // Optionally, change the icon color to indicate it's disabled
                                                     ),
                                                     Padding(
-                                                      padding: EdgeInsets.only(
-                                                          top:
-                                                              5.0), // Adjust the top padding to add space between the icon and the text
-                                                      child: Text(
-                                                        'Daily reports',
-                                                        style: TextStyle(
-                                                          color: isAfterFivePM
-                                                              ? Colors.black
-                                                              : Colors
-                                                                  .grey, // Change text color to indicate it's disabled
-                                                        ),
-                                                      ),
-                                                    ),
+                                                        padding:
+                                                            EdgeInsets.fromLTRB(
+                                                                0.0,
+                                                                5.0,
+                                                                0.0,
+                                                                0.0),
+                                                        child: Text(
+                                                          'Orders',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.black),
+                                                        )),
                                                   ],
                                                 ),
+                                              )),
+                                        ),
+                                        Expanded(
+                                            child: GestureDetector(
+                                                onTap: () {
+                                                  Navigator.pushAndRemoveUntil(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              SalesReportSelectDate()),
+                                                      ModalRoute.withName(
+                                                          "/sales_report_select_date"));
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      Image.asset(
+                                                        "assets/images/sales.png",
+                                                        width: 55,
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.fromLTRB(
+                                                                0.0,
+                                                                5.0,
+                                                                0.0,
+                                                                0.0),
+                                                        child: Text(
+                                                          'Sales',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.black),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ))),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Expanded(
+                                            child: GestureDetector(
+                                                onTap: () {
+                                                  Navigator.pushAndRemoveUntil(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              OrdersSyncReportView()),
+                                                      ModalRoute.withName(
+                                                          "/sync_report"));
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      Image.asset(
+                                                        "assets/images/sync.png",
+                                                        width: 55,
+                                                      ),
+                                                      Padding(
+                                                          padding: EdgeInsets
+                                                              .fromLTRB(
+                                                                  0.0,
+                                                                  5.0,
+                                                                  0.0,
+                                                                  0.0),
+                                                          child: Text(
+                                                            'Orders Sync',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black),
+                                                          )),
+                                                    ],
+                                                  ),
+                                                ))),
+                                        Expanded(
+                                            child: GestureDetector(
+                                                onTap: () {
+                                                  Navigator.pushAndRemoveUntil(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              AttendanceSyncReportView()),
+                                                      ModalRoute.withName(
+                                                          "/attendance_sync_report"));
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Column(
+                                                    children: <Widget>[
+                                                      Image.asset(
+                                                        "assets/images/sync.png",
+                                                        width: 55,
+                                                      ),
+                                                      Padding(
+                                                          padding: EdgeInsets
+                                                              .fromLTRB(
+                                                                  0.0,
+                                                                  5.0,
+                                                                  0.0,
+                                                                  0.0),
+                                                          child: Text(
+                                                            'Attendance Sync',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black),
+                                                          )),
+                                                    ],
+                                                  ),
+                                                ))),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      // crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+
+                                      children: [
+                                        Expanded(
+                                          child: GestureDetector(
+                                            onTap: isAfterFivePM != null &&
+                                                    isAfterFivePM
+                                                ? () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            DailyReports(),
+                                                      ),
+                                                    );
+                                                  }
+                                                : null,
+                                            // Disable the onTap function before
+                                            child: Container(
+                                              padding: EdgeInsets.all(10),
+                                              child: Row(
+                                                children: <Widget>[
+                                                  // Adding space to the left of the icon
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 38),
+                                                    // Adjust the value as needed
+                                                    child: Column(
+                                                      children: <Widget>[
+                                                        Image.asset(
+                                                          "assets/images/sync.png",
+                                                          width: 55,
+                                                          color: isAfterFivePM
+                                                              ? null
+                                                              : Colors
+                                                                  .grey, // Optionally, change the icon color to indicate it's disabled
+                                                        ),
+                                                        Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  top: 5.0),
+                                                          // Adjust the top padding to add space between the icon and the text
+                                                          child: Text(
+                                                            'Daily reports',
+                                                            style: TextStyle(
+                                                              color: isAfterFivePM
+                                                                  ? Colors.black
+                                                                  : Colors
+                                                                      .grey, // Change text color to indicate it's disabled
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ],
+                                            ),
                                           ),
                                         ),
-                                      ),
+                                      ],
                                     ),
                                   ],
                                 ),
+                              ))
                             ],
                           ),
-                              ))
-                        ],
-                      ),
                         ],
                       ),
                     ],
@@ -2053,88 +2067,6 @@ class _Home extends State<Home> {
               startAngle: 4 / 5 * 3.1415926535897932,
               arcLength: 7 / 5 * 3.1415926535897932));
     }
-  }
-
-  void _showLoader() {
-    // flutter defined function
-
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return SizedBox(
-          height: 10,
-          width: 10,
-          child: AlertDialog(
-            backgroundColor: Colors.transparent,
-            content: LoadingIndicator(
-              indicatorType: Indicator.ballPulse,
-              color: Colors.white,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future getDeliveryStatus() async {
-    print('sending status request');
-
-    /*  Map<String,dynamic> formData=new Map();
-    formData.addAll({"LoginUsername":globals.UserID.toString()});
-
-
-    formData.addAll({"DeviceID":globals.DeviceID});
-    //await loginUser(formData);
-    final response = await http.post(globals.ServerURL+'/deliverymanager/MobileGetPreSellStatus',body: formData);
-    print(response.toString());
-
-    if (response.statusCode == 200) {
-      print(response.statusCode);
-      var result=json.decode(response.body);
-      print(result['success']);
-      if(result['success']=="true"){
-
-        globals.TotalOutlets=int.parse(result['total_outlets'].toString()) ;
-        globals.SuccessfulDelivries=int.parse(result['successful_deliveries'].toString());
-        globals.PendingDeliveries=int.parse(result['pending_deliveries'].toString());
-        globals.AmountCollected=result['amount_collected'].toString();
-        List pre_sell_routes_rows=result['pre_sell_routes'];
-        for(var i=0;i<pre_sell_routes_rows.length;i++){
-
-          Map<String, dynamic> NewValues=new Map();
-          NewValues.addAll({'delivered_outlets':pre_sell_routes_rows[i]['delivered_outlets']});
-          List WhereArgs=new List();
-          WhereArgs.add(pre_sell_routes_rows[i]['dispatch_id']);
-         */ /* await repo.updatePreSellRoute(NewValues,WhereArgs);*/ /*
-
-        }
-
-        this.setState(() {
-         */ /* repo.getPreSellRoutes().then((val){
-
-            setState(()  {
-              PreSellRoutes=val;
-              // print(PreSellRoutes[0]['vehicle_no']);
-            });
-          });*/ /*
-          int ChartSeries=0;
-          print('status updated');
-          delivered=globals.SuccessfulDelivries/globals.TotalOutlets*100;
-          if(delivered>0){
-            ChartSeries=delivered.round();
-          }
-          PreSellData = [
-            new GaugeSegment('Low', ChartSeries ),
-            new GaugeSegment('Acceptable', 100-ChartSeries),
-
-          ];
-        });
-     }
-    }*/
-
-    // print(await fetchProducts());
   }
 
   bool isNumeric(String s) {

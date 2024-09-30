@@ -58,7 +58,7 @@ class _PreSellRoute extends State<PreSellRoute> {
   void initState() {
     super.initState();
     print("Inside Init of PresellRoute");
-    
+    print("Visit PJP :"+globals.selectedPJP.toString());
     BackButtonInterceptor.add(myInterceptor);
     globals.stopContinuousLocation();
     if (DispatchID == 0) {
@@ -74,7 +74,7 @@ class _PreSellRoute extends State<PreSellRoute> {
 
     PreSellOutlets = new List();
 
-    repo.getPreSellOutletsByIsVisible(weekday, "%%", globals.isAlternative).then((val) {
+    repo.getPreSellOutletsByIsVisible(weekday, "%%", globals.isAlternative,globals.selectedPJP).then((val) {
       setState(() {
         PreSellOutlets = val;
         _SelectFerightTerms = weekday.toString();
@@ -148,7 +148,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                           globals.isAlternative = 1;
                         });
                         repo
-                            .getPreSellOutletsByIsVisible(weekday, searchController.text, globals.isAlternative)
+                            .getPreSellOutletsByIsVisible(weekday, searchController.text, globals.isAlternative,globals.selectedPJP)
                             .then((value) {
                           setState(() {
                             PreSellOutlets = value;
@@ -163,7 +163,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                         globals.isAlternative = 1;
                       });
                       repo
-                          .getPreSellOutletsByIsVisible(weekday, searchController.text, globals.isAlternative)
+                          .getPreSellOutletsByIsVisible(weekday, searchController.text, globals.isAlternative,globals.selectedPJP)
                           .then((value) {
                         setState(() {
                           PreSellOutlets = value;
@@ -187,7 +187,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                           globals.isAlternative = 0;
                         });
                         repo
-                            .getPreSellOutletsByIsVisible(weekday, searchController.text, globals.isAlternative)
+                            .getPreSellOutletsByIsVisible(weekday, searchController.text, globals.isAlternative,globals.selectedPJP)
                             .then((value) {
                           setState(() {
                             PreSellOutlets = value;
@@ -202,7 +202,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                         globals.isAlternative = 0;
                       });
                       repo
-                          .getPreSellOutletsByIsVisible(weekday, searchController.text, globals.isAlternative)
+                          .getPreSellOutletsByIsVisible(weekday, searchController.text, globals.isAlternative,globals.selectedPJP)
                           .then((value) {
                         setState(() {
                           PreSellOutlets = value;
@@ -273,7 +273,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                                   }
                                   print(weekday);
                                   repo
-                                      .getPreSellOutletsByIsVisible(weekday, searchController.text, globals.isAlternative)
+                                      .getPreSellOutletsByIsVisible(weekday, searchController.text, globals.isAlternative, globals.selectedPJP)
                                       .then((value) {
                                     setState(() {
                                       PreSellOutlets = value;
@@ -309,7 +309,7 @@ class _PreSellRoute extends State<PreSellRoute> {
                                         });
                                       }
                                       repo
-                                          .getPreSellOutletsByIsVisible(weekday, val, globals.isAlternative)
+                                          .getPreSellOutletsByIsVisible(weekday, val, globals.isAlternative,globals.selectedPJP)
                                           .then((val) {
                                         setState(() {
 

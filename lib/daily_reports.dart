@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
         "&psr_id=" +
         globals.UserID.toString() +
         "&pjpid=" +
-        globals.pjpid.toString();
+        globals.selectedPJP.toString();
     print("ReportParams:" + reportParams);
 
     var queryParameters = <String, String>{

@@ -471,7 +471,9 @@ class _OrdersState extends State<Orders> {
           order[i].created_on,
           order[i].lat,
           order[i].lng,
-          order[i].accuracy);
+          order[i].accuracy,
+          globals.selectedPJP);
+
     }
   }
 

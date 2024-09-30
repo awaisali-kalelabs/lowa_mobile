@@ -53,7 +53,8 @@ class _OutletOrderImage extends State<OutletOrderImage> {
           order[i].created_on,
           order[i].lat,
           order[i].lng,
-          order[i].accuracy);
+          order[i].accuracy,
+          globals.selectedPJP);
     }
     // for (int i = 0; i < globals.serialNoController.length; i++) {
     //   repo.insertChiller(order[0].id, globals.serialNoController[i].text);

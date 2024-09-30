@@ -10,13 +10,13 @@ import 'package:order_booker/com/pbc/dao/repository.dart';
 import 'package:order_booker/home.dart';
 import 'package:permission_handler/permission_handler.dart';
 //wildspace1@%88
-String appVersion = "v3.3";
+String appVersion = "v3.6";
 final oCcy = new NumberFormat("#,##0");
 final oCcy1 = new NumberFormat("#,##0.##");
 double maxDiscountPercentage = 0;
 int distributorId = 0;
 bool isLoggedIn = false;
-String DisplayName = "Islam Danish";
+String DisplayName = "";
 
 String ServerURL = "3.78.122.135";
 String fileServerURL = "http://3.78.122.135/portal/mobile/MobileFileDownloadCommonFiles";
@@ -24,7 +24,8 @@ int sparkMobileRequestId = 0;
 //for Item_Quantity check
 int Rate  = 0;
 //
-int pjpid=0;
+String Discount = "";
+//int pjpid=0;
 String selectedPJP;
 double AfterSpotDsicount = 0.0;
 int IsGeoFence=0;
@@ -352,6 +353,23 @@ String EncryptSessionID(String qry) {
   }
 
   return ret2;
+}
+void showLoader(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevents the dialog from being dismissed by tapping outside.
+    builder: (BuildContext context) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    },
+  );
+}
+void hideLoader(BuildContext context) {
+  // Checks if the current route is a dialog and if so, closes it.
+  if (Navigator.of(context).canPop()) {
+    Navigator.of(context).pop();
+  }
 }
 
 String getCurrentTimestamp() {

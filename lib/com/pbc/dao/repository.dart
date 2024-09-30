@@ -45,7 +45,7 @@ class Repository {
       // Set the path to the database. Note: Using the `join` function from the
       // `path` package is best practice to ensure the path is correctly
       // constructed for each platform.
-      join(await getDatabasesPath(), 'delivery_managerV89.db'),
+      join(await getDatabasesPath(), 'delivery_managerV92.db'),
       // When the database is first created, create a table to store dogs.
       onUpgrade: _onUpgrade,
       onCreate: (db, version) {
@@ -59,7 +59,7 @@ class Repository {
             "CREATE TABLE outlet_orders_images(id INTEGER, file_type_id TEXT, file TEXT,is_uploaded INTEGER DEFAULT 0,created_on TEXT)");
         //Created By Irteza
         db.execute(
-            "CREATE TABLE selected_pjp(PJPID TEXT,PJPName TEXT)");
+            "CREATE TABLE selected_pjp(PJPID TEXT,PJPName TEXT, is_selected INTEGER DEFAULT 0)");
         db.execute(
             "CREATE TABLE outlet_no_orders_images(id INTEGER, file_type_id INTEGER, file TEXT,is_uploaded INTEGER DEFAULT 0)");
         db.execute(
@@ -68,7 +68,7 @@ class Repository {
         db.execute(
             "CREATE TABLE products( product_id INTEGER,product_label TEXT,package_id INTEGER,package_label TEXT,sort_order INTEGER,brand_id INTEGER,brand_label TEXT,unit_per_case INTEGER,lrb_type_id INTEGER);");
         db.execute(
-            "CREATE TABLE pre_sell_outlets2(outlet_id INTEGER,outlet_name TEXT,day_number INTEGER,owner TEXT ,address TEXT,telephone TEXT,nfc_tag_id TEXT, visit_type INTEGER,lat TEXT,lng TEXT,accuracy TEXT,area_label TEXT, sub_area_label TEXT,is_alternate_visible INTEGER,pic_channel_id TEXT, channel_label TEXT, order_created_on_date TEXT, common_outlets_vpo_classifications TEXT , Visit TEXT, purchaser_name TEXT, purchaser_mobile_no TEXT, cache_contact_nic TEXT,IsGeoFence INTEGER,Radius INTEGER,channel_id INTEGER,channel_name TEXT)");
+            "CREATE TABLE pre_sell_outlets2(outlet_id INTEGER,outlet_name TEXT,day_number INTEGER,owner TEXT ,address TEXT,telephone TEXT,nfc_tag_id TEXT, visit_type INTEGER,lat TEXT,lng TEXT,accuracy TEXT,area_label TEXT, sub_area_label TEXT,is_alternate_visible INTEGER,pic_channel_id TEXT, channel_label TEXT, order_created_on_date TEXT, common_outlets_vpo_classifications TEXT , Visit TEXT, purchaser_name TEXT, purchaser_mobile_no TEXT, cache_contact_nic TEXT,IsGeoFence INTEGER,Radius INTEGER,channel_id INTEGER,channel_name TEXT,PJP INTEGER)");
 
         db.execute("CREATE TABLE product_lrb_types(id INTEGER,label TEXT)");
 
@@ -79,7 +79,7 @@ class Repository {
             "CREATE TABLE outlet_product_prices(price_id INTEGER,outlet_id INTEGER,product_id INTEGER,raw_case REAL,unit TEXT)");
 
         db.execute(
-            "CREATE TABLE outlet_orders(id INTEGER,outlet_id INTEGER,is_completed INTEGER,is_uploaded INTEGER,total_amount REAL,uuid TEXT,created_on TEXT,lat TEXT,lng TEXT,accuracy TEXT)");
+            "CREATE TABLE outlet_orders(id INTEGER,outlet_id INTEGER,is_completed INTEGER,is_uploaded INTEGER,total_amount REAL,uuid TEXT,created_on TEXT,lat TEXT,lng TEXT,accuracy TEXT,PJP INTEGER)");
 
         db.execute(
             "CREATE TABLE outlet_order_items(id INTEGER,source_id INTEGER,order_id INTEGER,product_id INTEGER,discount REAL,quantity INTEGER,amount REAL,created_on TEXT,rate REAL,product_label TEXT, unit_quantity INTEGER, is_promotion INTEGER, promotion_id INTEGER,DiscountID INTEGER,defaultDiscount INTEGER,maximumDiscount INTEGER)");
@@ -87,7 +87,7 @@ class Repository {
             "CREATE TABLE users(user_id INTEGER,display_name TEXT,designation TEXT,distributor_employee_id TEXT,password TEXT, created_on TEXT, department TEXT , IsOutletLocationUpdate INTEGER)");
         db.execute("CREATE TABLE no_order_reasons(id INTEGER,label TEXT)");
         db.execute(
-            "CREATE TABLE outlet_no_orders(id INTEGER,outlet_id INTEGER,reason_type_id INTEGER,is_uploaded INTEGER,uuid TEXT,created_on TEXT,lat TEXT,lng TEXT,accuracy TEXT )");
+            "CREATE TABLE outlet_no_orders(id INTEGER,outlet_id INTEGER,reason_type_id INTEGER,is_uploaded INTEGER,uuid TEXT,created_on TEXT,lat TEXT,lng TEXT,accuracy TEXT ,PJP INTEGER)");
 
 //added by farhan after danish code STARTS
         db.execute(
@@ -167,26 +167,26 @@ class Repository {
 
 
 
-  Future<void> insertPromotionsProducts(promotion_id,package_id,total_units,brand_id) async {
+  Future<void> insertPromotionsProducts(promotionId,packageId,totalUnits,brandId) async {
     await this.initdb();
     final Database db = await database;
     try {
 
       await db.rawInsert(
           "insert into promotions_products(promotion_id,package_id,total_units,brand_id) values  (?,?,?,?) ",
-          [promotion_id ,package_id ,total_units ,brand_id ]);
+          [promotionId ,packageId ,totalUnits ,brandId ]);
     } catch (error) {
       //print(error);
     }
   }
-  Future<void> insertPromotionsActive(promotion_id,outlet_id) async {
+  Future<void> insertPromotionsActive(promotionId,outletId) async {
     await this.initdb();
     final Database db = await database;
     try {
 
       await db.rawInsert(
           "insert into promotions_active(promotion_id,outlet_id) values  (?,?) ",
-          [promotion_id,outlet_id ]);
+          [promotionId,outletId ]);
     } catch (error) {
       //print(error);
     }
@@ -202,24 +202,24 @@ class Repository {
     final List<Map> maps =  await db.rawQuery('Select *from  pre_sell_outlets2 where outlet_id=?1 ', args);
     return maps;
   }
-  Future<void> insertPromotionsProductsFree(promotion_id,package_id,total_units, package_label, brand_id, brand_label, unit_per_case, product_id) async {
+  Future<void> insertPromotionsProductsFree(promotionId,packageId,totalUnits, packageLabel, brandId, brandLabel, unitPerCase, productId) async {
     await this.initdb();
     final Database db = await database;
     try {
 
       await db.rawInsert(
           "insert into promotions_products_free(promotion_id,package_id,total_units, package_label, brand_id, brand_label, unit_per_case, product_id) values  (?,?,?,?,?,?,?,?) ",
-          [promotion_id,package_id,total_units, package_label, brand_id, brand_label, unit_per_case,product_id ]);
+          [promotionId,packageId,totalUnits, packageLabel, brandId, brandLabel, unitPerCase,productId ]);
     } catch (error) {
       //print(error);
     }
   }
 
-  Future<List<Map<String, dynamic>>> getPromotionProductsFree(promotion_id) async {
+  Future<List<Map<String, dynamic>>> getPromotionProductsFree(promotionId) async {
     await this.initdb();
     final Database db = await database;
     List args = new List();
-    args.add(promotion_id);
+    args.add(promotionId);
 
     final List<Map> maps = await db.rawQuery(
         "select * from promotions_products_free where promotion_id=?1", args);
@@ -228,11 +228,11 @@ class Repository {
     return maps;
   }
 
-  Future<int> getPromotionIdaa(outlet_id) async {
+  Future<int> getPromotionIdaa(outletId) async {
     await this.initdb();
     final Database db = await database;
     List args = new List();
-    args.add(outlet_id);
+    args.add(outletId);
 
     final List<Map> maps = await db.rawQuery(
         "select * from promotions_active where outlet_id=?1", args);
@@ -244,17 +244,17 @@ class Repository {
     return promotionId;
   }
 
-  Future<List<Map<String, dynamic>>> getPromotionalProduct(promotion_id, package_id, brand_id) async {
+  Future<List<Map<String, dynamic>>> getPromotionalProduct(promotionId, packageId, brandId) async {
     await this.initdb();
     final Database db = await database;
     List args = new List();
-    args.add(promotion_id);
-    args.add(package_id);
-    args.add(brand_id);
+    args.add(promotionId);
+    args.add(packageId);
+    args.add(brandId);
 
-    print('promotion_id:' + promotion_id);
-    print('package_id:' + package_id);
-    print('brand_id' + brand_id);
+    print('promotion_id:' + promotionId);
+    print('package_id:' + packageId);
+    print('brand_id' + brandId);
     final List<Map> maps = await db.rawQuery(
         "select * from promotions_products where promotion_id =?1 and package_id=?2 and brand_id=?3", args);
     //print(maps.toString());
@@ -274,13 +274,13 @@ class Repository {
     return maps;
   }
 
-  Future<int> getPromotionId(outlet_id, package_id, brand_id) async {
+  Future<int> getPromotionId(outletId, packageId, brandId) async {
     await this.initdb();
     final Database db = await database;
     List args = new List();
-    args.add(outlet_id);
-    args.add(package_id);
-    args.add(brand_id);
+    args.add(outletId);
+    args.add(packageId);
+    args.add(brandId);
 
     final List<Map> maps = await db.rawQuery(
         "select promotion_id from promotions_products where promotion_id in(select promotion_id from promotions_active where outlet_id=?1) and package_id=?2 and brand_id=?3", args);
@@ -293,13 +293,13 @@ class Repository {
   }
 
 
-  Future<List<Map<String, dynamic>>> getAllPromotionalProduct(outlet_id, package_id, brand_id) async {
+  Future<List<Map<String, dynamic>>> getAllPromotionalProduct(outletId, packageId, brandId) async {
     await this.initdb();
     final Database db = await database;
     List args = new List();
-    args.add(outlet_id);
-    args.add(package_id);
-    args.add(brand_id);
+    args.add(outletId);
+    args.add(packageId);
+    args.add(brandId);
 
     final List<Map> maps = await db.rawQuery(
         "select * from promotions_products where promotion_id in(select promotion_id from promotions_active where outlet_id=?1) and package_id=?2 and brand_id=?3", args);
@@ -322,19 +322,30 @@ class Repository {
 
     return maps;
   }
-  Future changePromotionProduct(id, product_id, product_label) async {
+  Future changePromotionProduct(id, productId, productLabel) async {
     await this.initdb();
     final Database db = await database;
 //print("ORDER ID"+orderId.toString());
 
     List args = new List();
 
-    args.add(product_id);
-    args.add(product_label);
+    args.add(productId);
+    args.add(productLabel);
     args.add(id);
 
     await db.rawUpdate(
         'update outlet_order_items set product_id=?1,product_label=?2 where id=?3',
+        args);
+    return true;
+  }
+  Future UpdatePJPselection(PJPID) async {
+    await this.initdb();
+    final Database db = await database;
+//print("ORDER ID"+orderId.toString());
+    List args = new List();
+    args.add(PJPID);
+    await db.rawUpdate(
+        'update selected_pjp set is_selected=1 where PJPID=?1',
         args);
     return true;
   }
@@ -356,22 +367,22 @@ class Repository {
     await db.delete('promotions_products');
   }
 
-  void saveOutletMarkClose(id,outlet_id, image_path, lat, lng, accuracy, uuid) async {
+  void saveOutletMarkClose(id,outletId, imagePath, lat, lng, accuracy, uuid) async {
     await this.initdb();
     final Database db = await database;
     try {
       await db.rawInsert(
           "insert into outlet_mark_close(id,outlet_id, image_path, lat, lng, accuracy, uuid, created_on, is_uploaded) values  (?,?, ?, ?, ?, ?, ?,DATETIME('now','5 hours'), 0) ",
-          [id,outlet_id, image_path, lat, lng, accuracy, uuid]);
+          [id,outletId, imagePath, lat, lng, accuracy, uuid]);
     } catch (error) {
       //print(error);
     }
   }
-  Future<void> insertSpotDiscount(DiscountID,product_id,default_discount, maximum_discount,ChannelID) async {
+  Future<void> insertSpotDiscount(DiscountID,productId,defaultDiscount, maximumDiscount,ChannelID) async {
     await this.initdb();
     final Database db = await database;
     try {
-      await db.rawInsert("insert into spot_discount(DiscountID,product_id,default_discount, maximum_discount,ChannelID) values  (?,?,?,?,?) ", [DiscountID,product_id,default_discount, maximum_discount,ChannelID]);
+      await db.rawInsert("insert into spot_discount(DiscountID,product_id,default_discount, maximum_discount,ChannelID) values  (?,?,?,?,?) ", [DiscountID,productId,defaultDiscount, maximumDiscount,ChannelID]);
     } catch (error) {
       //print(error);
     }
@@ -468,7 +479,40 @@ class Repository {
     //print(maps.toString());
     return maps;
   }
+  Future<List<Map<String, dynamic>>> getPJPs() async {
+    await this.initdb();
+    final Database db = await database;
+    //List args = new List();
+   // args.add(isUploaded);
 
+    final List<Map> maps = await db.rawQuery(
+        "select * from selected_pjp");
+    //print(maps.toString());
+    return maps;
+  }
+  Future<List<Map<String, dynamic>>> getSelectedPJPs() async {
+    await this.initdb();
+    final Database db = await database;
+    //List args = new List();
+   // args.add(isUploaded);
+
+    final List<Map> maps = await db.rawQuery(
+        "select PJPID from selected_pjp where is_selected=1");
+    //print(maps.toString());
+    return maps;
+  }
+
+  Future<List<Map<String, dynamic>>> updateisseleted() async {
+    await this.initdb();
+    final Database db = await database;
+    //List args = new List();
+    // args.add(isUploaded);
+
+    final List<Map> maps = await db.rawQuery(
+        "update  selected_pjp set is_selected=0");
+    //print(maps.toString());
+    return maps;
+  }
 //
   Future<void> deleteAllUserFeatures() async {
     final Database db = await database;
@@ -710,56 +754,54 @@ class Repository {
     return maps;
   }
   Future<List<Map<String, dynamic>>> getPreSellOutletsByIsVisible(
-      int dayNumber, String name, isVisible) async {
+      int dayNumber, String name, int isVisible, String pjp) async {
     // Get a reference to the database.
     await this.initdb();
     final Database db = await database;
-    //print("DAY NUMER "+dayNumber.toString());
+
     String OutletQuery = "";
-    List SearchOutletTerms = name.split(" ");
-    for (int i = 0; i < SearchOutletTerms.length; i++) {
+    List<String> searchOutletTerms = name.split(" ");
+    for (int i = 0; i < searchOutletTerms.length; i++) {
       if (i > 0) {
-        OutletQuery += " or ";
+        OutletQuery += " OR ";
       }
-      //area_label TEXT, sub_area_label
-      OutletQuery += "  ( outlet_id like '%" + SearchOutletTerms[i] + "%' or area_label like '%" + SearchOutletTerms[i] + "%' or sub_area_label like '%" + SearchOutletTerms[i] + "%' or "
+      OutletQuery +=
+      " (outlet_id LIKE '%${searchOutletTerms[i]}%' OR area_label LIKE '%${searchOutletTerms[i]}%' OR sub_area_label LIKE '%${searchOutletTerms[i]}%' OR outlet_name LIKE '%${searchOutletTerms[i]}%' OR address LIKE '%${searchOutletTerms[i]}%') ";
+    }
 
-          " outlet_name like '%" +
-          SearchOutletTerms[i] +
-          "%' or address like '%" +
-          SearchOutletTerms[i] +
-          "%' ) ";
-    }
-    String visibleQuery = " and is_alternate_visible="+ isVisible.toString() + " ";
-    if(isVisible==-1){
-      visibleQuery = "  ";
-    }
-    List<Map> maps = null;
+    // Visible Query
+    String visibleQuery = isVisible != -1
+        ? " AND is_alternate_visible = $isVisible "
+        : "";
+
+    // PJP Query
+    String pjpQuery = pjp.isNotEmpty
+        ? " AND PJP LIKE '$pjp' "  // Replace 'pjp_column' with the actual column name that stores the PJP values.
+        : "";
+
+    List<Map> maps;
     try {
-      print("select *  from pre_sell_outlets2 where day_number=" +
-          dayNumber.toString() +
-          visibleQuery +
-          " and  " +
-          OutletQuery +
-          " group by outlet_id limit 500");
-      maps = await db.rawQuery(
-          "select *  from pre_sell_outlets2 where day_number=" +
-              dayNumber.toString() +
-              visibleQuery +
-              " and  " +
-              OutletQuery +
-              " group by outlet_id limit 500");
-    } catch (e) {}
+      String query = "SELECT * FROM pre_sell_outlets2 "
+          "WHERE day_number = $dayNumber "
+          "$visibleQuery "
+          "$pjpQuery "
+          "AND ($OutletQuery) "
+          "GROUP BY outlet_id "
+          "LIMIT 500";
 
-    // Query the table for all The Dogs.
+      print(query);
 
-    // Convert the List<Map<String, dynamic> into a List<Dog>.
-    //print('list');
-    //print(maps);
+      maps = await db.rawQuery(query);
+    } catch (e) {
+      print("Error: $e");
+      return [];
+    }
+
     return maps;
   }
 
-  Future<List<Map<String, dynamic>>> getTotalOutlets(int dayNumber) async {
+
+  Future<List<Map<String, dynamic>>> getTotalOutlets(int dayNumber , pjp) async {
     // Get a reference to the database.
     await this.initdb();
     final Database db = await database;
@@ -767,36 +809,41 @@ class Repository {
     // Query the table for all The Dogs.
     List args = new List();
     args.add(dayNumber);
+    args.add(pjp);
 
     final List<Map> maps = await db.rawQuery(
-        "select count(*) as totalOutlets from pre_sell_outlets2 where day_number=?1 and is_alternate_visible=" + globals.isAlternative.toString(),
+        "select count(*) as totalOutlets from pre_sell_outlets2 where day_number=?1 and PJP=?2  and is_alternate_visible=" + globals.isAlternative.toString(),
         args);
 
     //print(maps);
     return maps;
   }
 
-  Future<int> getTotalOrders() async {
+  Future<int> getTotalOrders(pjp) async {
     // Get a reference to the database.
      
     await this.initdb();
     final Database db = await database;
     int totoalVisits = 0;
+    List args = new List();
+    args.add(pjp);
     final List<Map> maps = await db.rawQuery(
-        "select count(*) as totalOrders from outlet_orders where date(created_on)=date('now') and is_completed=1");
+        "select count(*) as totalOrders from outlet_orders where  PJP=?1 and date(created_on)=date('now') and is_completed=1",args);
 
     totoalVisits = maps[0]['totalOrders'];
     return totoalVisits;
   }
 
-  Future<int> getTotalNoOrders() async {
+  Future<int> getTotalNoOrders(pjp) async {
     // Get a reference to the database.
     await this.initdb();
     final Database db = await database;
     int totoalVisits = 0;
+    List args = new List();
+    args.add(pjp);
 
     final List<Map> maps1 = await db.rawQuery(
-        "select count(*) as totalNoOrders from outlet_no_orders where date(created_on)=date('now') ");
+        "select count(*) as totalNoOrders from outlet_no_orders where PJP=?1 and date(created_on)=date('now') ",args);
     totoalVisits = maps1[0]['totalNoOrders'];
     return totoalVisits;
   }
@@ -1010,25 +1057,26 @@ class Repository {
     }
   }
 
-  Future initOrder(id, outlet_id, is_completed, is_uploaded, total_amount, uuid,
-      created_on, lat, lng, accuracy) async {
+  Future initOrder(id, outletId, isCompleted, isUploaded, totalAmount, uuid,
+      createdOn, lat, lng, accuracy,PJP) async {
     await this.initdb();
     final Database db = await database;
 
     int i = 0;
     try {
       i = await db.rawInsert(
-          'insert into outlet_orders (id,outlet_id,is_completed,is_uploaded,total_amount,uuid,created_on, lat, lng, accuracy) values  (?,?,?,?,?,?,DATETIME("now","5 hours"),?,?,?) ',
+          'insert into outlet_orders (id,outlet_id,is_completed,is_uploaded,total_amount,uuid,created_on, lat, lng, accuracy,PJP) values  (?,?,?,?,?,?,DATETIME("now","5 hours"),?,?,?,?) ',
           [
             id,
-            outlet_id,
-            is_completed,
-            is_uploaded,
-            total_amount,
+            outletId,
+            isCompleted,
+            isUploaded,
+            totalAmount,
             uuid,
             lat,
             lng,
-            accuracy
+            accuracy,
+            PJP
           ]);
     } catch (error) {
       //print("//print ERROR");
@@ -1055,13 +1103,14 @@ class Repository {
     }
   }
 
-  void saveNoOrder(id, outlet_id, reason_type_id, lat, lng, accuracy, uuid) async {
+  void saveNoOrder(id, outletId, reasonTypeId, lat, lng, accuracy, uuid,PJP) async {
     await this.initdb();
     final Database db = await database;
     try {
+      print("uuid======"+uuid);
       await db.rawInsert(
-          "insert into outlet_no_orders (id, outlet_id, reason_type_id, lat, lng, accuracy, uuid, created_on, is_uploaded) values  (?, ?, ?, ?, ?, ?, ?,DATETIME('now','5 hours'), 0) ",
-          [id, outlet_id, reason_type_id, lat, lng, accuracy, uuid]);
+          "insert into outlet_no_orders (id, outlet_id, reason_type_id, lat, lng, accuracy, uuid, created_on, is_uploaded,PJP) values  (?, ?, ?, ?, ?, ?, ?,DATETIME('now','5 hours'), 0,?) ",
+          [id, outletId, reasonTypeId, lat, lng, accuracy, uuid,PJP]);
     } catch (error) {
       //print(error);
     }
@@ -1145,12 +1194,12 @@ class Repository {
     return maps;
   }
 
-  Future getOrderItemInfo(int orderId, int product_id) async {
+  Future getOrderItemInfo(int orderId, int productId) async {
     await this.initdb();
     final Database db = await database;
     List args1 = new List();
     args1.add(orderId);
-    args1.add(product_id);
+    args1.add(productId);
     final List<Map> maps = await db.rawQuery(
         "select * from outlet_order_items where order_id=?1 and product_id=?2",
         args1);
@@ -1420,7 +1469,21 @@ class Repository {
         "delete from outlet_order_items where order_id=?1 and source_id=?2",
         args);
   }
+  Future<List<Map<String, dynamic>>> getUserAgain() async {
+    // Get a reference to the database.
+    await this.initdb();
+    final Database db = await database;
 
+    // Query the table for all The Dogs.
+
+    final List<Map> maps = await db.rawQuery(
+        "select user_id,display_name  from users");
+
+    // Convert the List<Map<String, dynamic> into a List<Dog>.
+    //print('list: ');
+    //print(maps);
+    return maps;
+  }
   Future<List<Map<String, dynamic>>> getUser(
       int UserId, String Password) async {
     // Get a reference to the database.
@@ -1697,13 +1760,13 @@ class Repository {
     return true;
   }
 
-  Future markNoOrderPhotoUploaded(int id , int file_type_id ) async {
-   print("file_type_id"+file_type_id.toString());
+  Future markNoOrderPhotoUploaded(int id , int fileTypeId ) async {
+   print("file_type_id"+fileTypeId.toString());
     await this.initdb();
     final Database db = await database;
     List args = new List();
     args.add(id);
-    args.add(file_type_id);
+    args.add(fileTypeId);
     try {
       await db.rawUpdate(
           'update outlet_no_orders_images set is_uploaded=1  where id=?1 and file_type_id=?2' , args);
@@ -1870,12 +1933,12 @@ class Repository {
   }
 
   Future<List<Map<String, dynamic>>> getAllRegisteredOutletsByIsUploaded(
-      int isUploaded, int is_new) async {
+      int isUploaded, int isNew) async {
     await this.initdb();
     final Database db = await database;
     List args = new List();
     args.add(isUploaded);
-    args.add(is_new);
+    args.add(isNew);
 
     final List<Map> maps = await db.rawQuery(
         "select * from registered_outlets where  is_uploaded=?1 AND is_new=?2", args);
@@ -2039,7 +2102,7 @@ class Repository {
     return maps;
   }
 
-  Future markAttendance(mobile_request_id,image_path,attendance_type_id,lat,lng,accuracy,user_id,is_uploaded,uuid,is_photo_uploaded) async {
+  Future markAttendance(mobileRequestId,imagePath,attendanceTypeId,lat,lng,accuracy,userId,isUploaded,uuid,isPhotoUploaded) async {
     await this.initdb();
     final Database db = await database;
 
@@ -2047,7 +2110,7 @@ class Repository {
 
       await db.rawInsert(
         'insert into attendance (mobile_request_id ,mobile_timestamp,attendance_type_id,lat,lng,accuracy,is_uploaded,uuid,image_path,user_id,is_photo_uploaded) values  (?,DATETIME("now","5 hours"),?,?,?,?,?,?,?,?,?) ',
-          [mobile_request_id, attendance_type_id, lat, lng, accuracy, is_uploaded,uuid,image_path,user_id,is_photo_uploaded]);
+          [mobileRequestId, attendanceTypeId, lat, lng, accuracy, isUploaded,uuid,imagePath,userId,isPhotoUploaded]);
 
       } catch (error) {
       print(error);
@@ -2059,15 +2122,15 @@ class Repository {
 
 
 
-  Future UpdateOutletLocation(int outlet_id, String lat, String lng, String accuracy) async {
-    print("markAttendanceUploaded id" + outlet_id.toString());
+  Future UpdateOutletLocation(int outletId, String lat, String lng, String accuracy) async {
+    print("markAttendanceUploaded id" + outletId.toString());
     await this.initdb();
     final Database db = await database;
 
     try {
       await db.rawUpdate(
           'UPDATE pre_sell_outlets2 SET lat = ?, lng = ?, accuracy = ? WHERE outlet_id = ?',
-          [lat, lng, accuracy, outlet_id]
+          [lat, lng, accuracy, outletId]
       );
     } catch (error) {
       print("markAttendanceUploaded ==>> " + error.toString());
@@ -2109,14 +2172,14 @@ class Repository {
 
 
 
-  Future insertMerchandising(mobile_request_id,outlet_id,lat,lng ,accuracy,is_completed,uuid,imagesList,is_photo_uploaded,user_id) async {
+  Future insertMerchandising(mobileRequestId,outletId,lat,lng ,accuracy,isCompleted,uuid,imagesList,isPhotoUploaded,userId) async {
     await this.initdb();
     final Database db = await database;
     try {
       for(int i=0;i<imagesList.length;i++){
          await db.rawInsert(
           'insert into merchandising (mobile_request_id ,outlet_id ,user_id ,mobile_timestamp ,lat , lng , accuracy ,is_completed,uuid,image,type_id,is_photo_uploaded) values  (?,?,?,DATETIME("now","5 hours"),?,?,?,?,?,?,?,?)',
-                                       [mobile_request_id,outlet_id,user_id,lat , lng , accuracy,is_completed,uuid,imagesList[i]["image"],imagesList[i]["typeId"],is_photo_uploaded]);
+                                       [mobileRequestId,outletId,userId,lat , lng , accuracy,isCompleted,uuid,imagesList[i]["image"],imagesList[i]["typeId"],isPhotoUploaded]);
       }
     } catch (error) {
       print(error);

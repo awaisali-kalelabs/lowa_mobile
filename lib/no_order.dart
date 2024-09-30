@@ -37,7 +37,7 @@ class _NoOrder extends State<NoOrder> {
   int OutletId;
 
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
-
+  bool isLoading = false;
   String selected;
   int weekday;
   int noOrderReason;
@@ -188,7 +188,7 @@ class _NoOrder extends State<NoOrder> {
 
  // }
   }
-  saveNoOrder() {
+  saveNoOrder() async {
     Dialogs.showLoadingDialog(context, _keyLoader);
     Position position = globals.currentPosition;
     if (position == null) {
@@ -222,6 +222,7 @@ class _NoOrder extends State<NoOrder> {
             lng,
             accuracy,
             globals.DeviceID,
+              globals.selectedPJP
           );
           Navigator.of(context, rootNavigator: true).pop('dialog');
           _UploadNoOrder();
@@ -263,9 +264,10 @@ class _NoOrder extends State<NoOrder> {
         position.longitude,
         position.accuracy,
         globals.DeviceID,
+        globals.selectedPJP
       );
       Navigator.of(context, rootNavigator: true).pop('dialog');
-      _UploadNoOrder(); //(context);
+      await _UploadNoOrder(); //(context);
       repo.setVisitType(globals.OutletID, 2).then((value) {
         Navigator.push(
           context,
@@ -355,12 +357,14 @@ class _NoOrder extends State<NoOrder> {
             appVersion +
             "&accuracy=" +
             AllNoOrders[i]['accuracy'] +
+            "&PJP=" +
+            AllNoOrders[i]['PJP'].toString() +
             "";
         ORDERIDToDelete = AllNoOrders[i]['id'];
         var QueryParameters = <String, String>{
           "SessionID": globals.EncryptSessionID(orderParam),
         };
-        var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncNoOrdersV2');
+        var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncNoOrdersV3');
         print(url);
         try {
           var response = await http.post(
@@ -501,7 +505,7 @@ class _NoOrder extends State<NoOrder> {
             },
           ),
           actions: [
-            ElevatedButton(
+            isLoading ? CircularProgressIndicator() :   ElevatedButton(
               style: ElevatedButton.styleFrom(
                 onPrimary: Colors.grey, // Text Color
               ),
@@ -511,15 +515,19 @@ class _NoOrder extends State<NoOrder> {
                   color: noOrderReason == 0 ? Colors.grey : Colors.white,
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
+                isLoading = true;
+
                 if(outletImagePath[0]!= "") {
-                  noOrderReason == 0 ? ShowError(context) : saveNoOrder();
+                  print("========inside save order call=========");
+
+                  noOrderReason == 0 ? ShowError(context) : await saveNoOrder();
                 }
-                SaveOutletImage();
+                await  SaveOutletImage();
                 for (int i = 0; i < 2; i++) {
                   if (outletImagePath.elementAt(i) != "") {
 
-                    _UploadDocuments();
+                    await   _UploadDocuments();
                   } else {
                     Flushbar(
                       messageText: Column(
@@ -544,12 +552,14 @@ class _NoOrder extends State<NoOrder> {
                     )..show(context);
                   }
                 }
+                isLoading = false;
 
               },
             ),
           ],
         ),
-        body: ListView(
+        body:
+        isLoading ?  CircularProgressIndicator(): ListView(
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
           children: <Widget>[

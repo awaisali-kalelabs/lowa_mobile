@@ -1,3 +1,4 @@
+/*
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -23,9 +24,11 @@ import 'package:order_booker/com/pbc/model/product_sub_categories.dart';
 import 'package:order_booker/com/pbc/model/products.dart';
 import 'package:order_booker/com/pbc/model/user.dart';
 import 'package:order_booker/com/pbc/model/user_features.dart';
+*/
 /*
 import 'package:order_booker/home.dart';
-*/
+*//*
+
 import 'package:order_booker/order_cart_view.dart';
 import 'package:splashscreen/splashscreen.dart';
 
@@ -72,11 +75,13 @@ class _MyAppState extends State<MyApp> {
           seconds: 5,
           routeName: "/",
           navigateAfterSeconds: new LoginPage(),
-          /*title: new Text('Welcome In SplashScreen',
+          */
+/*title: new Text('Welcome In SplashScreen',
           style: new TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20.0
-          ),),*/
+          ),),*//*
+
           //image: new Image.asset('images/Dewallett.png'),
           title: Text("Theia",
               style: TextStyle(
@@ -166,7 +171,7 @@ class _LoginPageState extends State<LoginPage>
             //Navigator.pop(context);
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AreaSelectionScreen(pjpList: PJPList,)),
+              MaterialPageRoute(builder: (context) => AreaSelectionScreen()),
             );
           }
         }
@@ -244,7 +249,7 @@ class _LoginPageState extends State<LoginPage>
         Navigator.pop(context);
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AreaSelectionScreen(pjpList: PJPList,)),
+          MaterialPageRoute(builder: (context) => AreaSelectionScreen()),
         );
       } else {
         _showDialog("Error", "Invalid user id or password");
@@ -412,7 +417,8 @@ class _LoginPageState extends State<LoginPage>
                 no_order_reasons[i]['ID'], no_order_reasons[i]['Label']);
           }
           print("5");
-          /* for (var i = 0; i < pre_sell_outlets_rows.length; i++) {
+          */
+/* for (var i = 0; i < pre_sell_outlets_rows.length; i++) {
               pre_sell_outlets_rows[i]['visit_type'] =
                   await repo.getVisitType(pre_sell_outlets_rows[i]['OutletID']);
 
@@ -428,7 +434,8 @@ class _LoginPageState extends State<LoginPage>
 
               await repo.insertPreSellOutlet(
                   PreSellOutlets.fromJson(pre_sell_outlets_rows[i]));
-            }*/
+            }*//*
+
 
 
           List product_lrb_types_rows = responseBody['ProductLrbTypes'];
@@ -459,9 +466,13 @@ class _LoginPageState extends State<LoginPage>
           });
 
           print("8");
-          /******************************************************************************/
+          */
+/******************************************************************************//*
+
           //FARHAN WORK STARTS
-          /******************************************************************************/
+          */
+/******************************************************************************//*
+
           await repo.deleteAllOutletAreas();
           await repo.deleteAllOutletSubAreas();
           await repo.deleteAllOutletProductsAlternativePrices();
@@ -571,9 +582,13 @@ class _LoginPageState extends State<LoginPage>
           }
 
 
-          /******************************************************************************/
+          */
+/******************************************************************************//*
+
           //FARHAN WORK ENDS
-          /******************************************************************************/
+          */
+/******************************************************************************//*
+
 
           callreturn = true;
         }
@@ -587,10 +602,12 @@ class _LoginPageState extends State<LoginPage>
       callreturn = false;
       _showDialog("Error", "An error has occured " + responseBody.statusCode);
     }
-    /*} catch (e) {
+    */
+/*} catch (e) {
       //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
       _showDialog("Error", "Check your internet connection:" + e.toString());
-    }*/
+    }*//*
+
     return callreturn;
   }
 
@@ -917,7 +934,9 @@ class _LoginPageState extends State<LoginPage>
                                                                 child: Center(
                                                                   child: Text(
                                                                     'Login'
-                                                                    /*AppLocalizations.of(context).translate('continue_string')*/,
+                                                                    */
+/*AppLocalizations.of(context).translate('continue_string')*//*
+,
                                                                     style: TextStyle(
                                                                         fontSize:
                                                                         18.0,
@@ -948,7 +967,9 @@ class _LoginPageState extends State<LoginPage>
                                                               ),
                                                               Text(
                                                                 'Powered by Kale Labs'
-                                                                /*AppLocalizations.of(context).translate('continue_string')*/,
+                                                                */
+/*AppLocalizations.of(context).translate('continue_string')*//*
+,
                                                                 style: TextStyle(
                                                                     fontSize:
                                                                     15.0,
@@ -976,3 +997,4 @@ class _LoginPageState extends State<LoginPage>
             )));
   }
 }
+*/

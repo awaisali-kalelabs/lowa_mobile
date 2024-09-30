@@ -1026,6 +1026,8 @@ class _OrderCartView extends State<OrderCartView> {
             AllOrders[i]['lng'] +
             "&accuracy=" +
             AllOrders[i]['accuracy'] +
+            "&PJP=" +
+            AllOrders[i]['PJP'].toString() +
         "&version=" +
             appVersion +
             "&Spot_Discount=" +
@@ -1130,7 +1132,7 @@ class _OrderCartView extends State<OrderCartView> {
           var length = await photoFile.length();
           var url = Uri.http(
               globals.ServerURL, '/portal/mobile/MobileUploadOrdersImage');
-          print(url.toString());
+          print("================="+url.toString());
           print("===Hello===");
           String fileName = photoFile.path.split('/').last;
 
@@ -1154,7 +1156,7 @@ class _OrderCartView extends State<OrderCartView> {
             print("MarkImage SUCCESS");
             await repo.markPhotoUploaded(MobileRequestID);
           }else{
-            print("False");
+            print("False Image");
           }
         } catch (e) {
           print("===Hello3===");

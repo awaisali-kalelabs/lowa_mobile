@@ -11,97 +11,31 @@ import 'package:order_booker/com/pbc/dao/repository.dart';
 import 'home.dart';
 
 class AreaSelectionScreen extends StatefulWidget {
-  final List<dynamic> pjpList;
-
-  AreaSelectionScreen({Key key, @required this.pjpList}) : super(key: key);
-
   @override
   _AreaSelectionScreenState createState() => _AreaSelectionScreenState();
 }
 
 class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
   final _formKey = GlobalKey<FormState>();
+  List<Map<String, dynamic>> PJP = [];
+  //bool isLoading = true; // Flag to check if PJP is still loading
 
-  Future<bool> SaveCashSaleOrder() async {
-    Repository repo = new Repository();
-    await repo.initdb();
-    DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
-    String currDateTime = dateFormat.format(DateTime.now());
-    bool callreturn = false;
-    print("globals.DeviceID:" + globals.DeviceID);
-    String param = "timestamp=" +
-        currDateTime +
-        "&LoginUsername=" +
-        globals.UserID.toString() +
-        "&PJPID=" +
-        globals.selectedPJP;
-
-    var QueryParameters = <String, String>{
-      "SessionID": EncryptSessionID(param),
-    };
-
-    print("Called1111");
-    print("param" + param);
-    var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileAuthenticateOutletV1', QueryParameters);
-    print("Url........." + url.toString());
-    var response = await http.get(url, headers: {
-      HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
-    });
-    var responseBody = json.decode(latin1.decode(response.bodyBytes));
-    print(responseBody.toString());
-
-    if (response.statusCode == 200) {
-      print("Inside Status If");
-      print(responseBody.toString());
-      List pre_sell_outlets_rows = responseBody['BeatPlanRows'];
-
-      // Check if pre_sell_outlets_rows is null or empty
-      if (pre_sell_outlets_rows == "" || pre_sell_outlets_rows.isEmpty) {
-        // Show an error dialog
-        _showErrorDialog("No Outlets assigned to this PJP");
-        return callreturn;
-      }
-
-      for (var i = 0; i < pre_sell_outlets_rows.length; i++) {
-        pre_sell_outlets_rows[i]['visit_type'] =
-        await repo.getVisitType(pre_sell_outlets_rows[i]['OutletID']);
-
-        // alternate week day logic starts
-        int isVisible = 0;
-        if (globals.isOutletAllowed(pre_sell_outlets_rows[i]['IsAlternative'])) {
-          isVisible = 1;
-        }
-        pre_sell_outlets_rows[i]['is_alternate_visible'] = isVisible;
-        // alternate week day logic ends
-
-        await repo.insertPreSellOutlet(
-            PreSellOutlets.fromJson(pre_sell_outlets_rows[i]));
-      }
-    } else {
-      print("Inside Status Else");
-    }
-    return callreturn;
+  @override
+  void initState() {
+    super.initState();
+    _loadPJPs(); // Load PJP data on initialization
   }
 
-// Function to show an error dialog
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Error"),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-          ],
-        );
-      },
-    );
+  // Method to load PJP data asynchronously
+  void _loadPJPs() async {
+    Repository repo = Repository();
+    List<Map<String, dynamic>> fetchedPJP = await repo.getPJPs();
+
+    setState(() {
+      PJP = fetchedPJP;
+      print("PJP " + PJP.toString());
+    //  isLoading = false; // Set the flag to false when data is loaded
+    });
   }
 
   @override
@@ -122,13 +56,18 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
                 style: TextStyle(fontSize: 18),
               ),
               SizedBox(height: 16),
+          /*    isLoading
+                  ? Center(
+                      child:
+                          CircularProgressIndicator()) // Show loading indicator while fetching PJP
+                  :*/
               DropdownButtonFormField<String>(
-                value: globals.selectedPJP ,
+                value: PJP.any((pjp) => pjp['PJPID'].toString() == globals.selectedPJP) ? globals.selectedPJP : null,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'PJP',
                 ),
-                items: (widget.pjpList ?? []).map((pjp) {
+                items: PJP.map((pjp) {
                   return DropdownMenuItem<String>(
                     value: pjp['PJPID'].toString() ?? "",
                     child: Text('${pjp['PJPID']} - ${pjp['PJPName']}'),
@@ -137,13 +76,14 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
                 onChanged: (String newValue) {
                   setState(() {
                     globals.selectedPJP = newValue;
+                    print("Selected PJP: " + globals.selectedPJP.toString());
                   });
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'No PJP assigned';
                   }
-                  return null; // No error
+                  return null;
                 },
                 hint: Text('Select PJP'),
               ),
@@ -154,26 +94,23 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                        // Validate the form
                         if (_formKey.currentState.validate()) {
-                          // Show the loading dialog
-                          showDialog(
+           /*               showDialog(
                             context: context,
-                            barrierDismissible: false, // Prevents closing the dialog by tapping outside
+                            barrierDismissible: false,
                             builder: (BuildContext context) {
                               return Center(
-                                child: CircularProgressIndicator(), // Loading indicator
+                                child: CircularProgressIndicator(),
                               );
                             },
-                          );
+                          );*/
 
-                          // Perform the action (saving the order)
-                          await SaveCashSaleOrder();
+                        //  await SaveCashSaleOrder();
 
-                          // Close the loading dialog
-                          Navigator.of(context).pop();
-
-                          // Navigate to the Home screen
+                         // Navigator.of(context).pop();
+                          Repository repo = Repository();
+                          await   repo.updateisseleted();
+                          await repo.UpdatePJPselection(globals.selectedPJP);
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => Home()),
@@ -183,11 +120,11 @@ class _AreaSelectionScreenState extends State<AreaSelectionScreen> {
                         }
                       },
                       child: Row(
-                        mainAxisSize: MainAxisSize.min, // To keep the button size minimal to the content
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text('Proceed'),
                           SizedBox(width: 8),
-                          Icon(Icons.arrow_forward), // Replace with any icon you prefer
+                          Icon(Icons.arrow_forward),
                         ],
                       ),
                     ),
