@@ -57,6 +57,8 @@ class _OrderCartView extends State<UnregisteredOrderCartView> {
   _OrderCartView(int OrderId) {
     this.OrderId = OrderId;
   }
+  int mobileRequestID = globals.getUniqueMobileId();
+
 
 
 
@@ -170,21 +172,21 @@ class _OrderCartView extends State<UnregisteredOrderCartView> {
     globals.channellng = position.longitude;
     globals.channelacc = position.accuracy;
   }
-  double _calculateDistance() {
-    double latDouble = double.parse(globals.IsGeoFenceLat);
-    double lngDouble = double.parse(globals.IsGeoFenceLng);
-    double distanceInMeters = Geolocator.distanceBetween(
-      _latitude,
-      _longitude,
-      latDouble,
-      lngDouble,
-    );
-
-    // Convert the distance to other units if needed
-    // For example, to kilometers: distanceInKm = distanceInMeters / 1000;
-
-    return distanceInMeters;
-  }
+  // double _calculateDistance() {
+  //   double latDouble = double.parse(globals.IsGeoFenceLat);
+  //   double lngDouble = double.parse(globals.IsGeoFenceLng);
+  //   double distanceInMeters = Geolocator.distanceBetween(
+  //     _latitude,
+  //     _longitude,
+  //     latDouble,
+  //     lngDouble,
+  //   );
+  //
+  //   // Convert the distance to other units if needed
+  //   // For example, to kilometers: distanceInKm = distanceInMeters / 1000;
+  //
+  //   return distanceInMeters;
+  // }
 /*
   onDiscountChange(val){
 
@@ -238,6 +240,180 @@ class _OrderCartView extends State<UnregisteredOrderCartView> {
     }
   }
 */
+  Future _OutletRegisterationUpload(context) async {
+    print("============Selected PJP============" +
+        globals.selectedPJP.toString());
+    int ORDERIDToDelete = 0;
+    List AllRegisteredOutlets = new List();
+    await repo.getAllRegisteredOutletsByIsUploaded(0, 1).then((val) async {
+      setState(() {
+        AllRegisteredOutlets = val;
+
+        print("All Registered Outlets===>> " + AllRegisteredOutlets.toString());
+      });
+
+      for (int i = 0; i < AllRegisteredOutlets.length; i++) {
+        String outletRegisterationsParams = "timestamp=" +
+            globals.getCurrentTimestamp() +
+            "&id_for_update=" +
+            '0' +
+            "&outlet_name=" +
+            AllRegisteredOutlets[i]['outlet_name'] +
+            "&mobile_request_id=" +
+            (AllRegisteredOutlets[i]['mobile_request_id']).toString() +
+            "&mobile_timestamp=" +
+            AllRegisteredOutlets[i]['mobile_timestamp'] +
+            "&channel_id=" +
+            AllRegisteredOutlets[i]['channel_id'].toString() +
+            "&area_label=" +
+            AllRegisteredOutlets[i]['area_label'].toString() +
+            "&sub_area_label=" +
+            AllRegisteredOutlets[i]['sub_area_label'].toString() +
+            "&address=" +
+            AllRegisteredOutlets[i]['address'] +
+            "&owner_name=" +
+            AllRegisteredOutlets[i]['owner_name'] +
+            "&owner_cnic=" +
+            AllRegisteredOutlets[i]['owner_cnic'] +
+            "&owner_mobile_no=" +
+            AllRegisteredOutlets[i]['owner_mobile_no'] +
+            "&purchaser_name=" +
+            AllRegisteredOutlets[i]['purchaser_name'] +
+            "&purchaser_mobile_no=" +
+            AllRegisteredOutlets[i]['purchaser_mobile_no'] +
+            "&is_owner_purchaser=" +
+            AllRegisteredOutlets[i]['is_owner_purchaser'].toString() +
+            "&lat=" +
+            AllRegisteredOutlets[i]['lat'].toString() +
+            "&lng=" +
+            AllRegisteredOutlets[i]['lng'].toString() +
+            "&accuracy=" +
+            (AllRegisteredOutlets[i]['accuracy']).toString() +
+            "&created_on=" +
+            AllRegisteredOutlets[i]['created_on'] +
+            "&created_by=" +
+            AllRegisteredOutlets[i]['created_by'].toString() +
+            "&OutletChannel=" +
+            AllRegisteredOutlets[i]['outletchannel'].toString() +
+            "&uuid=" +
+            globals.DeviceID +
+            "&version=" +
+            globals.appVersion +
+            "&platform=android" +
+            "&PJP=" +
+            globals.selectedPJP;
+        print("outletRegisterationsParams:" + outletRegisterationsParams);
+
+        /* String orderParam="timestamp="+globa+"&order_no="+AllOrders[i]['id'].toString()+"&outlet_id="+ globals.OutletID.toString()+"&created_on="+AllOrders[i]['created_on'].toString()+"&created_by=100450&uuid=656d30b8182fea88&platform=android&lat="+globals.currentPosition.latitude.toString()+"&lng="+globals.currentPosition.longitude.toString()+"&accuracy=21";
+        print("AllOrders[i]['id']"+AllOrders[i]['id'].toString());*/
+
+        var QueryParameters = <String, String>{
+          "SessionID": globals.EncryptSessionID(outletRegisterationsParams),
+        };
+        //var localUrl="http://192.168.10.37:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
+        // var localUrl="http://192.168.30.125:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
+        var url = Uri.http(
+            globals.ServerURL, '/portal/mobile/MobileSyncOutletRegistration4');
+
+        try {
+          var response = await http.post(url,
+              headers: {
+                HttpHeaders.contentTypeHeader:
+                'application/x-www-form-urlencoded'
+              },
+              body: QueryParameters);
+
+          var responseBody = json.decode(utf8.decode(response.bodyBytes));
+          print('called4');
+          if (response.statusCode == 200) {
+            print("inside 200");
+            if (responseBody["success"] == "true") {
+              print("inside success");
+
+              print("Saved");
+              repo.markOutletUploaded(
+                  int.tryParse(AllRegisteredOutlets[i]['mobile_request_id']));
+              //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+            } else {
+              // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+              _showDialog("Error", responseBody["error_code"], 0);
+              print("Error:" + responseBody["error_code"]);
+            }
+          } else {
+            //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+            //_showDialog("Error", "An error has occured: " + responseBody.statusCode, 0);
+            print("Error: An error has occured: " + responseBody.statusCode);
+          }
+        } catch (e) {
+          // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+          //_showDialog("Error", "An error has occured " + e.toString(), 1);
+          print("Error: An error has occured: " + e.toString());
+        }
+      }
+    });
+    /* Navigator.push(
+      context,
+      //
+
+      MaterialPageRoute(builder: (context) =>ShopAction()
+
+
+      ),
+    );*/
+  }
+  Future _registerOutlet(context, List Items) async {
+    Dialogs.showLoadingDialog(context, _keyLoader);
+    await repo.registerOutlet(Items);
+    Navigator.of(context, rootNavigator: true).pop();
+
+  }
+
+  Future _UploadDocuments() async {
+    print("_UploadDocuments called");
+    // List AllDocuments = new List();
+    await repo.getNewOutletImages(mobileRequestID).then((val) async {
+      /* setState(() {
+        AllDocuments = val;
+      });*/
+
+      for (int i = 0; i < val.length; i++) {
+        int MobileRequestID = int.parse(val[i]['id'].toString());
+        try {
+          print("AllDocuments.length" + val.length.toString());
+          File photoFile = File(val[i]['file']);
+          //  var stream =
+          var stream = ByteStream(photoFile.openRead());
+          var length = await photoFile.length();
+          var url = Uri.http(
+              globals.ServerURL, '/portal/mobile/MobileUploadNewOutletImage');
+          print(url.toString());
+          String fileName = photoFile.path.split('/').last;
+
+          var request = new http.MultipartRequest("POST", url);
+          request.fields['RequestId'] = MobileRequestID.toString();
+          print("===Hello1===");
+          var multipartFile = new http.MultipartFile('file', stream, length,
+              filename: "Outlet_" + fileName);
+
+          request.files.add(multipartFile);
+          print("multipartFile===>" + multipartFile.toString());
+          var response = await request.send();
+          print("=====" + response.statusCode.toString());
+          if (response.statusCode == 200) {
+            print("MarkImage SUCCESS");
+            await repo.markOutletRegistrationPhotoUploaded(MobileRequestID);
+          } else {
+            print("False");
+          }
+        } catch (e) {
+          print("===Hello3===");
+          print("e.toString()  " + e.toString());
+        }
+      }
+    });
+  }
+
+
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
   @override
   Widget build(BuildContext context) {
@@ -269,12 +445,14 @@ class _OrderCartView extends State<UnregisteredOrderCartView> {
                   )),
               onPressed: AllOrdersItems==null || AllOrdersItems.isEmpty
                   ? null
-                  : () {
+                  : () async {
                 /* _UploadOrder();*/
                 //  _showIndicator();
-                completeOrder(context);
-                //_UploadDocuments();
 
+                await _OutletRegisterationUpload(context);
+                await  _UploadDocuments();
+
+                await completeOrderForUnregisteredoutlet(context);
               },
             ),
           ],
@@ -777,8 +955,8 @@ class _OrderCartView extends State<UnregisteredOrderCartView> {
     print("IsGeoFenceLat"+globals.IsGeoFenceLat);
     print("IsGeoFvenceLng"+globals.IsGeoFenceLng);
     Dialogs.showLoadingDialog(context, _keyLoader);
-    double distance = _calculateDistance();
-    print("Distance==>"+distance.toString());
+    // double distance = _calculateDistance();
+    // print("Distance==>"+distance.toString());
     int Distance2 = globals.Radius;
     Position position=globals.currentPosition;
     if ( globals.IsGeoFence == 0 ||  globals.IsGeoFence == null || globals.IsGeoFence == "0") {
@@ -860,52 +1038,205 @@ class _OrderCartView extends State<UnregisteredOrderCartView> {
             MaterialPageRoute(builder: (context) => PreSellRoute(2222)),
             ModalRoute.withName("/PreSellRoute"));
       }
-    }else{
-      if(distance < Distance2){
-        print("inside if");
-        Position position = globals.currentPosition;
-        await repo.completeOrder(globals.channellat, globals.channellat,
-            globals.channelacc, globals.OutletID);
-        await repo.setVisitType(globals.OutletID, 1);
+    }
+//     else{
+//       if(distance < Distance2){
+//         print("inside if");
+//         Position position = globals.currentPosition;
+//         await repo.completeOrder(globals.channellat, globals.channellat,
+//             globals.channelacc, globals.OutletID);
+//         await repo.setVisitType(globals.OutletID, 1);
+//         Navigator.of(context, rootNavigator: true).pop('dialog');
+// //            //1	1	Test Outlet K/S	1	System	MANDI TOWN	03001234747		1	31.6089111000000000000	71.0783096000000000000	Lahore 	Sub Area Label 4	1	6	Karyana Store	2024-03-14	E	7	System	03001234747		1	100
+//         ///.................................Upload Orders Method.........................
+//         _UploadOrder(context);
+//          _UploadDocuments();
+//         Navigator.pushAndRemoveUntil(
+//             context,
+//             MaterialPageRoute(builder: (context) => PreSellRoute(2222)),
+//             ModalRoute.withName("/PreSellRoute"));
+//       }
+//       else {
+//
+//         print("inside Else");
+//
+//         Navigator.of(context, rootNavigator: true).pop('dialog');
+//         showDialog(
+//           context: context,
+//           builder: (BuildContext context) {
+//             // return object of type Dialog
+//             return AlertDialog(
+//               title: new Text("Error"),
+//               content: new Text(
+//                   'Can\'t place order, you are ${distance
+//                       .toInt()} meters away from the shop.'),
+//               actions: <Widget>[
+//                 // usually buttons at the bottom of the dialog
+//                 new ElevatedButton(
+//                   child: new Text("Close"),
+//                   onPressed: () {
+//                     Navigator.pop(
+//                       context,
+//                       MaterialPageRoute(builder: (context) => UnregisteredOrderCartView()),
+//                     );
+//                   },
+//                 ),
+//               ],
+//             );
+//           },
+//         );
+//       }    }
+
+
+
+  }
+  Future completeOrderForUnregisteredoutlet(context) async {
+    print("IsGeoFenceLat=="+globals.IsGeoFenceLat);
+    print("IsGeoFvenceLng=="+globals.IsGeoFenceLng);
+    // List OutletData = new List();
+    // OutletData = await repo.SelectOutletByID(globals.OutletID);
+    // globals.IsGeoFence = OutletData[0]["IsGeoFence"];
+    // globals.IsGeoFenceLat = OutletData[0]["lat"];
+    // globals.IsGeoFenceLng = OutletData[0]["lng"];
+    // globals.Radius = OutletData[0]["Radius"];
+//31.6089111000000000000
+    //71.0783096000000000000
+    print("_latitude===>"+_latitude.toString());
+    print("lng===>"+_longitude.toString());
+    print("IsGeoFence"+globals.IsGeoFence.toString());
+    print("IsGeoFenceLat"+globals.IsGeoFenceLat);
+    print("IsGeoFvenceLng"+globals.IsGeoFenceLng);
+    Dialogs.showLoadingDialog(context, _keyLoader);
+    // double distance = _calculateDistance();
+    // print("Distance==>"+distance.toString());
+    int Distance2 = globals.Radius;
+    Position position=globals.currentPosition;
+    if ( globals.IsGeoFence == 0 ||  globals.IsGeoFence == null || globals.IsGeoFence == "0") {
+      if(position==null){
+        globals.getCurrentLocation(context).then((position1) {
+          position = position1;
+          print(position1);
+        })
+            .timeout(Duration(seconds: 7), onTimeout: ((){
+          print("i am here timedout");
+
+          setState(() {
+            isLocationTimedOut = true;
+
+          });
+
+        }))
+            .whenComplete(() async {
+          print("inside if");
+          if (position != null || isLocationTimedOut) {
+            if(isLocationTimedOut){
+              position = new Position(accuracy: 0, latitude: 0, longitude: 0);
+            }
+            print("position:"+position.toString());
+            await repo.completeOrder( position.latitude,position.longitude,position.accuracy, globals.OutletID);
+            await repo.setVisitType(globals.OutletID, 1);
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+            _UploadOrder(context);
+            // _UploadDocuments();
+
+            // _UploadNoOrder(context);
+
+
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => PreSellRoute(2222)),
+                ModalRoute.withName("/PreSellRoute"));
+
+          } else {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                // return object of type Dialog
+                return AlertDialog(
+                  title: new Text("Alert"),
+                  content: new Text("Please allow location to proceed"),
+                  actions: <Widget>[
+                    // usually buttons at the bottom of the dialog
+                    new ElevatedButton(
+                      child: new Text("Close"),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ShopAction()),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+
+
+
+          //    Navigator.of(_keyLoader.currentContext, rootNavigator: true).pop();
+        });
+      }else{
         Navigator.of(context, rootNavigator: true).pop('dialog');
-//            //1	1	Test Outlet K/S	1	System	MANDI TOWN	03001234747		1	31.6089111000000000000	71.0783096000000000000	Lahore 	Sub Area Label 4	1	6	Karyana Store	2024-03-14	E	7	System	03001234747		1	100
-        ///.................................Upload Orders Method.........................
+        print("position:"+position.toString());
+        await repo.completeOrder( position.latitude,position.longitude,position.accuracy, globals.OutletID);
+        await repo.setVisitType(globals.OutletID, 1);
         _UploadOrder(context);
         _UploadDocuments();
+        Navigator.pop(context);
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => PreSellRoute(2222)),
             ModalRoute.withName("/PreSellRoute"));
-      }else {
-
-        print("inside Else");
-
-        Navigator.of(context, rootNavigator: true).pop('dialog');
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            // return object of type Dialog
-            return AlertDialog(
-              title: new Text("Error"),
-              content: new Text(
-                  'Can\'t place order, you are ${distance
-                      .toInt()} meters away from the shop.'),
-              actions: <Widget>[
-                // usually buttons at the bottom of the dialog
-                new ElevatedButton(
-                  child: new Text("Close"),
-                  onPressed: () {
-                    Navigator.pop(
-                      context,
-                      MaterialPageRoute(builder: (context) => UnregisteredOrderCartView()),
-                    );
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      }    }
+      }
+    }
+//     else{
+//       if(distance < Distance2){
+//         print("inside if");
+//         Position position = globals.currentPosition;
+//         await repo.completeOrder(globals.channellat, globals.channellat,
+//             globals.channelacc, globals.OutletID);
+//         await repo.setVisitType(globals.OutletID, 1);
+//         Navigator.of(context, rootNavigator: true).pop('dialog');
+// //            //1	1	Test Outlet K/S	1	System	MANDI TOWN	03001234747		1	31.6089111000000000000	71.0783096000000000000	Lahore 	Sub Area Label 4	1	6	Karyana Store	2024-03-14	E	7	System	03001234747		1	100
+//         ///.................................Upload Orders Method.........................
+//         _UploadOrder(context);
+//          _UploadDocuments();
+//         Navigator.pushAndRemoveUntil(
+//             context,
+//             MaterialPageRoute(builder: (context) => PreSellRoute(2222)),
+//             ModalRoute.withName("/PreSellRoute"));
+//       }else {
+//
+//         print("inside Else");
+//
+//         Navigator.of(context, rootNavigator: true).pop('dialog');
+//         showDialog(
+//           context: context,
+//           builder: (BuildContext context) {
+//             // return object of type Dialog
+//             return AlertDialog(
+//               title: new Text("Error"),
+//               content: new Text(
+//                   'Can\'t place order, you are ${distance
+//                       .toInt()} meters away from the shop.'),
+//               actions: <Widget>[
+//                 // usually buttons at the bottom of the dialog
+//                 new ElevatedButton(
+//                   child: new Text("Close"),
+//                   onPressed: () {
+//                     Navigator.pop(
+//                       context,
+//                       MaterialPageRoute(builder: (context) => UnregisteredOrderCartView()),
+//                     );
+//                   },
+//                 ),
+//               ],
+//             );
+//           },
+//         );
+//       }    }
 
 
 
@@ -1114,59 +1445,59 @@ class _OrderCartView extends State<UnregisteredOrderCartView> {
 
     });
   }
-  Future _UploadDocuments() async {
-    print("_UploadDocuments called");
-    // List AllDocuments = new List();
-    await repo.getAllOutletImages(globals.orderId).then((val) async {
-      /*   setState(() {
-        AllDocuments = val;
-      });*/
-
-      for (int i = 0; i < val.length; i++) {
-        int MobileRequestID = int.parse(val[i]['id'].toString());
-        String created_on = val[i]['created_on'].toString();
-        print("created_on == " + created_on.toString());
-        try {
-          print("AllDocuments.length" + val.length.toString());
-          File photoFile = File(val[i]['file']);
-          //  var stream =
-          var stream = ByteStream(photoFile.openRead());
-          var length = await photoFile.length();
-          var url = Uri.http(
-              globals.ServerURL, '/portal/mobile/MobileUploadOrdersImage');
-          print("================="+url.toString());
-          print("===Hello===");
-          String fileName = photoFile.path.split('/').last;
-
-          var request = new http.MultipartRequest("POST", url);
-          request.fields['OrderNo'] = MobileRequestID.toString();
-          request.fields['created_on'] = created_on;
-          print("===Hello1===");
-          var multipartFile = new http.MultipartFile('file', stream, length,
-              filename: "Outlet_" + fileName);
-
-          request.files.add(multipartFile);
-          print("multipartFile===>" + multipartFile.toString());
-          var response = await request.send();
-          print("===Hello=="+response.toString());
-
-          print("====="+response.statusCode.toString());
-
-          print("response"+response.statusCode.toString());
-          print(response.toString());
-          if (response.statusCode == 200) {
-            print("MarkImage SUCCESS");
-            await repo.markPhotoUploaded(MobileRequestID);
-          }else{
-            print("False Image");
-          }
-        } catch (e) {
-          print("===Hello3===");
-          print("e.toString()  " + e.toString());
-        }
-      }
-    });
-  }
+  // Future _UploadDocuments() async {
+  //   print("_UploadDocuments called");
+  //   // List AllDocuments = new List();
+  //   await repo.getAllOutletImages(globals.orderId).then((val) async {
+  //     /*   setState(() {
+  //       AllDocuments = val;
+  //     });*/
+  //
+  //     for (int i = 0; i < val.length; i++) {
+  //       int MobileRequestID = int.parse(val[i]['id'].toString());
+  //       String created_on = val[i]['created_on'].toString();
+  //       print("created_on == " + created_on.toString());
+  //       try {
+  //         print("AllDocuments.length" + val.length.toString());
+  //         File photoFile = File(val[i]['file']);
+  //         //  var stream =
+  //         var stream = ByteStream(photoFile.openRead());
+  //         var length = await photoFile.length();
+  //         var url = Uri.http(
+  //             globals.ServerURL, '/portal/mobile/MobileUploadOrdersImage');
+  //         print("================="+url.toString());
+  //         print("===Hello===");
+  //         String fileName = photoFile.path.split('/').last;
+  //
+  //         var request = new http.MultipartRequest("POST", url);
+  //         request.fields['OrderNo'] = MobileRequestID.toString();
+  //         request.fields['created_on'] = created_on;
+  //         print("===Hello1===");
+  //         var multipartFile = new http.MultipartFile('file', stream, length,
+  //             filename: "Outlet_" + fileName);
+  //
+  //         request.files.add(multipartFile);
+  //         print("multipartFile===>" + multipartFile.toString());
+  //         var response = await request.send();
+  //         print("===Hello=="+response.toString());
+  //
+  //         print("====="+response.statusCode.toString());
+  //
+  //         print("response"+response.statusCode.toString());
+  //         print(response.toString());
+  //         if (response.statusCode == 200) {
+  //           print("MarkImage SUCCESS");
+  //           await repo.markPhotoUploaded(MobileRequestID);
+  //         }else{
+  //           print("False Image");
+  //         }
+  //       } catch (e) {
+  //         print("===Hello3===");
+  //         print("e.toString()  " + e.toString());
+  //       }
+  //     }
+  //   });
+  // }
 
 
   void _showDialog(String Title, String Message, int isSuccess) {

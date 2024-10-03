@@ -365,7 +365,83 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                   ),
                   TextButton(
                     child: Text("Place Order"),
-                    onPressed: () {
+                    onPressed: () async {
+                      print("globals.currentPosition: " + globals.currentPosition.toString());
+                      int isOwnerPurchaser = _isChecked ? 1 : 0;
+
+                      // If location is not available, get the current location
+                      if (globals.currentPosition == null) {
+                        Dialogs.showLoadingDialog(context, _keyLoader);
+
+                        try {
+                          globals.currentPosition = await globals.getCurrentLocation(context);
+                          print(globals.currentPosition);
+                        } catch (error) {
+                          print("ERROR: " + error.toString());
+                        }
+
+                        if (globals.currentPosition != null) {
+                          LatController.text = globals.currentPosition.latitude.toString();
+                          AccuracyController.text = globals.currentPosition.accuracy.toString();
+                          LongController.text = globals.currentPosition.longitude.toString();
+                        } else {
+                          LatController.text = "0";
+                          AccuracyController.text = "0";
+                          LongController.text = "0";
+                        }
+
+                        setState(() {
+                          islocationGet = true;
+                          dynamicheight = 1.6;
+                          myFocusNode.requestFocus();
+                        });
+
+                        // Dismiss the loading dialog
+                        Navigator.of(context, rootNavigator: true).pop();
+                      } else {
+                        // If location is already available, set the coordinates
+                        LatController.text = globals.currentPosition.latitude.toString();
+                        AccuracyController.text = globals.currentPosition.accuracy.toString();
+                        LongController.text = globals.currentPosition.longitude.toString();
+
+                        setState(() {
+                          islocationGet = true;
+                          dynamicheight = 1.6;
+                          myFocusNode.requestFocus();
+                        });
+                      }
+
+                      // Stop continuous location updates
+                      globals.stopContinuousLocation();
+
+                      // Prepare arguments to register the outlet
+                      List args = [];
+                      String encodedOutletName = base64.encode(utf8.encode(outletNameController.text));
+                      args.add({
+                        'outlet_name': encodedOutletName,
+                        'mobile_request_id': mobileRequestID,
+                        'mobile_timestamp': globals.getCurrentTimestamp(),
+                        'pic_channel_id': _selectedChannelArea,
+                        'area_label': _AreatypeAheadController.text,
+                        'sub_area_label': _SubAreatypeAheadController.text,
+                        'address': addressController.text,
+                        'owner_name': ownerNameController.text,
+                        'owner_cnic': cnicController.text,
+                        'owner_mobile_no': mobileNoController.text,
+                        'purchaser_name': ownerPurchaseController.text,
+                        'purchaser_mobile_no': mobileNumberPurchaserController.text,
+                        'is_owner_purchaser': isOwnerPurchaser,
+                        'lat': LatController.text,
+                        'lng': LongController.text,
+                        'accuracy': AccuracyController.text,
+                        'created_on': globals.getCurrentTimestamp(),
+                        'created_by': globals.UserID,
+                        'is_uploaded': 0,
+                        'is_new': 1,
+                        'outletchannel': _selectedOutletChannel
+                      });
+                      await _registerOutlet(context, args);
+
                       Navigator.of(context).pop(); // Close the dialog
                       // Navigate to Orders page
                       Navigator.of(context).push(MaterialPageRoute(builder: (context) => UnregisteredOutletOrders()));
