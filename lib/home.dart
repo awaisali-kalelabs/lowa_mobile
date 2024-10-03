@@ -1520,17 +1520,17 @@ class _Home extends State<Home> {
                                                       ),
                                                     ],
                                                   ),
-                                                ))),
+                                                ),
+                                            ),
+                                        ),
                                         Expanded(
                                             child: GestureDetector(
-                                                onTap: () {
-                                                  Navigator.push(
+                                                onTap: () => Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
                                                         builder: (context) =>
                                                             PreSellRoute(2222)),
-                                                  );
-                                                },
+                                                  ),
                                                 child: Container(
                                                   padding: EdgeInsets.all(10),
                                                   child: Column(
@@ -1555,7 +1555,9 @@ class _Home extends State<Home> {
                                                       ),
                                                     ],
                                                   ),
-                                                )))
+                                                ),
+                                            ),
+                                        ),
                                       ],
                                     ),
                                     Row(
@@ -1579,10 +1581,12 @@ class _Home extends State<Home> {
                                                     'Complaint',
                                                     style: TextStyle(
                                                         color: Colors.black),
-                                                  )),
+                                                  ),
+                                              ),
                                             ],
                                           ),
-                                        )),
+                                        ),
+                                        ),
                                         Expanded(
                                             child: GestureDetector(
                                           onTap: () {
@@ -1613,12 +1617,14 @@ class _Home extends State<Home> {
                                               ],
                                             ),
                                           ),
-                                        ))
+                                        ),
+                                        ),
                                       ],
                                     ),
                                   ],
                                 ),
-                              )),
+                              ),
+                              ),
                               SizedBox(
                                 height: 12.0,
                               ),
@@ -1644,7 +1650,8 @@ class _Home extends State<Home> {
                                                 color: Colors.blue,
                                                 fontSize: 17,
                                                 fontWeight: FontWeight.bold),
-                                          )),
+                                          ),
+                                      ),
                                     ),
                                     Container(
                                       child: Divider(
@@ -1674,7 +1681,8 @@ class _Home extends State<Home> {
                                                       'Performance',
                                                       style: TextStyle(
                                                           color: Colors.black),
-                                                    )),
+                                                    ),
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -1713,7 +1721,9 @@ class _Home extends State<Home> {
                                                           )),
                                                     ],
                                                   ),
-                                                ))),
+                                                ),
+                                            ),
+                                        ),
                                       ],
                                     ),
                                     Row(
@@ -1752,10 +1762,12 @@ class _Home extends State<Home> {
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.black),
-                                                        )),
+                                                        ),
+                                                    ),
                                                   ],
                                                 ),
-                                              )),
+                                              ),
+                                          ),
                                         ),
                                         Expanded(
                                             child: GestureDetector(
@@ -1831,10 +1843,13 @@ class _Home extends State<Home> {
                                                             style: TextStyle(
                                                                 color: Colors
                                                                     .black),
-                                                          )),
+                                                          ),
+                                                      ),
                                                     ],
                                                   ),
-                                                ))),
+                                                ),
+                                            ),
+                                        ),
                                         Expanded(
                                             child: GestureDetector(
                                                 onTap: () {
