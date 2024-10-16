@@ -224,6 +224,8 @@ class _AttendanceActionState extends State<AttendanceAction> {
              "&UUID=" +
              AllMarkedAttendances[i]['uuid'] +
              "&DevicePlatformVersion=''" +
+             "&PJP=" +
+             globals.selectedPJP.toString() +
              "";
          ORDERIDToDelete = int.parse(AllMarkedAttendances[i]['mobile_request_id']);
 
@@ -231,7 +233,7 @@ class _AttendanceActionState extends State<AttendanceAction> {
          var QueryParameters = <String, String>{
            "SessionID": globals.EncryptSessionID(orderParam),
          };
-         var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncMarkAttendanceV3');
+         var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncMarkAttendanceV4');
 
          try {
            var response = await http.post(url,

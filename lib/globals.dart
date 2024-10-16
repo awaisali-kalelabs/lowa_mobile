@@ -10,7 +10,7 @@ import 'package:order_booker/com/pbc/dao/repository.dart';
 import 'package:order_booker/home.dart';
 import 'package:permission_handler/permission_handler.dart';
 //wildspace1@%88
-String appVersion = "v3.6";
+String appVersion = "v3.7";
 final oCcy = new NumberFormat("#,##0");
 final oCcy1 = new NumberFormat("#,##0.##");
 double maxDiscountPercentage = 0;
@@ -19,6 +19,7 @@ bool isLoggedIn = false;
 String DisplayName = "";
 
 String ServerURL = "3.78.122.135";
+//String ServerURL = "192.168.201.197:8080";
 String fileServerURL = "http://3.78.122.135/portal/mobile/MobileFileDownloadCommonFiles";
 int sparkMobileRequestId = 0;
 //for Item_Quantity check
@@ -115,6 +116,7 @@ final LocationSettings locationSettings = LocationSettings(
   accuracy: LocationAccuracy.high,
   distanceFilter: 100,
 );
+
 void Reset() {
   print('reset values');
   //DispatchID=0;
@@ -152,7 +154,7 @@ int getUniqueMobileId() {
   }
   return int.parse(MobileId);
 }
-
+int RegisterOUletOrderRequestID = 0;
 
 
 void asyncFileUpload() async {

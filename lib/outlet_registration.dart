@@ -19,6 +19,7 @@ import 'package:order_booker/globals.dart';
 import 'package:order_booker/un_registered_outlet_orders.dart';
 //import 'package:order_booker/shopAction.dart';
 
+import 'UnregisteredOutletOrderImage.dart';
 import 'com/pbc/model/pre_sell_outlets.dart';
 import 'globals.dart' as globals;
 import 'home.dart';
@@ -119,6 +120,8 @@ class _OutletRegisteration extends State<OutletRegisteration> {
   String outletImagePath = "";
   int mobileRequestID = globals.getUniqueMobileId();
 
+
+
   Future SaveOutletImage() async {
     if (outletImagePath != "") {
       List imageDetailList = new List();
@@ -154,7 +157,131 @@ class _OutletRegisteration extends State<OutletRegisteration> {
       )..show(context);
     }
   }
+  Future _OutletRegisterationUpload(context) async {
+    print("============Selected PJP============"+globals.selectedPJP.toString());
+    int ORDERIDToDelete = 0;
+    List AllRegisteredOutlets = new List();
+    await repo.getAllRegisteredOutletsByIsUploaded(0,1).then((val) async {
+      setState(() {
+        AllRegisteredOutlets = val;
 
+        print("All Registered Outlets===>> " + AllRegisteredOutlets.toString());
+      });
+
+      for (int i = 0; i < AllRegisteredOutlets.length; i++) {
+        String outletRegisterationsParams = "timestamp=" +
+            globals.getCurrentTimestamp() +
+            "&id_for_update=" +
+            '0' +
+            "&outlet_name=" +
+            AllRegisteredOutlets[i]['outlet_name'] +
+            "&mobile_request_id=" +
+            (AllRegisteredOutlets[i]['mobile_request_id']).toString() +
+            "&mobile_timestamp=" +
+            AllRegisteredOutlets[i]['mobile_timestamp'] +
+            "&channel_id=" +
+            AllRegisteredOutlets[i]['channel_id'].toString() +
+            "&area_label=" +
+            AllRegisteredOutlets[i]['area_label'].toString() +
+            "&sub_area_label=" +
+            AllRegisteredOutlets[i]['sub_area_label'].toString() +
+            "&address=" +
+            AllRegisteredOutlets[i]['address'] +
+            "&owner_name=" +
+            AllRegisteredOutlets[i]['owner_name'] +
+            "&owner_cnic=" +
+            AllRegisteredOutlets[i]['owner_cnic'] +
+            "&owner_mobile_no=" +
+            AllRegisteredOutlets[i]['owner_mobile_no'] +
+            "&purchaser_name=" +
+            AllRegisteredOutlets[i]['purchaser_name'] +
+            "&purchaser_mobile_no=" +
+            AllRegisteredOutlets[i]['purchaser_mobile_no'] +
+            "&is_owner_purchaser=" +
+            AllRegisteredOutlets[i]['is_owner_purchaser'].toString() +
+            "&lat=" +
+            AllRegisteredOutlets[i]['lat'].toString() +
+            "&lng=" +
+            AllRegisteredOutlets[i]['lng'].toString() +
+            "&accuracy=" +
+            (AllRegisteredOutlets[i]['accuracy'])
+                .toString() +
+            "&created_on=" +
+            AllRegisteredOutlets[i]['created_on'] +
+            "&created_by=" +
+            AllRegisteredOutlets[i]['created_by'].toString() +
+            "&OutletChannel=" +
+            AllRegisteredOutlets[i]['outletchannel'].toString() +
+            "&uuid=" +
+            globals.DeviceID +
+            "&version=" +
+            globals.appVersion +
+            "&platform=android" +
+            "&PJP=" +
+            globals.selectedPJP+
+            "&is_order=" +
+            0.toString();;
+        print("outletRegisterationsParams:" + outletRegisterationsParams);
+
+        /* String orderParam="timestamp="+globa+"&order_no="+AllOrders[i]['id'].toString()+"&outlet_id="+ globals.OutletID.toString()+"&created_on="+AllOrders[i]['created_on'].toString()+"&created_by=100450&uuid=656d30b8182fea88&platform=android&lat="+globals.currentPosition.latitude.toString()+"&lng="+globals.currentPosition.longitude.toString()+"&accuracy=21";
+        print("AllOrders[i]['id']"+AllOrders[i]['id'].toString());*/
+
+        var QueryParameters = <String, String>{
+          "SessionID": globals.EncryptSessionID(outletRegisterationsParams),
+        };
+        //var localUrl="http://192.168.10.37:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
+        // var localUrl="http://192.168.30.125:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
+        var url = Uri.http(
+            globals.ServerURL, '/portal/mobile/MobileSyncOutletRegistration4');
+
+
+        try {
+          var response = await http.post(url,
+              headers: {
+                HttpHeaders.contentTypeHeader:
+                'application/x-www-form-urlencoded'
+              },
+              body: QueryParameters);
+
+          var responseBody = json.decode(utf8.decode(response.bodyBytes));
+          print('called4');
+          if (response.statusCode == 200) {
+            print("inside 200");
+            if (responseBody["success"] == "true") {
+              print("inside success");
+
+              print("Saved");
+              repo.markOutletUploaded(
+                  int.tryParse(AllRegisteredOutlets[i]['mobile_request_id']));
+              //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+
+            } else {
+              // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+              _showDialog("Error", responseBody["error_code"], 0);
+              print("Error:" + responseBody["error_code"]);
+            }
+          } else {
+            //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+            //_showDialog("Error", "An error has occured: " + responseBody.statusCode, 0);
+            print("Error: An error has occured: " + responseBody.statusCode);
+          }
+        } catch (e) {
+          // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+          //_showDialog("Error", "An error has occured " + e.toString(), 1);
+          print("Error: An error has occured: " + e.toString());
+        }
+      }
+    });
+    /* Navigator.push(
+      context,
+      //
+
+      MaterialPageRoute(builder: (context) =>ShopAction()
+
+
+      ),
+    );*/
+  }
   Future _UploadDocuments() async {
     print("_UploadDocuments called");
     // List AllDocuments = new List();
@@ -272,6 +399,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                     child: Text("Save Outlet"),
                     onPressed: () async {
                       // Validate the form before proceeding
+                      globals.showLoader(context);
                       if (_formKey.currentState?.validate() ?? false) {
                         int isOwnerPurchaser = _isChecked ? 1 : 0;
 
@@ -308,7 +436,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                           });
 
                           // Dismiss the loading dialog
-                          Navigator.of(context, rootNavigator: true).pop();
+                         // Navigator.of(context, rootNavigator: true).pop();
                         } else {
                           // If location is already available, set the coordinates
                           LatController.text = globals.currentPosition.latitude.toString();
@@ -353,13 +481,16 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                         });
 
                         // Call the necessary functions to register the outlet
-                        await _UploadDocuments();
                         await _registerOutlet(context, args);
                         await _OutletRegisterationUpload(context);
+                        await _UploadDocuments();
 
                         print("_OutletRegisterationUpload function called");
-
-                        Navigator.of(context).pop(); // Close the dialog
+                        globals.hideLoader(context);
+                        Navigator.of(context, rootNavigator: true).pop();
+                        Navigator.pushReplacement(
+                            context, MaterialPageRoute(builder: (BuildContext context) => Home()));
+                     //   Navigator.of(context).pop(); // Close the dialog
                       }
                     },
                   ),
@@ -368,6 +499,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                     onPressed: () async {
                       print("globals.currentPosition: " + globals.currentPosition.toString());
                       int isOwnerPurchaser = _isChecked ? 1 : 0;
+                      SaveOutletImage();
 
                       // If location is not available, get the current location
                       if (globals.currentPosition == null) {
@@ -444,7 +576,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
 
                       Navigator.of(context).pop(); // Close the dialog
                       // Navigate to Orders page
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => UnregisteredOutletOrders()));
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => UnregisteredOutletOrderImage()));
                     },
                   ),
                 ],
@@ -1028,133 +1160,12 @@ class _OutletRegisteration extends State<OutletRegisteration> {
   Future _registerOutlet(context, List Items) async {
     Dialogs.showLoadingDialog(context, _keyLoader);
     await repo.registerOutlet(Items);
-    Navigator.of(context, rootNavigator: true).pop();
+  //  Navigator.of(context, rootNavigator: true).pop();
 
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (BuildContext context) => Home()));
+ /*   Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (BuildContext context) => Home()));*/
   }
 
-  Future _OutletRegisterationUpload(context) async {
-    print("============Selected PJP============" +
-        globals.selectedPJP.toString());
-    int ORDERIDToDelete = 0;
-    List AllRegisteredOutlets = new List();
-    await repo.getAllRegisteredOutletsByIsUploaded(0, 1).then((val) async {
-      setState(() {
-        AllRegisteredOutlets = val;
-
-        print("All Registered Outlets===>> " + AllRegisteredOutlets.toString());
-      });
-
-      for (int i = 0; i < AllRegisteredOutlets.length; i++) {
-        String outletRegisterationsParams = "timestamp=" +
-            globals.getCurrentTimestamp() +
-            "&id_for_update=" +
-            '0' +
-            "&outlet_name=" +
-            AllRegisteredOutlets[i]['outlet_name'] +
-            "&mobile_request_id=" +
-            (AllRegisteredOutlets[i]['mobile_request_id']).toString() +
-            "&mobile_timestamp=" +
-            AllRegisteredOutlets[i]['mobile_timestamp'] +
-            "&channel_id=" +
-            AllRegisteredOutlets[i]['channel_id'].toString() +
-            "&area_label=" +
-            AllRegisteredOutlets[i]['area_label'].toString() +
-            "&sub_area_label=" +
-            AllRegisteredOutlets[i]['sub_area_label'].toString() +
-            "&address=" +
-            AllRegisteredOutlets[i]['address'] +
-            "&owner_name=" +
-            AllRegisteredOutlets[i]['owner_name'] +
-            "&owner_cnic=" +
-            AllRegisteredOutlets[i]['owner_cnic'] +
-            "&owner_mobile_no=" +
-            AllRegisteredOutlets[i]['owner_mobile_no'] +
-            "&purchaser_name=" +
-            AllRegisteredOutlets[i]['purchaser_name'] +
-            "&purchaser_mobile_no=" +
-            AllRegisteredOutlets[i]['purchaser_mobile_no'] +
-            "&is_owner_purchaser=" +
-            AllRegisteredOutlets[i]['is_owner_purchaser'].toString() +
-            "&lat=" +
-            AllRegisteredOutlets[i]['lat'].toString() +
-            "&lng=" +
-            AllRegisteredOutlets[i]['lng'].toString() +
-            "&accuracy=" +
-            (AllRegisteredOutlets[i]['accuracy']).toString() +
-            "&created_on=" +
-            AllRegisteredOutlets[i]['created_on'] +
-            "&created_by=" +
-            AllRegisteredOutlets[i]['created_by'].toString() +
-            "&OutletChannel=" +
-            AllRegisteredOutlets[i]['outletchannel'].toString() +
-            "&uuid=" +
-            globals.DeviceID +
-            "&version=" +
-            globals.appVersion +
-            "&platform=android" +
-            "&PJP=" +
-            globals.selectedPJP;
-        print("outletRegisterationsParams:" + outletRegisterationsParams);
-
-        /* String orderParam="timestamp="+globa+"&order_no="+AllOrders[i]['id'].toString()+"&outlet_id="+ globals.OutletID.toString()+"&created_on="+AllOrders[i]['created_on'].toString()+"&created_by=100450&uuid=656d30b8182fea88&platform=android&lat="+globals.currentPosition.latitude.toString()+"&lng="+globals.currentPosition.longitude.toString()+"&accuracy=21";
-        print("AllOrders[i]['id']"+AllOrders[i]['id'].toString());*/
-
-        var QueryParameters = <String, String>{
-          "SessionID": globals.EncryptSessionID(outletRegisterationsParams),
-        };
-        //var localUrl="http://192.168.10.37:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
-        // var localUrl="http://192.168.30.125:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
-        var url = Uri.http(
-            globals.ServerURL, '/portal/mobile/MobileSyncOutletRegistration3');
-
-        try {
-          var response = await http.post(url,
-              headers: {
-                HttpHeaders.contentTypeHeader:
-                    'application/x-www-form-urlencoded'
-              },
-              body: QueryParameters);
-
-          var responseBody = json.decode(utf8.decode(response.bodyBytes));
-          print('called4');
-          if (response.statusCode == 200) {
-            print("inside 200");
-            if (responseBody["success"] == "true") {
-              print("inside success");
-
-              print("Saved");
-              repo.markOutletUploaded(
-                  int.tryParse(AllRegisteredOutlets[i]['mobile_request_id']));
-              //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-            } else {
-              // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-              _showDialog("Error", responseBody["error_code"], 0);
-              print("Error:" + responseBody["error_code"]);
-            }
-          } else {
-            //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-            //_showDialog("Error", "An error has occured: " + responseBody.statusCode, 0);
-            print("Error: An error has occured: " + responseBody.statusCode);
-          }
-        } catch (e) {
-          // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          //_showDialog("Error", "An error has occured " + e.toString(), 1);
-          print("Error: An error has occured: " + e.toString());
-        }
-      }
-    });
-    /* Navigator.push(
-      context,
-      //
-
-      MaterialPageRoute(builder: (context) =>ShopAction()
-
-
-      ),
-    );*/
-  }
 
   void _showDialog(String Title, String Message, int isSuccess) {
     // flutter defined function

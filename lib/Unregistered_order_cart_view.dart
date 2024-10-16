@@ -14,27 +14,27 @@ import 'package:order_booker/com/pbc/dao/repository.dart';
 /*import 'package:order_booker/delivery.dart';*/
 import 'package:order_booker/gauge_segment.dart';
 import 'package:order_booker/globals.dart';
-import 'package:order_booker/no_order.dart';
-import 'package:order_booker/pre_sell_route.dart';
-import 'package:order_booker/shopAction.dart';
-import 'package:another_flushbar/flushbar.dart';
 
 import 'globals.dart' as globals;
+/*
+import 'home.dart';
+*/
+import 'home.dart';
 import 'orders.dart';
 
 // This app is a stateful, it tracks the user's current choice.
-class OrderCartView extends StatefulWidget {
+class UnregisteredOrderCartView extends StatefulWidget {
   int OrderId = 0;
 
-  OrderCartView({int OrderId}) {
+  UnregisteredOrderCartView({int OrderId}) {
     this.OrderId = OrderId;
   }
 
   @override
-  _OrderCartView createState() => _OrderCartView(OrderId);
+  _UnregisteredOrderCartView createState() => _UnregisteredOrderCartView(OrderId);
 }
 
-class _OrderCartView extends State<OrderCartView> {
+class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
   bool _isLoading = false;
   int OrderId = 0;
   int totalAddedProducts = 0;
@@ -52,7 +52,7 @@ class _OrderCartView extends State<OrderCartView> {
   double maximumDiscount = 0;
   double defaultDiscount = 0;
   int DiscountIDmain = 0;
-  _OrderCartView(int OrderId) {
+  _UnregisteredOrderCartView(int OrderId) {
     this.OrderId = OrderId;
   }
 
@@ -270,7 +270,11 @@ class _OrderCartView extends State<OrderCartView> {
                   : () {
                 /* _UploadOrder();*/
                 //  _showIndicator();
+               // globals.showLoader(context);
+
                 completeOrder(context);
+             //   globals.hideLoader(context);
+
                 //_UploadDocuments();
 
               },
@@ -761,13 +765,13 @@ class _OrderCartView extends State<OrderCartView> {
   Future completeOrder(context) async {
     print("IsGeoFenceLat=="+globals.IsGeoFenceLat);
     print("IsGeoFvenceLng=="+globals.IsGeoFenceLng);
-    List OutletData = new List();
+    /*List OutletData = new List();
     OutletData = await repo.SelectOutletByID(globals.OutletID);
     globals.IsGeoFence = OutletData[0]["IsGeoFence"];
     globals.IsGeoFenceLat = OutletData[0]["lat"];
     globals.IsGeoFenceLng = OutletData[0]["lng"];
     globals.Radius = OutletData[0]["Radius"];
-//31.6089111000000000000
+//31.6089111000000000000*/
     //71.0783096000000000000
     print("_latitude===>"+_latitude.toString());
     print("lng===>"+_longitude.toString());
@@ -775,11 +779,11 @@ class _OrderCartView extends State<OrderCartView> {
     print("IsGeoFenceLat"+globals.IsGeoFenceLat);
     print("IsGeoFvenceLng"+globals.IsGeoFenceLng);
     Dialogs.showLoadingDialog(context, _keyLoader);
-    double distance = _calculateDistance();
+  /*  double distance = _calculateDistance();
     print("Distance==>"+distance.toString());
-    int Distance2 = globals.Radius;
+    int Distance2 = globals.Radius;*/
     Position position=globals.currentPosition;
-    if ( globals.IsGeoFence == 0 ||  globals.IsGeoFence == null || globals.IsGeoFence == "0") {
+   // if ( globals.IsGeoFence == 0 ||  globals.IsGeoFence == null || globals.IsGeoFence == "0") {
       if(position==null){
         globals.getCurrentLocation(context).then((position1) {
           position = position1;
@@ -804,16 +808,32 @@ class _OrderCartView extends State<OrderCartView> {
             await repo.completeOrder( position.latitude,position.longitude,position.accuracy, globals.OutletID);
             await repo.setVisitType(globals.OutletID, 1);
             Navigator.of(context, rootNavigator: true).pop('dialog');
-            _UploadOrder(context);
-            _UploadDocuments();
+            globals.showLoader(context); // Show the loader
+            try {
+
+              await _OutletRegisterationUpload(context);
+              await _UploadDocumentsnregistrationimage();
+
+            } catch (e) {
+              print("An error occurred: $e");
+            } finally {
+              globals.hideLoader(context); // Hide the loader in the finally block
+            }
+
+
+            // await _UploadOrder(context);
+            print("_UploadOrder Run");
+
+           // await   _UploadDocuments();
+            print("_UploadDocuments Run");
 
             // _UploadNoOrder(context);
 
 
             Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => PreSellRoute(2222)),
-                ModalRoute.withName("/PreSellRoute"));
+                MaterialPageRoute(builder: (context) => Home()),
+                ModalRoute.withName("/Home"));
 
           } else {
             Navigator.of(context, rootNavigator: true).pop('dialog');
@@ -831,7 +851,7 @@ class _OrderCartView extends State<OrderCartView> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => ShopAction()),
+                          MaterialPageRoute(builder: (context) => Home()),
                         );
                       },
                     ),
@@ -850,15 +870,23 @@ class _OrderCartView extends State<OrderCartView> {
         print("position:"+position.toString());
         await repo.completeOrder( position.latitude,position.longitude,position.accuracy, globals.OutletID);
         await repo.setVisitType(globals.OutletID, 1);
-        _UploadOrder(context);
-        _UploadDocuments();
+       // globals.showLoader(context);
+
+        await  _OutletRegisterationUpload(context);
+      //  globals.hideLoader(context);
+        await _UploadDocumentsnregistrationimage();
+
+      //  _UploadOrder(context);
+       // _UploadDocuments();
         Navigator.pop(context);
         Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => PreSellRoute(2222)),
-            ModalRoute.withName("/PreSellRoute"));
+            MaterialPageRoute(builder: (context) => Home()),
+            ModalRoute.withName("/Home"));
       }
-    }else{
+   // }
+/*
+    else{
       if(distance < Distance2){
         print("inside if");
         Position position = globals.currentPosition;
@@ -895,7 +923,7 @@ class _OrderCartView extends State<OrderCartView> {
                   onPressed: () {
                     Navigator.pop(
                       context,
-                      MaterialPageRoute(builder: (context) => OrderCartView()),
+                      MaterialPageRoute(builder: (context) => _UnregisteredOrderCartView()),
                     );
                   },
                 ),
@@ -904,214 +932,58 @@ class _OrderCartView extends State<OrderCartView> {
           },
         );
       }    }
+*/
 
 
 
   }
 
-  Future _UploadNoOrder(context) async {
-    String TimeStamp = globals.getCurrentTimestamp();
-    print("currDateTime" + TimeStamp);
-    int ORDERIDToDelete = 0;
-    List AllNoOrders = new List();
-    await repo.getAllNoOrders(0).then((val) async {
-      setState(() {
-        AllNoOrders = val;
-
-        print("MAIN ORDER" + AllNoOrders.toString());
-      });
-
-      for (int i = 0; i < AllNoOrders.length; i++) {
-        String orderParam = "timestamp=" +
-            TimeStamp +
-            "&NoOrderID=" +
-            AllNoOrders[i]['id'].toString() +
-            "&OutletID=" +
-            AllNoOrders[i]['outlet_id'].toString() +
-            "&ReasonID=" +
-            AllNoOrders[i]['reason_type_id'].toString() +
-            "&MobileTimestamp=" +
-            AllNoOrders[i]['created_on'].toString() +
-            "&UserID=" +
-            globals.UserID.toString() +
-            "&uuid=" +
-            globals.DeviceID +
-            "&platform=android&Lat=" +
-            AllNoOrders[i]['lat'] +
-            "&Lng=" +
-            AllNoOrders[i]['lng'] +
-            "&accuracy=" +
-            AllNoOrders[i]['accuracy'] +
-            "";
-        ORDERIDToDelete = AllNoOrders[i]['id'];
-        var QueryParameters = <String, String>{
-          "SessionID": globals.EncryptSessionID(orderParam),
-        };
-
-        var url =
-        Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncNoOrdersV2');
-        print(url);
-
+  Future _UploadDocumentsnregistrationimage() async {
+    print("_UploadDocuments called");
+    // List AllDocuments = new List();
+    print( globals.RegisterOUletOrderRequestID);
+    await repo.getNewOutletImages(globals.RegisterOUletOrderRequestID).then((val) async {
+      /* setState(() {
+        AllDocuments = val;
+      });*/
+      print("val :"+val.toString());
+      for (int i = 0; i < val.length; i++) {
+        int MobileRequestID = int.parse(val[i]['id'].toString());
         try {
-          var response = await http.post(url,
-              headers: {
-                HttpHeaders.contentTypeHeader:
-                'application/x-www-form-urlencoded'
-              },
-              body: QueryParameters);
+          print("AllDocuments.length" + val.length.toString());
+          File photoFile = File(val[i]['file']);
+          //  var stream =
+          var stream = ByteStream(photoFile.openRead());
+          var length = await photoFile.length();
+          var url = Uri.http(
+              globals.ServerURL, '/portal/mobile/MobileUploadNewOutletImage');
+          print(url.toString());
+          String fileName = photoFile.path.split('/').last;
 
-          var responseBody = json.decode(utf8.decode(response.bodyBytes));
-          print('called4');
+          var request = new http.MultipartRequest("POST", url);
+          request.fields['RequestId'] = MobileRequestID.toString();
+          print("===Hello1===");
+          var multipartFile = new http.MultipartFile('file', stream, length,
+              filename: "Outlet_" + fileName);
+
+          request.files.add(multipartFile);
+          print("multipartFile===>" + multipartFile.toString());
+          var response = await request.send();
+          print("=====" + response.statusCode.toString());
           if (response.statusCode == 200) {
-            if (responseBody["success"] == "true") {
-              await repo.markNoOrderUploaded(ORDERIDToDelete);
-            } else {
-              _showDialog("Error", responseBody["error_code"], 0);
-            }
+            print("MarkImage SUCCESS");
+            await repo.markOutletRegistrationPhotoUploaded(MobileRequestID);
           } else {
-            // If that response was not OK, throw an error.
-
-            //await _showDialog("Error Uploading No Order", "An error has occured " + responseBody.statusCode);
+            print("False");
           }
         } catch (e) {
-          //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          //await _showDialog("Error Uploading No Order", "An error has occured " + e.toString());
+          print("===Hello3===");
+          print("e.toString()  " + e.toString());
         }
-        //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
-
       }
     });
   }
 
-  Future _UploadOrder(context) async {
-
-    DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
-    String currDateTime = dateFormat.format(DateTime.now());
-    var str = currDateTime.split(".");
-
-    String TimeStamp = str[0];
-
-    print("currDateTime" + TimeStamp);
-
-    int ORDERIDToDelete = 0;
-    AllOrders = new List();
-    await repo.getAllOrdersByIsUploaded(0).then((val) async {
-
-      AllOrders = val;
-      /*
-      setState(() {
-        AllOrders = val;
-
-        print("MAIN ORDER" + AllOrders.toString());
-      });
-      */
-      AllOrdersItems = new List();
-      print(AllOrders.toString());
-      for (int i = 0; i < AllOrders.length; i++) {
-        String orderParam = "timestamp=" +
-            TimeStamp +
-            "&order_no=" +
-            AllOrders[i]['id'].toString() +
-            "&outlet_id=" +
-            AllOrders[i]['outlet_id'].toString() +
-            "&created_on=" +
-            AllOrders[i]['created_on'].toString() +
-            "&created_by=" +
-            globals.UserID.toString() +
-            "&uuid=" +
-            globals.DeviceID +
-            "&platform=android&lat=" +
-            AllOrders[i]['lat'] +
-            "&lng=" +
-            AllOrders[i]['lng'] +
-            "&accuracy=" +
-            AllOrders[i]['accuracy'] +
-            "&PJP=" +
-            AllOrders[i]['PJP'].toString() +
-        "&version=" +
-            appVersion +
-            "&Spot_Discount=" +
-            discountController.text ;
-
-        ORDERIDToDelete = AllOrders[i]['id'];
-        await repo
-            .getAllAddedItemsOfOrder(AllOrders[i]['id'])
-            .then((val) async {
-          AllOrdersItems = val;
-          /*
-          setState(() {
-            AllOrdersItems = val;
-            print("ITEMS" + AllOrdersItems.toString());
-          });
-          */
-          print("orderParam 1 :" + orderParam.toString());
-          String orderItemParam = "";
-          for (int j = 0; j < AllOrdersItems.length; j++) {
-            orderParam += "&product_id=" +
-                AllOrdersItems[j]['product_id'].toString() +
-                "&quantity=" +
-                AllOrdersItems[j]['quantity'].toString() +
-                "&discount=" +
-                AllOrdersItems[j]['discount'].toString() +
-                "&unit_quantity=" +
-                AllOrdersItems [j]['unit_quantity'].toString() +
-                "&is_promotion=" +
-                AllOrdersItems [j]['is_promotion'].toString() +
-                "&promotion_id=" +
-                AllOrdersItems [j]['promotion_id'].toString() +
-                "&Spot_Discount_ID=" +
-                AllOrdersItems [j]['DiscountID'].toString() +
-                "&defaultDiscount=" +
-                AllOrdersItems [j]['defaultDiscount'].toString() +
-                "&maximumDiscount=" +
-                AllOrdersItems [j]['maximumDiscount'].toString() +
-                "";
-          }
-        });
-        print("orderParam: "+orderParam.toString());
-        var QueryParameters = <String, String>{
-          "SessionID": EncryptSessionID(orderParam),
-        };
-
-        var url =
-        Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncOrdersV13');
-        print(url);
-
-        try {
-          var response = await http.post(url,
-              headers: {
-                HttpHeaders.contentTypeHeader:
-                'application/x-www-form-urlencoded'
-              },
-              body: QueryParameters);
-
-          var responseBody = json.decode(utf8.decode(response.bodyBytes));
-          print('called4');
-          print("bhai :"+response.statusCode.toString());
-          if (response.statusCode == 200) {
-          //  print();
-            if (responseBody["success"] == "true") {
-              await repo.markOrderUploaded(ORDERIDToDelete);
-              _showDialog("Success","order uploaded. ",1);
-
-            } else {
-              _showDialog("Error", responseBody["error_code"], 0);
-            }
-          } else {
-            // If that response was not OK, throw an error.
-
-            //_showDialog("Error", "An error has occured " + responseBody.statusCode, 0);
-          }
-        } catch (e) {
-          //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          //_showDialog("Error", "An error has occured " + e.toString(), 1);
-        }
-        //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
-
-      }
-
-    });
-  }
   Future _UploadDocuments() async {
     print("_UploadDocuments called");
    // List AllDocuments = new List();
@@ -1166,6 +1038,227 @@ class _OrderCartView extends State<OrderCartView> {
     });
   }
 
+  Future _OutletRegisterationUpload(context) async {
+    print("============Selected PJP============" +
+        globals.selectedPJP.toString());
+    int ORDERIDToDelete = 0;
+    List AllRegisteredOutlets = new List();
+    await repo.getAllRegisteredOutletsByIsUploaded(0, 1).then((val) async {
+      setState(() {
+        AllRegisteredOutlets = val;
+
+        print("All Registered Outlets===>> " + AllRegisteredOutlets.toString());
+      });
+      for (int i = 0; i < AllRegisteredOutlets.length; i++) {
+        globals.RegisterOUletOrderRequestID =  int.tryParse(AllRegisteredOutlets[i]['mobile_request_id']);
+
+        String orderParam = "timestamp=" +
+            globals.getCurrentTimestamp() +
+            "&id_for_update=" +
+            '0' +
+            "&outlet_name=" +
+            AllRegisteredOutlets[i]['outlet_name'] +
+            "&mobile_request_id=" +
+            (AllRegisteredOutlets[i]['mobile_request_id']).toString() +
+            "&mobile_timestamp=" +
+            AllRegisteredOutlets[i]['mobile_timestamp'] +
+            "&channel_id=" +
+            AllRegisteredOutlets[i]['channel_id'].toString() +
+            "&area_label=" +
+            AllRegisteredOutlets[i]['area_label'].toString() +
+            "&sub_area_label=" +
+            AllRegisteredOutlets[i]['sub_area_label'].toString() +
+            "&address=" +
+            AllRegisteredOutlets[i]['address'] +
+            "&owner_name=" +
+            AllRegisteredOutlets[i]['owner_name'] +
+            "&owner_cnic=" +
+            AllRegisteredOutlets[i]['owner_cnic'] +
+            "&owner_mobile_no=" +
+            AllRegisteredOutlets[i]['owner_mobile_no'] +
+            "&purchaser_name=" +
+            AllRegisteredOutlets[i]['purchaser_name'] +
+            "&purchaser_mobile_no=" +
+            AllRegisteredOutlets[i]['purchaser_mobile_no'] +
+            "&is_owner_purchaser=" +
+            AllRegisteredOutlets[i]['is_owner_purchaser'].toString() +
+            "&lat=" +
+            AllRegisteredOutlets[i]['lat'].toString() +
+            "&lng=" +
+            AllRegisteredOutlets[i]['lng'].toString() +
+            "&accuracy=" +
+            (AllRegisteredOutlets[i]['accuracy']).toString() +
+            "&created_on=" +
+            AllRegisteredOutlets[i]['created_on'] +
+            "&created_by=" +
+            AllRegisteredOutlets[i]['created_by'].toString() +
+            "&OutletChannel=" +
+            AllRegisteredOutlets[i]['outletchannel'].toString() +
+            "&uuid=" +
+            globals.DeviceID +
+            "&version=" +
+            globals.appVersion +
+            "&platform=android" +
+            "&PJP=" +
+            globals.selectedPJP +
+            "&is_order=" +
+           1.toString();
+        print("outletRegisterationsParams:" + orderParam);
+
+
+        DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
+        String currDateTime = dateFormat.format(DateTime.now());
+        var str = currDateTime.split(".");
+
+        String TimeStamp = str[0];
+
+        print("currDateTime" + TimeStamp);
+
+        int ORDERIDToDelete = 0;
+        AllOrders = new List();
+        await repo.getAllOrdersByIsUploaded(0).then((val) async {
+
+          AllOrders = val;
+          /*
+      setState(() {
+        AllOrders = val;
+
+        print("MAIN ORDER" + AllOrders.toString());
+      });
+      */
+          AllOrdersItems = new List();
+          print("AllOrders :"+AllOrders.toString());
+          for (int i = 0; i < AllOrders.length; i++) {
+             orderParam += "&timestamp=" +
+                TimeStamp +
+                "&order_no=" +
+                AllOrders[i]['id'].toString() +
+                "&outlet_id=" +
+                AllOrders[i]['outlet_id'].toString() +
+                "&created_on=" +
+                AllOrders[i]['created_on'].toString() +
+                "&created_by=" +
+                globals.UserID.toString() +
+                "&uuid=" +
+                globals.DeviceID +
+                "&platform=android&lat=" +
+                AllOrders[i]['lat'] +
+                "&lng=" +
+                AllOrders[i]['lng'] +
+                "&accuracy=" +
+                AllOrders[i]['accuracy'] +
+                "&PJP=" +
+                AllOrders[i]['PJP'].toString() +
+                "&version=" +
+                appVersion +
+                "&Spot_Discount=" +
+                discountController.text ;
+
+            ORDERIDToDelete = AllOrders[i]['id'];
+            await repo
+                .getAllAddedItemsOfOrder(AllOrders[i]['id'])
+                .then((val) async {
+              AllOrdersItems = val;
+              /*
+          setState(() {
+            AllOrdersItems = val;
+            print("ITEMS" + AllOrdersItems.toString());
+          });
+          */
+              print("AllOrdersItems :"+AllOrdersItems.toString());
+
+              print("orderParam 1 :" + orderParam.toString());
+              String orderItemParam = "";
+              for (int j = 0; j < AllOrdersItems.length; j++) {
+                orderParam += "&product_id=" +
+                    AllOrdersItems[j]['product_id'].toString() +
+                    "&quantity=" +
+                    AllOrdersItems[j]['quantity'].toString() +
+                    "&discount=" +
+                    AllOrdersItems[j]['discount'].toString() +
+                    "&unit_quantity=" +
+                    AllOrdersItems [j]['unit_quantity'].toString() +
+                    "&is_promotion=" +
+                    AllOrdersItems [j]['is_promotion'].toString() +
+                    "&promotion_id=" +
+                    AllOrdersItems [j]['promotion_id'].toString() +
+                    "&Spot_Discount_ID=" +
+                    AllOrdersItems [j]['DiscountID'].toString() +
+                    "&defaultDiscount=" +
+                    AllOrdersItems [j]['defaultDiscount'].toString() +
+                    "&maximumDiscount=" +
+                    AllOrdersItems [j]['maximumDiscount'].toString() +
+                    "&amount=" +
+                    AllOrdersItems [j]['amount'].toString() +
+                    "";
+              }
+            });
+            print("orderParam: "+orderParam.toString());
+            //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
+          }
+
+        });
+        /* String orderParam="timestamp="+globa+"&order_no="+AllOrders[i]['id'].toString()+"&outlet_id="+ globals.OutletID.toString()+"&created_on="+AllOrders[i]['created_on'].toString()+"&created_by=100450&uuid=656d30b8182fea88&platform=android&lat="+globals.currentPosition.latitude.toString()+"&lng="+globals.currentPosition.longitude.toString()+"&accuracy=21";
+        print("AllOrders[i]['id']"+AllOrders[i]['id'].toString());*/
+
+        var QueryParameters = <String, String>{
+          "SessionID": globals.EncryptSessionID(orderParam),
+        };
+        //var localUrl="http://192.168.10.37:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
+        // var localUrl="http://192.168.30.125:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
+        var url = Uri.http(
+            globals.ServerURL, '/portal/mobile/MobileSyncOutletRegistration4');
+
+        try {
+          var response = await http.post(url,
+              headers: {
+                HttpHeaders.contentTypeHeader:
+                'application/x-www-form-urlencoded'
+              },
+              body: QueryParameters);
+
+          var responseBody = json.decode(utf8.decode(response.bodyBytes));
+          print('called4');
+          print('called4');
+          print('statusCode'+response.statusCode.toString());
+          if (response.statusCode == 200) {
+            print("inside 200");
+            if (responseBody["success"] == "true") {
+              print("inside success");
+
+              print("Saved");
+              repo.markOutletUploaded(
+                  int.tryParse(AllRegisteredOutlets[i]['mobile_request_id']));
+              await repo.markOrderUploaded(ORDERIDToDelete);
+
+              //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+            } else {
+              // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+              _showDialog("Error", responseBody["error_code"], 0);
+              print("Error:" + responseBody["error_code"]);
+            }
+          } else {
+            //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+            //_showDialog("Error", "An error has occured: " + responseBody.statusCode, 0);
+            print("Error: An error has occured: " + responseBody.statusCode);
+          }
+        } catch (e) {
+          // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
+          //_showDialog("Error", "An error has occured " + e.toString(), 1);
+          print("Error: An error has occured: " + e.toString());
+        }
+      }
+    });
+    /* Navigator.push(
+      context,
+      //
+
+      MaterialPageRoute(builder: (context) =>ShopAction()
+
+
+      ),
+    );*/
+  }
 
   void _showDialog(String Title, String Message, int isSuccess) {
     // flutter defined function
@@ -1189,7 +1282,7 @@ class _OrderCartView extends State<OrderCartView> {
                     context,
                     //
 
-                    MaterialPageRoute(builder: (context) => ShopAction()
+                    MaterialPageRoute(builder: (context) => Home()
                       //  MaterialPageRoute(builder: (context) =>ShopAction_test()
 
                     ),

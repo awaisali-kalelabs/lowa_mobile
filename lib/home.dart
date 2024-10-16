@@ -688,7 +688,7 @@ class _Home extends State<Home> {
           String fileName = photoFile.path.split('/').last;
 
           var request = new http.MultipartRequest("POST", url);
-          request.fields['mobile_timestamp'] =
+          request.fields['de'] =
               AllMerchandsingPhotos[i]['mobile_timestamp'].toString();
           request.fields['outletId'] =
               AllMerchandsingPhotos[i]['outlet_id'].toString();

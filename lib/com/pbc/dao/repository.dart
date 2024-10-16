@@ -828,8 +828,7 @@ class Repository {
     List args = new List();
     args.add(pjp);
     final List<Map> maps = await db.rawQuery(
-        "select count(*) as totalOrders from outlet_orders where  PJP=?1 and date(created_on)=date('now') and is_completed=1",args);
-
+        "SELECT COUNT(DISTINCT outlet_id) AS totalOrders FROM outlet_orders WHERE PJP = ?1 AND date(created_on) = date('now') AND is_completed = 1",args);
     totoalVisits = maps[0]['totalOrders'];
     return totoalVisits;
   }
@@ -843,7 +842,7 @@ class Repository {
     args.add(pjp);
 
     final List<Map> maps1 = await db.rawQuery(
-        "select count(*) as totalNoOrders from outlet_no_orders where PJP=?1 and date(created_on)=date('now') ",args);
+        "select COUNT(DISTINCT outlet_id) as totalNoOrders from outlet_no_orders where PJP=?1 and date(created_on)=date('now') ",args);
     totoalVisits = maps1[0]['totalNoOrders'];
     return totoalVisits;
   }

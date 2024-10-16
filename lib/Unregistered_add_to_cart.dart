@@ -1,14 +1,12 @@
-/*
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:order_booker/com/pbc/dao/repository.dart';
-import 'package:order_booker/orders.dart';
-import 'package:order_booker/shopAction.dart';
-import 'package:order_booker/un_registered_outlet_orders.dart';
 import 'dart:math' as math;
 
+import 'Unregisteredorders.dart';
+import 'UnregisteredshopAction.dart';
 import 'globals.dart' as globals;
 
 void main() async {
@@ -19,7 +17,6 @@ void main() async {
 
 // This app is a stateful, it tracks the user's current choice.
 class UnregisteredAddToCart extends StatefulWidget {
-  ///screen 2
   int OutletId;
 
   UnregisteredAddToCart(OutletId) {
@@ -28,10 +25,10 @@ class UnregisteredAddToCart extends StatefulWidget {
     print(OutletId);
   }
   @override
-  _AddToCart createState() => _AddToCart(OutletId);
+  _UnregisteredAddToCart createState() => _UnregisteredAddToCart(OutletId);
 }
 
-class _AddToCart extends State<UnregisteredAddToCart> {
+class _UnregisteredAddToCart extends State<UnregisteredAddToCart> {
   int OutletId;
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
   String selected;
@@ -40,7 +37,7 @@ class _AddToCart extends State<UnregisteredAddToCart> {
   bool isDiscountAllowed = false;
   List<Map<String, dynamic>> AllAddToCarts;
   String _SelectFerightTerms;
-  _AddToCart(OutletId) {
+  _UnregisteredAddToCart(OutletId) {
     this.OutletId = OutletId;
   }
   Repository repo = new Repository();
@@ -171,7 +168,7 @@ class _AddToCart extends State<UnregisteredAddToCart> {
                     context,
                     //
 
-                    MaterialPageRoute(builder: (context) => ShopAction()
+                    MaterialPageRoute(builder: (context) => UnregisteredShopAction()
                       //  MaterialPageRoute(builder: (context) =>ShopAction_test()
 
                     ),
@@ -330,19 +327,15 @@ class _AddToCart extends State<UnregisteredAddToCart> {
           print(      "raw_case" +  ( priceRateAfterDiscount = ProductsPrice[0]["raw_case"]).toString());
           priceRateAfterDiscount = ProductsPrice[0]["raw_case"];
           priceRate = ProductsPrice[0]["raw_case"];
-          */
-/*if(globals.maxDiscountPercentage>0 && priceRate>0){
+          /*if(globals.maxDiscountPercentage>0 && priceRate>0){
             maximumDiscount = priceRate/100*globals.maxDiscountPercentage;
             print("print(maximumDiscount);"+maximumDiscount.toString());
-          }*//*
-
+          }*/
 
         }
 
-        */
-/*  priceRateAfterDiscount=153;
-        priceRate=153;*//*
-
+        /*  priceRateAfterDiscount=153;
+        priceRate=153;*/
 
         rateController.text = priceRate.toString();
 
@@ -356,12 +349,10 @@ class _AddToCart extends State<UnregisteredAddToCart> {
             priceRate = ProductsPrice[0]["raw_case_price"];
             rateController.text = priceRate.toString();
 
-            */
-/*if(globals.maxDiscountPercentage>0 && priceRate>0){
+            /*if(globals.maxDiscountPercentage>0 && priceRate>0){
               maximumDiscount = priceRate/100*globals.maxDiscountPercentage;
               print("print(maximumDiscount);"+maximumDiscount.toString());
-            }*//*
-
+            }*/
 
           }
         });
@@ -390,7 +381,7 @@ class _AddToCart extends State<UnregisteredAddToCart> {
     print("discountController 1==> " + discountController.text.toString());
 
     if (double.parse(discountController.text) < priceRate && double.parse(discountController.text)<=maximumDiscount && double.parse(discountController.text) >= defaultDiscount ) {
-      // priceRateAfterDiscount = priceRate - double.parse(discountController.text);
+     // priceRateAfterDiscount = priceRate - double.parse(discountController.text);
       priceRateCal = priceRate * double.parse(discountController.text)/100;
       priceRateAfterDiscount = priceRate - priceRateCal;
       print("discountController==> " + discountController.text.toString());
@@ -459,7 +450,7 @@ class _AddToCart extends State<UnregisteredAddToCart> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              UnregisteredOutletOrders(outletId: globals.OutletID)),
+                              UnregisteredOrders()),
                       ModalRoute.withName("/Orders"));
                 }),
           ),
@@ -668,18 +659,16 @@ class _AddToCart extends State<UnregisteredAddToCart> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                UnregisteredOutletOrders(outletId: globals.OutletID)),
+                                                UnregisteredOrders()),
                                         ModalRoute.withName("/Orders"));
-                                    */
-/*
+                                    /*
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => Orders(
                                               outletId: globals.OutletID)),
                                     );
-                                    *//*
-
+                                    */
                                   } else {
                                     Flushbar(
                                       messageText: Column(
@@ -723,7 +712,6 @@ class _AddToCart extends State<UnregisteredAddToCart> {
                   ],
                 ),
               ),
-*/
 /*
                     Positioned(
                         top: -90,
@@ -737,18 +725,14 @@ class _AddToCart extends State<UnregisteredAddToCart> {
                           child: Image.asset("assets/images/cart.png",width: 100,height: 100,),
                         )
                     ),
-            *//*
-
-              */
-/*    Positioned(
+            */
+              /*    Positioned(
               top: 10,
               child:Container(
                 child:,
-              ),)*//*
-
+              ),)*/
             ],
           )),
     );
   }
 }
-*/

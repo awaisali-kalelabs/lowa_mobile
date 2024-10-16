@@ -1,42 +1,36 @@
-/*
 import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-import 'package:order_booker/add_to_cart.dart';
 import 'package:order_booker/com/pbc/dao/repository.dart';
 import 'package:order_booker/com/pbc/model/outlet_orders.dart';
 import 'package:order_booker/promotion_sku_selection.dart';
-import 'package:order_booker/shopAction.dart';
-import 'package:order_booker/un_registered_outlet_order_cart_view.dart';
-import 'package:order_booker/unregistered_outlet_order_cart.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:badges/badges.dart' as badges;
 
+import 'Unregistered_add_to_cart.dart';
+import 'Unregistered_order_cart_view.dart';
+import 'UnregisteredshopAction.dart';
 import 'globals.dart' as globals;
-import 'order_cart_view.dart';
-import 'outlet_registration.dart';
 
-class UnregisteredOutletOrders extends StatefulWidget {
-  /// screen 1
+class UnregisteredOrders extends StatefulWidget {
   int outletId = 0;
   @override
-  UnregisteredOutletOrders({int outletId}) {
+  Orders({int outletId}) {
     this.outletId = outletId;
   }
-  _OrdersState createState() => _OrdersState(outletId);
+  _UnregisteredOrders createState() => _UnregisteredOrders(outletId);
 }
 
-class _OrdersState extends State<UnregisteredOutletOrders> {
+class _UnregisteredOrders extends State<UnregisteredOrders> {
   int outletId = 0;
   int totalAddedProducts = 0;
   double totalAmount = 0.0;
   bool isLocationTimedOut = false;
 
-  _OrdersState(int outletId) {
+  _UnregisteredOrders(int outletId) {
     this.outletId = outletId;
   }
 
@@ -143,8 +137,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
         order.add(orderobj);
         initiateOrder(order);
         // Dialogs.showLoadingDialog(context, _keyLoader);
-        */
-/*
+        /*
         Position position;
         globals.getCurrentLocation(context).then((position1) {
           position = position1;
@@ -210,8 +203,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
           }
 
           //    Navigator.of(_keyLoader.currentContext, rootNavigator: true).pop();
-        });*//*
-
+        });*/
       } else {
         orderId = AllOrders[0]['id'];
       }
@@ -327,7 +319,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
               style: new TextStyle(
                   fontSize: 13,
                   color:
-                  SelectedLRBType[index] ? Colors.white : Colors.blueGrey)),
+                      SelectedLRBType[index] ? Colors.white : Colors.blueGrey)),
         ),
       ],
     );
@@ -345,9 +337,9 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
           children: [
             InkWell(
                 focusColor:
-                SelectedLRBType[index] ? Colors.lightBlue : Colors.white,
+                    SelectedLRBType[index] ? Colors.lightBlue : Colors.white,
                 highlightColor:
-                SelectedLRBType[index] ? Colors.lightBlue : Colors.white,
+                    SelectedLRBType[index] ? Colors.lightBlue : Colors.white,
                 splashColor: Colors.lightBlue,
                 onTap: () {
                   setState(() {
@@ -376,7 +368,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                   //working here
                   repo
                       .getProductsSubCategoriesByCategoryId(
-                      selectedLRBMenuValue)
+                          selectedLRBMenuValue)
                       .then((val) {
                     setState(() {
                       ProductsCatgories = val;
@@ -389,7 +381,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
 
                   repo
                       .getProducts(
-                      selectedLRBMenuValue, selectedCategoryMenuValue)
+                          selectedLRBMenuValue, selectedCategoryMenuValue)
                       .then((val) {
                     setState(() {
                       Products = val;
@@ -421,7 +413,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
         ListTile(
           selected: SelectedCategories[index],
           selectedTileColor:
-          SelectedCategories[index] ? Colors.blue : Colors.white,
+              SelectedCategories[index] ? Colors.blue : Colors.white,
           focusColor: Colors.lightBlueAccent,
           onTap: () async {
             setState(() {
@@ -502,10 +494,8 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
           priceRate = ProductsPrice[0]["raw_case"];
         }
 
-        */
-/*  priceRateAfterDiscount=153;
-        priceRate=153;*//*
-
+        /*  priceRateAfterDiscount=153;
+        priceRate=153;*/
 
         rateController.text = priceRate.toString();
       });
@@ -571,7 +561,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                                         onChanged: (val) {},
                                         decoration: InputDecoration(
                                           enabledBorder:
-                                          const UnderlineInputBorder(
+                                              const UnderlineInputBorder(
                                             borderSide: const BorderSide(
                                                 color: Colors.black12,
                                                 width: 0.0),
@@ -593,11 +583,11 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                                               double.parse(
                                                   discountController.text);
                                           if (int.parse(
-                                              quantityController.text) !=
+                                                  quantityController.text) !=
                                               0) {
                                             double amount = 0;
                                             double price = double.parse(
-                                                quantityController.text) *
+                                                    quantityController.text) *
                                                 priceRateAfterDiscount;
                                             amountController.text =
                                                 price.toString();
@@ -605,7 +595,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                                         },
                                         decoration: InputDecoration(
                                           enabledBorder:
-                                          const UnderlineInputBorder(
+                                              const UnderlineInputBorder(
                                             borderSide: const BorderSide(
                                                 color: Colors.black12,
                                                 width: 0.0),
@@ -638,7 +628,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                                         keyboardType: TextInputType.number,
                                         decoration: InputDecoration(
                                           enabledBorder:
-                                          const UnderlineInputBorder(
+                                              const UnderlineInputBorder(
                                             borderSide: const BorderSide(
                                                 color: Colors.black12,
                                                 width: 0.0),
@@ -646,16 +636,14 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                                           labelText: 'Quantity *',
                                         )),
                                   ),
-                                  */
-/*Visibility(
+                                  /*Visibility(
                                   visible: isQuantityNotAdded,
                                     child:
                                       Container(
                                         alignment: Alignment.topLeft,
                                         child: Text("ABC",textAlign: TextAlign.left,style: TextStyle(color: Colors.blue),),
                                       ),
-                                ),*//*
-
+                                ),*/
                                   Container(
                                     // width: cardWidth,
                                     padding: EdgeInsets.all(5.0),
@@ -667,7 +655,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                                         controller: amountController,
                                         decoration: InputDecoration(
                                           enabledBorder:
-                                          const UnderlineInputBorder(
+                                              const UnderlineInputBorder(
                                             borderSide: const BorderSide(
                                                 color: Colors.black12,
                                                 width: 0.0),
@@ -680,7 +668,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                                     child: MaterialButton(
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                          BorderRadius.circular(40),
+                                              BorderRadius.circular(40),
                                         ),
                                         color: Colors.lightBlue,
                                         child: Text(
@@ -722,9 +710,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                  builder: (context) => UnregisteredOutletOrders(
-                                                      outletId:
-                                                      globals.OutletID)),
+                                                  builder: (context) => UnregisteredOrders()),
                                             );
                                           }
 
@@ -773,19 +759,17 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                 //
 
                 MaterialPageRoute(builder: (context) => UnregisteredAddToCart(1)
-                  //  MaterialPageRoute(builder: (context) =>ShopAction_test()
+                    //  MaterialPageRoute(builder: (context) =>ShopAction_test()
 
-                ),
+                    ),
               );
-              */
-/*
+            /*
               Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
                           AddToCart(1)),
-                  ModalRoute.withName("/Orders"));*//*
-
+                  ModalRoute.withName("/Orders"));*/
 
 
             },
@@ -795,8 +779,8 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
         ),
         (Products.length - 1) == index
             ? Container(
-          height: 500,
-        )
+                height: 500,
+              )
             : Container(height: 0)
       ],
     );
@@ -829,26 +813,22 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => OutletRegisteration()),
+                      MaterialPageRoute(builder: (context) => UnregisteredShopAction()),
                     );
                   })),
           actions: <Widget>[
             Row(
-
               mainAxisSize: MainAxisSize.min,
               children: [
-                */
-/*   Flexible(
+             /*   Flexible(
                     child: Container(
                   padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
                   child: IconButton(
                       icon: Icon(Icons.account_balance_wallet),
                       color: Colors.white,
                       onPressed: () {}),
-                )),*//*
-
-                */
-/*  Flexible(
+                )),*/
+              /*  Flexible(
                     child: Container(
                         padding: EdgeInsets.fromLTRB(0.0, 10.0, 15.0, 0.0),
                         child: Text(
@@ -856,8 +836,7 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                               .getDisplayCurrencyFormat(totalAmount)
                               .toString(),
                           style: TextStyle(color: Colors.white),
-                        )))*//*
-
+                        )))*/
               ],
             ),
             Padding(
@@ -935,47 +914,47 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
                 ),
                 Expanded(
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Expanded(
-                          child: Container(
-                              height: 250,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Flexible(
-                                      child: ListView.builder(
-                                        shrinkWrap: true,
-                                        //physics: ClampingScrollPhysics(),
-                                        itemCount: ProductsLrbTypes != null
-                                            ? ProductsLrbTypes.length
-                                            : 0,
-                                        itemBuilder: _getLRBTypeList,
-                                      )),
-                                ],
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: Container(
+                          height: 250,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              Flexible(
+                                  child: ListView.builder(
+                                shrinkWrap: true,
+                                //physics: ClampingScrollPhysics(),
+                                itemCount: ProductsLrbTypes != null
+                                    ? ProductsLrbTypes.length
+                                    : 0,
+                                itemBuilder: _getLRBTypeList,
                               )),
-                        ),
-                        Expanded(
-                          child: Container(
-                              height: 250,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Expanded(
-                                      child: ListView.builder(
-                                        shrinkWrap: true,
-                                        //physics: ClampingScrollPhysics(),
-                                        itemCount: ProductsCatgories.length,
-                                        itemBuilder: _getSubCategoirsList,
-                                      )),
-                                ],
+                            ],
+                          )),
+                    ),
+                    Expanded(
+                      child: Container(
+                          height: 250,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              Expanded(
+                                  child: ListView.builder(
+                                shrinkWrap: true,
+                                //physics: ClampingScrollPhysics(),
+                                itemCount: ProductsCatgories.length,
+                                itemBuilder: _getSubCategoirsList,
                               )),
-                        ),
-                      ],
-                    ))
+                            ],
+                          )),
+                    ),
+                  ],
+                ))
               ],
             ),
           ),
@@ -1006,39 +985,39 @@ class _OrdersState extends State<UnregisteredOutletOrders> {
           ),
           body: SingleChildScrollView(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Container(
-                    // width: cardWidth,
-                    margin: EdgeInsets.all(5.0),
-                    child: TextField(
-                        focusNode: _focus,
-                        autofocus: false,
-                        onChanged: (val) {
-                          repo
-                              .getProductsBySerachMethod(selectedLRBMenuValue,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                // width: cardWidth,
+                margin: EdgeInsets.all(5.0),
+                child: TextField(
+                    focusNode: _focus,
+                    autofocus: false,
+                    onChanged: (val) {
+                      repo
+                          .getProductsBySerachMethod(selectedLRBMenuValue,
                               selectedCategoryMenuValue, val)
-                              .then((val) {
-                            setState(() {
-                              Products = val;
-                            });
-                          });
-                        },
-                        decoration: InputDecoration(
-                          enabledBorder: const UnderlineInputBorder(
-                            borderSide:
+                          .then((val) {
+                        setState(() {
+                          Products = val;
+                        });
+                      });
+                    },
+                    decoration: InputDecoration(
+                      enabledBorder: const UnderlineInputBorder(
+                        borderSide:
                             const BorderSide(color: Colors.black12, width: 0.0),
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.search_sharp,
-                          ),
-                          labelText: 'Search',
-                        )),
-                  ),
-                  _buildListView(),
-                ],
-              )),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search_sharp,
+                      ),
+                      labelText: 'Search',
+                    )),
+              ),
+              _buildListView(),
+            ],
+          )),
         ),
       ),
     );
@@ -1081,4 +1060,3 @@ class HexColor extends Color {
 
   HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
 }
-*/
