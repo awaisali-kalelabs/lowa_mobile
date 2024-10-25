@@ -35,6 +35,7 @@ class OutletRegisteration extends StatefulWidget {
 class _OutletRegisteration extends State<OutletRegisteration> {
   final _formKey = GlobalKey<FormState>();
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
+  final GlobalKey<State> _keyLoader2 = new GlobalKey<State>();
   int _selectedArea;
   int _selectedSubArea;
   int _selectedChannelArea;
@@ -398,6 +399,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                   TextButton(
                     child: Text("Save Outlet"),
                     onPressed: () async {
+                      Dialogs.showLoadingDialog(context, _keyLoader2);
                       // Validate the form before proceeding
                       globals.showLoader(context);
                       if (_formKey.currentState?.validate() ?? false) {
@@ -718,6 +720,7 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                                       suggestion['label'];
                                   this._selectedChannelArea = suggestion['id'];
                                   FocusScope.of(context).requestFocus(focus);
+
                                 },
                                 validator: (value) => value.isEmpty
                                     ? 'Please select a channel'
@@ -757,6 +760,8 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                                   this._selectedOutletChannel =
                                       suggestion['id'];
                                   FocusScope.of(context).requestFocus(focus2);
+                                  globals.UnregisterChannelID=suggestion['id'];
+                                  print( "sdbahdfsj"+globals.UnregisterChannelID.toString());
                                 },
                                 validator: (value) => value.isEmpty
                                     ? 'Please select Outlet channel'

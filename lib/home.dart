@@ -5,7 +5,9 @@ import 'dart:io';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:new_version_plus/new_version_plus.dart';
@@ -30,6 +32,7 @@ import 'pre_sell_chart.dart';
 import 'pre_sell_route.dart';
 import 'spot_sell_chart.dart';*/
 import 'SelectPJP.dart';
+import 'com/pbc/dao/database_export.dart';
 import 'daily_reports.dart';
 import 'globals.dart' as globals;
 
@@ -77,12 +80,18 @@ class _Home extends State<Home> {
     super.initState();
     String DeviceID;
    //checkForNewVersion()
-    _getDeviceId().then((val) {
+    _getDeviceId().then((val)
+    {
       setState(() {
         DeviceID = val;
         globals.DeviceID = DeviceID;
       });
     });
+    globals.OutletID = 0;
+    globals.OutletAddress = "";
+    globals.OutletName ="";
+    globals.OutletNumber = 0.toString();
+    globals.OutletOwner = "";
     // globals.DeviceID = DeviceID;
     print("Device IDs" + globals.DeviceID.toString());
     globals.stopContinuousLocation();
@@ -340,6 +349,59 @@ class _Home extends State<Home> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+  Future _UploadDocuments() async {
+    print("_UploadDocuments called");
+    // List AllDocuments = new List();
+    await repo.getAllOutletImages(globals.orderId).then((val) async {
+      /*   setState(() {
+        AllDocuments = val;
+      });*/
+
+      for (int i = 0; i < val.length; i++) {
+        int MobileRequestID = int.parse(val[i]['id'].toString());
+        String created_on = val[i]['created_on'].toString();
+        print("created_on == " + created_on.toString());
+        try {
+          print("AllDocuments.length" + val.length.toString());
+          File photoFile = File(val[i]['file']);
+          //  var stream =
+          var stream = ByteStream(photoFile.openRead());
+          var length = await photoFile.length();
+          var url = Uri.http(
+              globals.ServerURL, '/portal/mobile/MobileUploadOrdersImage');
+          print("================="+url.toString());
+          print("===Hello===");
+          String fileName = photoFile.path.split('/').last;
+
+          var request = new http.MultipartRequest("POST", url);
+          request.fields['OrderNo'] = MobileRequestID.toString();
+          request.fields['created_on'] = created_on;
+          print("===Hello1===");
+          var multipartFile = new http.MultipartFile('file', stream, length,
+              filename: "Outlet_" + fileName);
+
+          request.files.add(multipartFile);
+          print("multipartFile===>" + multipartFile.toString());
+          var response = await request.send();
+          print("===Hello=="+response.toString());
+
+          print("====="+response.statusCode.toString());
+
+          print("response"+response.statusCode.toString());
+          print(response.toString());
+          if (response.statusCode == 200) {
+            print("MarkImage SUCCESS");
+            await repo.markPhotoUploaded(MobileRequestID);
+          }else{
+            print("False Image");
+          }
+        } catch (e) {
+          print("===Hello3===");
+          print("e.toString()  " + e.toString());
+        }
+      }
+    });
   }
 
   Future _UploadOutletMarkClosed() async {
@@ -849,6 +911,97 @@ class _Home extends State<Home> {
       }
     });
   }
+  Future _UploadDocumentNoOrder() async {
+    print("_UploadDocuments called");
+    List AllDocuments = new List();
+    print("================" + globals.orderId.bitLength.toString());
+    // for (int i = 0; i < 2; i++) {
+    // if (outletImagePath.elementAt(i) != "") {
+
+    await repo.getNoOrderImages(globals.orderId).then((val) async {
+      setState(() {
+        AllDocuments = val;
+      });
+      print("===" + val.toString());
+      //List AllDocuments = val;
+
+      print("==========" + AllDocuments.length.toString());
+      for (int i = 0; i < AllDocuments.length; i++) {
+        int MobileRequestID = int.parse(AllDocuments[i]['id'].toString());
+        try {
+          print("AllDocuments.length" + AllDocuments.length.toString());
+          File photoFile = File(AllDocuments[i]['file']);
+          //  var stream =
+          var stream = ByteStream(photoFile.openRead());
+          var length = await photoFile.length();
+          var url = Uri.http(
+              globals.ServerURL, '/portal/mobile/MobileUploadNoOrdersImage');
+          print(url.toString());
+          print("===Hello===");
+          String fileName = photoFile.path
+              .split('/')
+              .last;
+
+          var request = new http.MultipartRequest("POST", url);
+          request.fields['NoOrderNo'] = MobileRequestID.toString();
+          print("===Hello1===");
+          var multipartFile = new http.MultipartFile('file', stream, length,
+              filename: "Outlet_" + fileName);
+
+          request.files.add(multipartFile);
+          print("multipartFile===>" + multipartFile.toString());
+          var response = await request.send();
+          print("===Hello==" + response.toString());
+
+          print("=====" + response.statusCode.toString());
+
+          print("response" + response.statusCode.toString());
+          print(response.toString());
+          if (response.statusCode == 200) {
+            print("MarkImage SUCCESS");
+            await repo.markNoOrderPhotoUploaded(MobileRequestID, i + 1);
+            //
+          } else {
+            print("False");
+          }
+        } catch (e) {
+          print("===Hello3===");
+          print("e.toString()  " + e.toString());
+        }
+      }
+    });
+
+
+/* }else {
+        if(i < 1) {
+          Flushbar(
+            messageText: Column(
+              children: <Widget>[
+                Text(
+                  "Please provide at least 1 outlet image",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            backgroundGradient:
+            LinearGradient(colors: [Colors.black, Colors.black]),
+            icon: Icon(
+              Icons.notifications_active,
+              size: 30.0,
+              color: Colors.blue[800],
+            ),
+            duration: Duration(seconds: 2),
+            leftBarIndicatorColor: Colors.blue[800],
+          )
+            ..show(context);
+        }
+      }*/
+
+    // }
+  }
 
   Future _OutletRegisterationUpload(context) async {
     int ORDERIDToDelete = 0;
@@ -1090,6 +1243,9 @@ class _Home extends State<Home> {
     DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
     String currDateTime = dateFormat.format(DateTime.now());
     var str = currDateTime.split(".");
+    //Position position=globals.currentPosition;
+
+  //  await repo.completeOrder( position.latitude,position.longitude,position.accuracy, globals.OutletID);
 
     String TimeStamp = str[0];
 
@@ -1251,7 +1407,8 @@ class _Home extends State<Home> {
                       print("waiting......");
                     }
                     //Dialogs.showLoadingDialog(context, _scaffoldKey2);
-                    _UploadOrder(context).whenComplete(() => _UploadNoOrder(context)
+                    _UploadOrder(context).whenComplete(() => _UploadDocuments().whenComplete(() =>
+                        _UploadNoOrder(context) .whenComplete(() => _UploadDocumentNoOrder()
                         .whenComplete(() => _OutletRegisterationUpload(context)
                             .whenComplete(() => _OutletRegisterationUpload2(context)
                                 .whenComplete(() => _SyncMarkedAttendance()
@@ -1261,7 +1418,22 @@ class _Home extends State<Home> {
                                         .whenComplete(() => () {
                                               _SyncMarkedAttendancePhoto();
                                               _SyncMerchandisingPhoto();
-                                            }))))));
+                                            }))))))));
+                  },
+                ),
+                Divider(
+                  height: 1,
+                  color: Colors.grey,
+                ),
+                ListTile(
+                  leading: Icon(Icons.data_exploration, color: Colors.blue),
+                  title: Text('Export DB'),
+                  onTap: () {
+                   /* globals.Reset();*/
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => DatabaseExport()),
+                    );
                   },
                 ),
                 Divider(

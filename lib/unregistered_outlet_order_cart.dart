@@ -523,7 +523,7 @@ class _AddToCart extends State<UnregisteredAddToCart> {
                                                 borderSide: const BorderSide(
                                                     color: Colors.black12, width: 0.0),
                                               ),
-                                              labelText: 'Rate',
+                                             labelText: 'Rate',
                                             )),
                                       )),
 

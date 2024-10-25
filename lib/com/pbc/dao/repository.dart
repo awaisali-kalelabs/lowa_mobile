@@ -314,7 +314,7 @@ class Repository {
     List args = new List();
     args.add(orderId);
     args.add(isPromotion);
-
+    print("orderId in getAllAddedItemsOfOrderByIsPromotion"+orderId.toString());
     // Query the table for all The Dogs.
     final List<Map> maps = await db.rawQuery(
         "select * from outlet_order_items where order_id=?1 and is_promotion=?2", args);
@@ -1089,7 +1089,39 @@ class Repository {
       return false;
     }
   }
+  Future initOrder2(id, isCompleted, isUploaded, totalAmount, uuid,
+      createdOn, lat, lng, accuracy,PJP) async {
+    await this.initdb();
+    final Database db = await database;
+    print("dsdsadsadsa");
 
+    int i = 0;
+    try {
+      i = await db.rawInsert(
+          'insert into outlet_orders (id,is_completed,is_uploaded,total_amount,uuid,created_on, lat, lng, accuracy,PJP) values  (?,?,?,?,?,DATETIME("now","5 hours"),?,?,?,?) ',
+          [
+            id,
+            isCompleted,
+            isUploaded,
+            totalAmount,
+            uuid,
+            lat,
+            lng,
+            accuracy,
+            PJP
+          ]);
+    } catch (error) {
+      //print("//print ERROR");
+      print("sad"+error);
+    }
+    if (i > 0) {
+      print("created");
+      return true;
+    } else {
+      print("not created");
+      return false;
+    }
+  }
   void insertNoOrderReason(id, label) async {
     await this.initdb();
     final Database db = await database;
@@ -1144,6 +1176,34 @@ class Repository {
     return maps;
   }
 
+  Future<List<Map<String, dynamic>>> getAllOrdersunregistered(
+       int isCompleted) async {
+    await this.initdb();
+    final Database db = await database;
+    List args = new List();
+    args.add(isCompleted);
+
+    // Query the table for all The Dogs.
+    final List<Map> maps = await db.rawQuery(
+        "select * from outlet_orders where  is_completed=?1",
+        args);
+    print(maps.toString());
+    return maps;
+  }
+  Future<List<Map<String, dynamic>>> getAllOrdersunregistered2(
+      int orderid) async {
+    await this.initdb();
+    final Database db = await database;
+    List args = new List();
+    args.add(orderid);
+
+    // Query the table for all The Dogs.
+    final List<Map> maps = await db.rawQuery(
+        "select * from outlet_orders where  id=?1",
+        args);
+    print(maps.toString());
+    return maps;
+  }
   Future<List<Map<String, dynamic>>> getNoOrderReasons() async {
     await this.initdb();
     final Database db = await database;
@@ -1263,14 +1323,15 @@ class Repository {
     return true;
   }*/
 
-  Future<int> addItemToCurrentOrder( int orderId, List item, isForcedNewEntry) async {
+  Future<int> addItemToCurrentOrder(int orderId, List item, isForcedNewEntry) async {
     await this.initdb();
     final Database db = await database;
     int isNewEntry = 0;
-//print("ORDER ID"+orderId.toString());
+    print("ORDER ID: " + orderId.toString());
     double totalAmount = 0.0;
+
     for (int i = 0; i < item.length; i++) {
-      List args = new List();
+      List args = [];
       args.add(orderId);
       args.add(item[i]['product_id']);
       args.add(item[i]['discount']);
@@ -1280,7 +1341,6 @@ class Repository {
       args.add(item[i]['created_on']);
       args.add(item[i]['rate']);
       args.add(item[i]['product_label']);
-
       args.add(item[i]['unit_quantity']);
       args.add(item[i]['is_promotion']);
       args.add(item[i]['promotion_id']);
@@ -1289,59 +1349,80 @@ class Repository {
       args.add(item[i]['DiscountID']);
       args.add(item[i]['defaultDiscount']);
       args.add(item[i]['maximumDiscount']);
-
       totalAmount += Amount;
-
-      List args1 = new List();
+      print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+      print(item[i]['discount'].toString());
+      print(item[i]['quantity'].toString());
+      double withoutdiscountamount = 0.0;
+      List args1 = [];
       args1.add(orderId);
       args1.add(item[i]['product_id']);
+
+      // Print SELECT query
+      print("Executing SELECT query: select * from outlet_order_items where order_id=${args1[0]} and product_id=${args1[1]}");
       final List<Map> maps = await db.rawQuery(
           "select * from outlet_order_items where order_id=?1 and product_id=?2",
-          args1);
-      if(isForcedNewEntry==1){
+          args1
+      );
+
+      if (isForcedNewEntry == 1) {
+        // Print INSERT query for forced new entry
+        print("Executing INSERT query (forced new entry): insert into outlet_order_items with args: $args");
         await db.rawInsert(
             'insert into outlet_order_items (order_id ,product_id ,discount,quantity ,amount ,created_on,rate,'
-                'product_label, unit_quantity, is_promotion, promotion_id, id, source_id,DiscountID,defaultDiscount,maximumDiscount) values  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ',
-            args);
-      }else if (maps.isEmpty) {
-        isNewEntry =1;
+                'product_label, unit_quantity, is_promotion, promotion_id, id, source_id,DiscountID,defaultDiscount,maximumDiscount) values  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            args
+        );
+      } else if (maps.isEmpty) {
+        isNewEntry = 1;
+        // Print INSERT query for new entry
+        print("Executing INSERT query (new entry): insert into outlet_order_items with args: $args");
         await db.rawInsert(
             'insert into outlet_order_items (order_id ,product_id ,discount,quantity ,amount ,created_on,rate,'
-                'product_label, unit_quantity, is_promotion, promotion_id,id,source_id,DiscountID,defaultDiscount,maximumDiscount) values  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ',
-            args);
+                'product_label, unit_quantity, is_promotion, promotion_id,id,source_id,DiscountID,defaultDiscount,maximumDiscount) values  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            args
+        );
       } else {
-        List args2 = new List();
+        List args2 = [];
         args2.add(item[i]['quantity']);
         args2.add(item[i]['discount']);
         args2.add(item[i]['amount']);
         args2.add(item[i]['rate']);
         args2.add(orderId);
         args2.add(item[i]['product_id']);
-
         args2.add(item[i]['unit_quantity']);
         args2.add(item[i]['is_promotion']);
         args2.add(item[i]['promotion_id']);
 
-
-        if(item[i]['is_promotion']==0){
-
+        if (item[i]['is_promotion'] == 0) {
+          // Print UPDATE query for non-promotion
+          print("Executing UPDATE query (non-promotion): update outlet_order_items with args: $args2");
           await db.rawUpdate(
-              'update outlet_order_items set quantity=?1,discount=?2,amount=?3, rate=?4, unit_quantity=?7,is_promotion=?8, promotion_id=?9  where order_id=?5 and product_id=?6',
-              args2);
-        }else{
+              'update outlet_order_items set quantity=?1,discount=?2,amount=?3, rate=?4, unit_quantity=?7,is_promotion=?8, promotion_id=?9 where order_id=?5 and product_id=?6',
+              args2
+          );
+        } else {
+          // Print UPDATE query for promotion
+          print("Executing UPDATE query (promotion): update outlet_order_items with args: $args2");
           await db.rawUpdate(
-              'update outlet_order_items set quantity=?1,discount=?2,amount=?3, rate=?4, unit_quantity=?7,is_promotion=?8, promotion_id=?9  where order_id=?5 and product_id=?6 and promotion_id=?9',
-              args2);
+              'update outlet_order_items set quantity=?1,discount=?2,amount=?3, rate=?4, unit_quantity=?7,is_promotion=?8, promotion_id=?9 where order_id=?5 and product_id=?6 and promotion_id=?9',
+              args2
+          );
         }
       }
     }
 
-    List args = new List();
+    List args = [];
     args.add(orderId);
     args.add(totalAmount);
+
+    // Print UPDATE query for outlet_orders
+    print("Executing UPDATE query for outlet_orders: update outlet_orders set total_amount=${args[1]} where id=${args[0]}");
     await db.rawUpdate(
-        'update outlet_orders set is_completed=0,total_amount=?2 where id=?1 ',
-        args);
+        'update outlet_orders set is_completed=0,total_amount=?2 where id=?1',
+        args
+    );
+
     return isNewEntry;
   }
 
@@ -1361,21 +1442,59 @@ class Repository {
     return maps;
   }
 
-  Future completeOrder( lat, lng, accuracy, int outletId) async {
+  Future completeOrder(lat, lng, accuracy, int outletId) async {
     await this.initdb();
     final Database db = await database;
-    List args = new List();
+    List args = [];
 
+    // Get the current time in the local time zone
+    String currentTime = DateTime.now().toString(); // This will be in local time
 
     args.add(lat);
     args.add(lng);
     args.add(accuracy);
+    args.add(currentTime); // Add the local time to the arguments
     args.add(outletId);
+
+    // Print the query for debugging
+    print(
+        'UPDATE outlet_orders SET is_completed=1, lat=$lat, lng=$lng, accuracy=$accuracy, created_on=$currentTime WHERE outlet_id=$outletId');
+
+    // Execute the query
     await db.rawUpdate(
-        'update outlet_orders set is_completed=1, lat=?1,lng=?2,accuracy=?3 where outlet_id=?4 ', args);
+      'UPDATE outlet_orders SET is_completed=1, lat=?1, lng=?2, accuracy=?3, created_on=?4 WHERE outlet_id=?5',
+      args,
+    );
+
     return true;
   }
 
+  Future completeOrder2(lat, lng, accuracy, int orderID) async {
+    await this.initdb();
+    final Database db = await database;
+    List args = [];
+
+    // Get the current time in the local time zone
+    String currentTime = DateTime.now().toString(); // This will be in local time
+
+    args.add(lat);
+    args.add(lng);
+    args.add(accuracy);
+    args.add(currentTime); // Add the local time to the arguments
+    args.add(orderID);
+
+    // Print the query for debugging
+    print(
+        'UPDATE outlet_orders SET is_completed=1, lat=$lat, lng=$lng, accuracy=$accuracy, created_on=$currentTime WHERE id=$orderID');
+
+    // Execute the query
+    await db.rawUpdate(
+      'UPDATE outlet_orders SET is_completed=1, lat=?1, lng=?2, accuracy=?3, created_on=?4 WHERE id=?5',
+      args,
+    );
+
+    return true;
+  }
 
   Future markOrderUploaded(int orderId) async {
     await this.initdb();

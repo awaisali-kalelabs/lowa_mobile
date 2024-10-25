@@ -15,6 +15,7 @@ import 'package:order_booker/com/pbc/dao/repository.dart';
 import 'package:order_booker/gauge_segment.dart';
 import 'package:order_booker/globals.dart';
 
+import 'Unregisteredorders.dart';
 import 'globals.dart' as globals;
 /*
 import 'home.dart';
@@ -52,6 +53,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
   double maximumDiscount = 0;
   double defaultDiscount = 0;
   int DiscountIDmain = 0;
+  bool isLoading = false;
   _UnregisteredOrderCartView(int OrderId) {
     this.OrderId = OrderId;
   }
@@ -63,16 +65,19 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
 
     AllOrders = new List();
     freeProductsQuantity = new List();
-    repo.getAllOrders(globals.OutletID, 0).then((val) async {
+    repo.getAllOrdersunregistered2(globals.unregisterorderid).then((val) async {
       setState(() {
         AllOrders = val;
       });
 
       AllOrdersItems = new List();
       for (int i = 0; i < AllOrders.length; i++) {
+        print("AllOrders :"+AllOrders.toString());
         repo.getAllAddedItemsOfOrderByIsPromotion(AllOrders[i]['id'], 0).then((val) async {
           setState(() {
             AllOrdersItems = val;
+            print("AllOrdersItems :"+AllOrdersItems.toString());
+
             totalAddedProducts = AllOrdersItems.length;
             for (int i = 0; i < AllOrdersItems.length; i++) {
               totalAmount += AllOrdersItems[i]['amount'];
@@ -119,7 +124,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
         isDiscountAllowed = value;
       });
     });
-   /* repo.getSpotDiscount(globals.productId).then((value) => {
+    /* repo.getSpotDiscount(globals.productId).then((value) => {
       setState(() {
         if(value==null){
 
@@ -251,13 +256,32 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => Orders(
+                      builder: (context) => UnregisteredOrders(
                         outletId: globals.OutletID,
                       )),
                 );
               }),
           actions: [
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                onPrimary: Colors.grey, // Text Color
+              ),
+              child: isLoading
+                  ? CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              )
+                  : Text('Save',
+                  style: TextStyle(
+                    color: Colors.white,
+                  )),
+              onPressed: AllOrdersItems == null || AllOrdersItems.isEmpty
+                  ? null
+                  : () {
+                completeOrder(context);
+              },
+            ),
+
+            /*ElevatedButton(
               style: ElevatedButton.styleFrom(
                   onPrimary: Colors.grey, // Text Color
               ),
@@ -268,9 +292,10 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
               onPressed: AllOrdersItems==null || AllOrdersItems.isEmpty
                   ? null
                   : () {
-                /* _UploadOrder();*/
+
                 //  _showIndicator();
                // globals.showLoader(context);
+               // Dialogs.showLoadingDialog(context, _keyLoader);
 
                 completeOrder(context);
              //   globals.hideLoader(context);
@@ -278,7 +303,35 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
                 //_UploadDocuments();
 
               },
-            ),
+            ),*/
+            // ElevatedButton(
+            //   style: ElevatedButton.styleFrom(
+            //     onPrimary: Colors.grey, // Text Color
+            //   ),
+            //   child: isLoading
+            //       ? CircularProgressIndicator(
+            //     color: Colors.white, // Loader color
+            //   )
+            //       : Text(
+            //     'Save',
+            //     style: TextStyle(
+            //       color: Colors.white,
+            //     ),
+            //   ),
+            //   onPressed: AllOrdersItems == null || AllOrdersItems.isEmpty
+            //       ? null
+            //       : () async {
+            //     setState(() {
+            //       isLoading = true; // Show loader
+            //     });
+            //
+            //     await completeOrder(context); // Execute your function
+            //
+            //     setState(() {
+            //       isLoading = false; // Hide loader
+            //     });
+            //   },
+            // )
           ],
         ),
         body: ListView(
@@ -460,7 +513,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
                                                             TextAlign.center,
                                                           ),
                                                         ),
-                                                      /*  Expanded(
+                                                        /*  Expanded(
                                                           flex: 1,
                                                           child: Text(
                                                             "Disc",
@@ -527,81 +580,81 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
                                       children: [
                                         Expanded(
                                             child:
-                                        Container(
+                                            Container(
 
-                                            margin: EdgeInsets.fromLTRB(
-                                                5.0, 10.0, 2.0, 0.0),
+                                                margin: EdgeInsets.fromLTRB(
+                                                    5.0, 10.0, 2.0, 0.0),
 
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                              children: <Widget>[
-                                                SizedBox(height: 30,),
-                                                Container(
-                                                  padding: EdgeInsets.all(10), child: Text("Promotions", style:
-                                                TextStyle(
-                                                    fontSize: 12.5,
-                                                    fontWeight:
-                                                    FontWeight.bold,
-                                                    color: Colors.white),), alignment: Alignment.centerLeft,
-                                                  color: Colors.blue,
-                                                ),
-                                                SizedBox(height: 10,),
-                                                Container(
-                                                  padding: EdgeInsets.all(10.0),
-                                                  child: Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                    children: [
-                                                      Expanded(
-                                                        flex: 3,
-                                                        child: Text(
-                                                          "Products",
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              fontWeight:
-                                                              FontWeight.bold,
-                                                              color: Colors.black),
-                                                        ),
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                                  children: <Widget>[
+                                                    SizedBox(height: 30,),
+                                                    Container(
+                                                      padding: EdgeInsets.all(10), child: Text("Promotions", style:
+                                                    TextStyle(
+                                                        fontSize: 12.5,
+                                                        fontWeight:
+                                                        FontWeight.bold,
+                                                        color: Colors.white),), alignment: Alignment.centerLeft,
+                                                      color: Colors.blue,
+                                                    ),
+                                                    SizedBox(height: 10,),
+                                                    Container(
+                                                      padding: EdgeInsets.all(10.0),
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                        children: [
+                                                          Expanded(
+                                                            flex: 3,
+                                                            child: Text(
+                                                              "Products",
+                                                              style: TextStyle(
+                                                                  fontSize: 12.5,
+                                                                  fontWeight:
+                                                                  FontWeight.bold,
+                                                                  color: Colors.black),
+                                                            ),
+                                                          ),
+                                                          Expanded(
+                                                            flex: 1,
+                                                            child: Text(
+                                                              "Qty",
+                                                              style: TextStyle(
+                                                                  fontSize: 12.5,
+                                                                  fontWeight:
+                                                                  FontWeight.bold,
+                                                                  color: Colors.black),
+                                                              textAlign:
+                                                              TextAlign.right,
+                                                            ),
+                                                          ),
+
+                                                        ],
                                                       ),
-                                                      Expanded(
-                                                        flex: 1,
-                                                        child: Text(
-                                                          "Qty",
-                                                          style: TextStyle(
-                                                              fontSize: 12.5,
-                                                              fontWeight:
-                                                              FontWeight.bold,
-                                                              color: Colors.black),
-                                                          textAlign:
-                                                          TextAlign.right,
-                                                        ),
-                                                      ),
-
-                                                    ],
-                                                  ),
-                                                  color: Colors.black12,
-                                                ),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Flexible(
-                                                    child: ListView.builder(
-                                                      shrinkWrap: true,
-                                                      physics:
-                                                      const NeverScrollableScrollPhysics(),
-                                                      itemCount: AllOrdersItemsPromotion != null
-                                                          ? AllOrdersItemsPromotion.length
-                                                          : 0,
-                                                      itemBuilder: itemsListPromotion,
-                                                    ))
-                                              ],
-                                            ))),
+                                                      color: Colors.black12,
+                                                    ),
+                                                    SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    Flexible(
+                                                        child: ListView.builder(
+                                                          shrinkWrap: true,
+                                                          physics:
+                                                          const NeverScrollableScrollPhysics(),
+                                                          itemCount: AllOrdersItemsPromotion != null
+                                                              ? AllOrdersItemsPromotion.length
+                                                              : 0,
+                                                          itemBuilder: itemsListPromotion,
+                                                        ))
+                                                  ],
+                                                ))),
 
                                       ],),
-                                   /* Row(
+                                    /* Row(
                                       children :[
                                         Expanded(
                                             child: Container(
@@ -722,7 +775,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
                   ),
                 ),
               ),
-            /*  Expanded(
+              /*  Expanded(
                 flex: 1,
                 child: Text(
                     globals
@@ -763,6 +816,9 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
   }
 
   Future completeOrder(context) async {
+    setState(() {
+      isLoading = true; // Show loader
+    });
     print("IsGeoFenceLat=="+globals.IsGeoFenceLat);
     print("IsGeoFvenceLng=="+globals.IsGeoFenceLng);
     /*List OutletData = new List();
@@ -773,118 +829,119 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
     globals.Radius = OutletData[0]["Radius"];
 //31.6089111000000000000*/
     //71.0783096000000000000
+    Dialogs.showLoadingDialog(context, _keyLoader);
+
     print("_latitude===>"+_latitude.toString());
     print("lng===>"+_longitude.toString());
     print("IsGeoFence"+globals.IsGeoFence.toString());
     print("IsGeoFenceLat"+globals.IsGeoFenceLat);
     print("IsGeoFvenceLng"+globals.IsGeoFenceLng);
-    Dialogs.showLoadingDialog(context, _keyLoader);
-  /*  double distance = _calculateDistance();
+    /*  double distance = _calculateDistance();
     print("Distance==>"+distance.toString());
     int Distance2 = globals.Radius;*/
     Position position=globals.currentPosition;
-   // if ( globals.IsGeoFence == 0 ||  globals.IsGeoFence == null || globals.IsGeoFence == "0") {
-      if(position==null){
-        globals.getCurrentLocation(context).then((position1) {
-          position = position1;
-          print(position1);
-        })
-            .timeout(Duration(seconds: 7), onTimeout: ((){
-          print("i am here timedout");
+    // if ( globals.IsGeoFence == 0 ||  globals.IsGeoFence == null || globals.IsGeoFence == "0") {
+    if(position==null){
+      globals.getCurrentLocation(context).then((position1) {
+        position = position1;
+        print(position1);
+      })
+          .timeout(Duration(seconds: 7), onTimeout: ((){
+        print("i am here timedout");
 
-          setState(() {
-            isLocationTimedOut = true;
+        setState(() {
+          isLocationTimedOut = true;
 
-          });
+        });
 
-        }))
-            .whenComplete(() async {
-          print("inside if");
-          if (position != null || isLocationTimedOut) {
-            if(isLocationTimedOut){
-              position = new Position(accuracy: 0, latitude: 0, longitude: 0);
-            }
-            print("position:"+position.toString());
-            await repo.completeOrder( position.latitude,position.longitude,position.accuracy, globals.OutletID);
-            await repo.setVisitType(globals.OutletID, 1);
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            globals.showLoader(context); // Show the loader
-            try {
+      }))
+          .whenComplete(() async {
+        print("inside if");
+        if (position != null || isLocationTimedOut) {
+          if(isLocationTimedOut){
+            position = new Position(accuracy: 0, latitude: 0, longitude: 0);
+          }
+          print("position:"+position.toString());
+          await repo.completeOrder2( position.latitude,position.longitude,position.accuracy, globals.unregisterorderid);
+          await repo.setVisitType(globals.OutletID, 1);
+          Navigator.of(context, rootNavigator: true).pop('dialog');
+          globals.showLoader(context); // Show the loader
+          try {
 
-              await _OutletRegisterationUpload(context);
-              await _UploadDocumentsnregistrationimage();
+            await _OutletRegisterationUpload(context);
+            await _UploadDocumentsnregistrationimage();
 
-            } catch (e) {
-              print("An error occurred: $e");
-            } finally {
-              globals.hideLoader(context); // Hide the loader in the finally block
-            }
-
-
-            // await _UploadOrder(context);
-            print("_UploadOrder Run");
-
-           // await   _UploadDocuments();
-            print("_UploadDocuments Run");
-
-            // _UploadNoOrder(context);
-
-
-            Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => Home()),
-                ModalRoute.withName("/Home"));
-
-          } else {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                // return object of type Dialog
-                return AlertDialog(
-                  title: new Text("Alert"),
-                  content: new Text("Please allow location to proceed"),
-                  actions: <Widget>[
-                    // usually buttons at the bottom of the dialog
-                    new ElevatedButton(
-                      child: new Text("Close"),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Home()),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              },
-            );
+          } catch (e) {
+            print("An error occurred: $e");
+          } finally {
+            globals.hideLoader(context); // Hide the loader in the finally block
           }
 
 
+          // await _UploadOrder(context);
+          print("_UploadOrder Run");
 
-          //    Navigator.of(_keyLoader.currentContext, rootNavigator: true).pop();
-        });
-      }else{
-        Navigator.of(context, rootNavigator: true).pop('dialog');
-        print("position:"+position.toString());
-        await repo.completeOrder( position.latitude,position.longitude,position.accuracy, globals.OutletID);
-        await repo.setVisitType(globals.OutletID, 1);
-       // globals.showLoader(context);
+          // await   _UploadDocuments();
+          print("_UploadDocuments Run");
 
-        await  _OutletRegisterationUpload(context);
+          // _UploadNoOrder(context);
+
+
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => Home()),
+              ModalRoute.withName("/Home"));
+
+        } else {
+          Navigator.of(context, rootNavigator: true).pop('dialog');
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              // return object of type Dialog
+              return AlertDialog(
+                title: new Text("Alert"),
+                content: new Text("Please allow location to proceed"),
+                actions: <Widget>[
+                  // usually buttons at the bottom of the dialog
+                  new ElevatedButton(
+                    child: new Text("Close"),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Home()),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        }
+
+
+
+        //    Navigator.of(_keyLoader.currentContext, rootNavigator: true).pop();
+      });
+    }else{
+      Navigator.of(context, rootNavigator: true).pop('dialog');
+      print("position:"+position.toString());
+      await repo.completeOrder2( position.latitude,position.longitude,position.accuracy, globals.unregisterorderid);
+      await repo.setVisitType(globals.OutletID, 1);
+      // globals.showLoader(context);
+
+      await  _OutletRegisterationUpload(context);
       //  globals.hideLoader(context);
-        await _UploadDocumentsnregistrationimage();
+      await _UploadDocumentsnregistrationimage();
 
       //  _UploadOrder(context);
-       // _UploadDocuments();
-        Navigator.pop(context);
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Home()),
-            ModalRoute.withName("/Home"));
-      }
-   // }
+      // _UploadDocuments();
+      Navigator.pop(context);
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Home()),
+          ModalRoute.withName("/Home"));
+    }
+    // }
 /*
     else{
       if(distance < Distance2){
@@ -934,7 +991,9 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
       }    }
 */
 
-
+    setState(() {
+      isLoading = false; // Hide loader when task is completed
+    });
 
   }
 
@@ -986,9 +1045,9 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
 
   Future _UploadDocuments() async {
     print("_UploadDocuments called");
-   // List AllDocuments = new List();
-   await repo.getAllOutletImages(globals.orderId).then((val) async {
-   /*   setState(() {
+    // List AllDocuments = new List();
+    await repo.getAllOutletImages(globals.orderId).then((val) async {
+      /*   setState(() {
         AllDocuments = val;
       });*/
 
@@ -999,7 +1058,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
         try {
           print("AllDocuments.length" + val.length.toString());
           File photoFile = File(val[i]['file']);
-        //  var stream =
+          //  var stream =
           var stream = ByteStream(photoFile.openRead());
           var length = await photoFile.length();
           var url = Uri.http(
@@ -1102,7 +1161,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
             "&PJP=" +
             globals.selectedPJP +
             "&is_order=" +
-           1.toString();
+            1.toString();
         print("outletRegisterationsParams:" + orderParam);
 
 
@@ -1129,7 +1188,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
           AllOrdersItems = new List();
           print("AllOrders :"+AllOrders.toString());
           for (int i = 0; i < AllOrders.length; i++) {
-             orderParam += "&timestamp=" +
+            orderParam += "&timestamp=" +
                 TimeStamp +
                 "&order_no=" +
                 AllOrders[i]['id'].toString() +
@@ -1168,8 +1227,19 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
               print("AllOrdersItems :"+AllOrdersItems.toString());
 
               print("orderParam 1 :" + orderParam.toString());
-              String orderItemParam = "";
+              //  String orderItemParam = "";
               for (int j = 0; j < AllOrdersItems.length; j++) {
+                double discount = AllOrdersItems[j]['discount'];   // Discount percentage
+                int quantity = AllOrdersItems[j]['quantity'];      // Product quantity
+                double discountedAmount = AllOrdersItems[j]['amount'];  // Amount after discount
+
+                // Calculate the price per item before discount
+                double pricePerItem = discountedAmount / quantity / ((100 - discount) / 100);
+
+                // Calculate the total amount before discount
+                double withoutDiscountAmount = pricePerItem * quantity;
+                print("fdsfsddddddddddddddddddddddddddddddddd");
+                print(withoutDiscountAmount);
                 orderParam += "&product_id=" +
                     AllOrdersItems[j]['product_id'].toString() +
                     "&quantity=" +
@@ -1177,21 +1247,22 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
                     "&discount=" +
                     AllOrdersItems[j]['discount'].toString() +
                     "&unit_quantity=" +
-                    AllOrdersItems [j]['unit_quantity'].toString() +
+                    AllOrdersItems[j]['unit_quantity'].toString() +
                     "&is_promotion=" +
-                    AllOrdersItems [j]['is_promotion'].toString() +
+                    AllOrdersItems[j]['is_promotion'].toString() +
                     "&promotion_id=" +
-                    AllOrdersItems [j]['promotion_id'].toString() +
+                    AllOrdersItems[j]['promotion_id'].toString() +
                     "&Spot_Discount_ID=" +
-                    AllOrdersItems [j]['DiscountID'].toString() +
+                    AllOrdersItems[j]['DiscountID'].toString() +
                     "&defaultDiscount=" +
-                    AllOrdersItems [j]['defaultDiscount'].toString() +
+                    AllOrdersItems[j]['defaultDiscount'].toString() +
                     "&maximumDiscount=" +
-                    AllOrdersItems [j]['maximumDiscount'].toString() +
+                    AllOrdersItems[j]['maximumDiscount'].toString() +
                     "&amount=" +
-                    AllOrdersItems [j]['amount'].toString() +
+                    withoutDiscountAmount.toString() +
                     "";
               }
+
             });
             print("orderParam: "+orderParam.toString());
             //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
@@ -1371,25 +1442,6 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
 }
 
 //old working function
-Future<void> uploadOrder222(String orderParam) async {
-  print("orderParam:" + orderParam);
-  var QueryParameters = <String, String>{
-    "SessionID": EncryptSessionID(orderParam),
-  };
-  //globals.ServerURL = "192.168.30.125:8080";
-  var url = Uri.http(globals.ServerURL,
-      '/portal/mobile/MobileSyncOrdersV9', QueryParameters);
-//      Wave/grain/sales/MobileVFSalesContractExecute
-  print(url);
-  var response = await http.get(url, headers: {
-    HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'
-  });
-  print(response);
-  var responseBody = json.decode(utf8.decode(response.bodyBytes));
-  print('called4');
-  //  print(responseBody);
-  if (responseBody["success"] == "true") {}
-}
 
 String EncryptSessionID(String qry) {
   String ret = "";
@@ -1438,16 +1490,6 @@ class Dialogs {
   }
 }
 
-List<charts.Series<GaugeSegment, String>> _createSampleData(data) {
-  return [
-    new charts.Series<GaugeSegment, String>(
-      id: 'Segments',
-      domainFn: (GaugeSegment segment, _) => segment.segment,
-      measureFn: (GaugeSegment segment, _) => segment.size,
-      data: data,
-    )
-  ];
-}
 
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {

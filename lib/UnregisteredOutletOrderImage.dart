@@ -12,6 +12,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:order_booker/home.dart';
 import 'package:order_booker/shopAction.dart';
 
 import 'UnregisteredshopAction.dart';
@@ -23,7 +24,8 @@ import 'globals.dart';
 import 'orders.dart';
 
 class UnregisteredOutletOrderImage extends StatefulWidget {
-
+  int outletId;
+  UnregisteredOutletOrderImage({this.outletId});
   @override
   _UnregisteredOutletOrderImage createState() => _UnregisteredOutletOrderImage();
 }
@@ -34,7 +36,6 @@ class _UnregisteredOutletOrderImage extends State<UnregisteredOutletOrderImage> 
   void initState() {
     super.initState();
     OrderID = getOrderNumber(0);
-    print("OrderID :"+OrderID.toString());
   }
 
   void addTimestamp(orderId) async {
@@ -44,9 +45,10 @@ class _UnregisteredOutletOrderImage extends State<UnregisteredOutletOrderImage> 
 
   void initiateOrder(List<OutletOrders> order) {
     for (var i = 0; i < order.length; i++) {
+      globals.unregisterorderid=order[i].id;
       repo.initOrder(
           order[i].id,
-          order[i].outlet_id,
+         "",
           order[i].is_completed,
           order[i].is_uploaded,
           order[i].total_amount,
@@ -68,7 +70,7 @@ class _UnregisteredOutletOrderImage extends State<UnregisteredOutletOrderImage> 
       setState(() {
         AllOrders = val;
       });
-print("AllOrders ::"+AllOrders.toString());
+
       if (AllOrders.length < 1) {
         List<OutletOrders> order = new List();
         var currDate = new DateTime.now();
@@ -98,7 +100,6 @@ print("AllOrders ::"+AllOrders.toString());
         initiateOrder(order);
         addTimestamp(orderId);
       } else {
-        print("else of Image");
         orderId = AllOrders[0]['id'];
         addTimestamp(orderId);
       }
@@ -209,39 +210,43 @@ print("AllOrders ::"+AllOrders.toString());
                   icon: Icon(Icons.arrow_back),
                   color: Colors.white,
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) => Home()
+                      //MaterialPageRoute(
+                      //builder: (context) => Orders(outletId: widget.outletId)
+                    ));
                   })),
           body: new Container(
-              //padding: EdgeInsets.all(16.0),
+            //padding: EdgeInsets.all(16.0),
               child: new ListView(
-            children: <Widget>[
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            children: <Widget>[
-                              Container(
-                                padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
-                                child: Text(
-                                    "Please use the camera  icon to take image"),
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              Row(
+                children: <Widget>[
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              flex: 3,
+                              child: Column(
                                 children: <Widget>[
-                                  outletImagePath != ""
-                                      ? Container(
+                                  Container(
+                                    padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
+                                    child: Text(
+                                        "Please use the camera  icon to take image"),
+                                  ),
+                                  SizedBox(
+                                    height: 5,
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      outletImagePath != ""
+                                          ? Container(
                                           margin: const EdgeInsets.all(15.0),
                                           padding: const EdgeInsets.all(3.0),
                                           decoration: BoxDecoration(
@@ -250,44 +255,44 @@ print("AllOrders ::"+AllOrders.toString());
                                           width: 100,
                                           height: 100,
                                           child:
-                                              Image.file(File(outletImagePath)))
-                                      : Container(
-                                          margin: const EdgeInsets.all(15.0),
-                                          padding: const EdgeInsets.all(3.0),
-                                          decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: Colors.black)),
-                                          width: 100,
-                                          height: 100,
-                                        ),
-                                  TextButton.icon(
-                                    onPressed: () {
-                                      openCamera();
-                                    },
-                                    icon: Icon(Icons.camera_alt,
-                                        color: Color(0xFFC9002B)),
-                                    label: Text("Camera",
-                                        style: TextStyle(
-                                            color: Color(0xFFC9002B))),
-                                  ),
+                                          Image.file(File(outletImagePath)))
+                                          : Container(
+                                        margin: const EdgeInsets.all(15.0),
+                                        padding: const EdgeInsets.all(3.0),
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Colors.black)),
+                                        width: 100,
+                                        height: 100,
+                                      ),
+                                      TextButton.icon(
+                                        onPressed: () {
+                                          openCamera();
+                                        },
+                                        icon: Icon(Icons.camera_alt,
+                                            color: Color(0xFFC9002B)),
+                                        label: Text("Camera",
+                                            style: TextStyle(
+                                                color: Color(0xFFC9002B))),
+                                      ),
+                                    ],
+                                  )
                                 ],
-                              )
-                            ],
-                          ),
+                              ),
+                            ),
+                            // btnOkIcon: Icons.photo_library,
+                            // btnCancelIcon: Icons.camera_alt,
+                          ],
                         ),
-                        // btnOkIcon: Icons.photo_library,
-                        // btnCancelIcon: Icons.camera_alt,
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Divider(color: Color(0xFF004b93)),
                       ],
                     ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Divider(color: Color(0xFF004b93)),
-                  ],
-                ),
-              )
-            ],
-          )),
+                  )
+                ],
+              )),
         ));
   }
 }

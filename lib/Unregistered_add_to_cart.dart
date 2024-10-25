@@ -58,10 +58,10 @@ class _UnregisteredAddToCart extends State<UnregisteredAddToCart> {
 
   Future GetOutletOrderItemInfo() async {
     List OutletOrder = List();
-    print(globals.orderId);
+    print(globals.unregisterorderid);
     print(globals.ProductID);
     OutletOrder =
-    await repo.getOrderItemInfo(globals.orderId, globals.productId);
+    await repo.getOrderItemInfo(globals.unregisterorderid, globals.productId);
 
     OutletOrder = OutletOrder;
     if (OutletOrder.isNotEmpty) {
@@ -114,7 +114,7 @@ class _UnregisteredAddToCart extends State<UnregisteredAddToCart> {
       });
     });
 
-    repo.getSpotDiscount(globals.productId,globals.Channel_ID).then((value) => {
+    repo.getSpotDiscount(globals.productId,globals.UnregisterChannelID).then((value) => {
       setState(() {
         if(value==null){
           DiscountID = 0;
@@ -231,7 +231,6 @@ class _UnregisteredAddToCart extends State<UnregisteredAddToCart> {
       'created_on': createdOn,
       'rate': rate,
       'product_label': productLabel,
-
       'unit_quantity': 0,
       'is_promotion': 0,
       'promotion_id': 0,
@@ -240,7 +239,6 @@ class _UnregisteredAddToCart extends State<UnregisteredAddToCart> {
       'DiscountID' : DiscountID,
       'defaultDiscount' : defaultDiscount,
       'maximumDiscount' : maximumDiscount
-
     });
     int isNewEntry  = await  repo.addItemToCurrentOrder(orderId, Items, 0);
 
@@ -654,7 +652,7 @@ class _UnregisteredAddToCart extends State<UnregisteredAddToCart> {
                                     var str = currDateTime.split(".");
 
 
-                                    addItemOrder(globals.orderId, globals.productId, Discount, int.parse(quantityController.text), double.parse(amountController.text), str[0], double.parse(rateController.text), globals.productLabel);
+                                    addItemOrder(globals.unregisterorderid, globals.productId, Discount, int.parse(quantityController.text), double.parse(amountController.text), str[0], double.parse(rateController.text), globals.productLabel);
                                     Navigator.pushAndRemoveUntil(
                                         context,
                                         MaterialPageRoute(

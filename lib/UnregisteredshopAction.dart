@@ -11,11 +11,11 @@ import 'package:order_booker/mark_close.dart';
 import 'package:order_booker/merchandising.dart';
 import 'package:order_booker/no_order.dart';
 import 'package:order_booker/outlet_location.dart';
-import 'package:order_booker/pre_sell_route.dart';
 /*import 'package:order_booker/take_images.dart';*/
 import 'package:url_launcher/url_launcher.dart';
 
 import 'Outlet_sales_report_select_date.dart';
+import 'UnregisteredOutletOrderImage.dart';
 import 'Unregisteredorders.dart';
 import 'UpdateLocation.dart';
 import 'UpdateProfile.dart';
@@ -122,7 +122,7 @@ if( globals.IsOutletLocationUpdate == 1){
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PreSellRoute(2222)),
+                  MaterialPageRoute(builder: (context) => UnregisteredOutletOrderImage()),
                 );
               }),
           title: Text(

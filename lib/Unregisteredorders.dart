@@ -18,7 +18,7 @@ import 'globals.dart' as globals;
 class UnregisteredOrders extends StatefulWidget {
   int outletId = 0;
   @override
-  Orders({int outletId}) {
+  UnregisteredOrders({int outletId}) {
     this.outletId = outletId;
   }
   _UnregisteredOrders createState() => _UnregisteredOrders(outletId);
@@ -104,7 +104,7 @@ class _UnregisteredOrders extends State<UnregisteredOrders> {
 
   int getOrderNumber(int outletId) {
     AllOrders = new List();
-    repo.getAllOrders(outletId, 0).then((val) {
+    repo.getAllOrdersunregistered(0).then((val) {
       setState(() {
         AllOrders = val;
       });
@@ -220,7 +220,7 @@ class _UnregisteredOrders extends State<UnregisteredOrders> {
 
   int getTotalOrders(int outletId) {
     AllOrders = new List();
-    repo.getAllOrders(outletId, 0).then((val) async {
+    repo.getAllOrdersunregistered( 0).then((val) async {
       setState(() {
         AllOrders = val;
       });
@@ -753,6 +753,9 @@ class _UnregisteredOrders extends State<UnregisteredOrders> {
                   Products[index]['product_label'].toString();
               globals.productId = Products[index]['product_id'];
               globals.orderId = orderId;
+/*
+              globals.neworderId = orderId;
+*/
 
               Navigator.push(
                 context,

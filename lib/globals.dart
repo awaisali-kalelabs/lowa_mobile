@@ -9,8 +9,10 @@ import 'package:intl/intl.dart';
 import 'package:order_booker/com/pbc/dao/repository.dart';
 import 'package:order_booker/home.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+// import 'package:connectivity_plus/connectivity_plus.dart';
 //wildspace1@%88
-String appVersion = "v3.7";
+String appVersion = "v4.0";
 final oCcy = new NumberFormat("#,##0");
 final oCcy1 = new NumberFormat("#,##0.##");
 double maxDiscountPercentage = 0;
@@ -25,6 +27,10 @@ int sparkMobileRequestId = 0;
 //for Item_Quantity check
 int Rate  = 0;
 //
+/*
+int neworderId = 0;
+*/
+
 String Discount = "";
 //int pjpid=0;
 String selectedPJP;
@@ -47,6 +53,7 @@ File SignImage;
 String SignImagePath = "";
 String OutletImagePath = "";
 int ChannelIDCHECK = 0;
+int UnregisterChannelID = 0;
 /////////////
 // Channel tagging
 String channelTag="";
@@ -382,7 +389,7 @@ String getCurrentTimestamp() {
   String TimeStamp = str[0];
   return TimeStamp;
 }
-
+int unregisterorderid = 0;
 String getCurrentTimestampSql() {
   DateFormat dateFormat = DateFormat("yyyy/MM/dd HH:mm:ss");
   String currDateTime = dateFormat.format(DateTime.now());
@@ -494,6 +501,12 @@ class LoadingDialogs {
                   ]));
         });
   }
+
+   // Future<bool> checkInternet() async {
+   //  var connectivityResult = await (Connectivity().checkConnectivity());
+   //  if (connectivityResult == ConnectivityResult.mobile) {    return true;  }
+   //  else if (connectivityResult == ConnectivityResult.wifi) {    return true;  }
+   //  return false;}
 }
 
 

@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:device_info/device_info.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -41,8 +42,10 @@ import 'home.dart';
 */
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
 
+//  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   HttpOverrides.global = new MyHttpOverrides();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     systemNavigationBarColor: Colors.blue[800], // navigation bar color

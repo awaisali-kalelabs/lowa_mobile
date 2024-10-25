@@ -756,7 +756,9 @@ class _OrdersState extends State<Orders> {
                   Products[index]['product_label'].toString();
               globals.productId = Products[index]['product_id'];
               globals.orderId = orderId;
-
+/*
+              globals.neworderId = orderId;
+*/
               Navigator.push(
                 context,
                 //

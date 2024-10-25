@@ -293,13 +293,14 @@ class _OrdersSyncReportView extends State<OrdersSyncReportView> {
                                   child: Container(
                                       padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       child: Text(
-                                        e['outlet_id'].toString() +
-                                            " - " +
-                                            e['outlet_name'],
-                                        style: TextStyle(
-                                            fontSize: 11, color: Colors.black),
+                                        (e['outlet_id'] == null || e['outlet_id'].toString().isEmpty || e['outlet_id'].toString() == "0" ||
+                                            e['outlet_name'] == null || e['outlet_name'].toString().isEmpty || e['outlet_name'].toString() == "0")
+                                            ? "Partial Opened"
+                                            : e['outlet_id'].toString() + " - " + e['outlet_name'].toString(),
+                                        style: TextStyle(fontSize: 11, color: Colors.black),
                                         textAlign: TextAlign.left,
-                                      )),
+                                      )
+                                  ),
                                 ),
                                 TableCell(
                                   child: Container(

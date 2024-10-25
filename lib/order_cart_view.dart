@@ -52,6 +52,8 @@ class _OrderCartView extends State<OrderCartView> {
   double maximumDiscount = 0;
   double defaultDiscount = 0;
   int DiscountIDmain = 0;
+  bool isLoading = false;
+
   _OrderCartView(int OrderId) {
     this.OrderId = OrderId;
   }
@@ -257,7 +259,7 @@ class _OrderCartView extends State<OrderCartView> {
                 );
               }),
           actions: [
-            ElevatedButton(
+         /*   ElevatedButton(
               style: ElevatedButton.styleFrom(
                   onPrimary: Colors.grey, // Text Color
               ),
@@ -268,13 +270,41 @@ class _OrderCartView extends State<OrderCartView> {
               onPressed: AllOrdersItems==null || AllOrdersItems.isEmpty
                   ? null
                   : () {
-                /* _UploadOrder();*/
+                *//* _UploadOrder();*//*
                 //  _showIndicator();
                 completeOrder(context);
                 //_UploadDocuments();
 
               },
-            ),
+            ),*/
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                onPrimary: Colors.grey, // Text Color
+              ),
+              child: isLoading
+                  ? CircularProgressIndicator(
+                color: Colors.white, // Loader color
+              )
+                  : Text(
+                'Save',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              onPressed: AllOrdersItems == null || AllOrdersItems.isEmpty
+                  ? null
+                  : () async {
+                setState(() {
+                  isLoading = true; // Show loader
+                });
+
+                await completeOrder(context); // Execute your function
+
+                setState(() {
+                  isLoading = false; // Hide loader
+                });
+              },
+            )
           ],
         ),
         body: ListView(
@@ -1092,7 +1122,7 @@ class _OrderCartView extends State<OrderCartView> {
           //  print();
             if (responseBody["success"] == "true") {
               await repo.markOrderUploaded(ORDERIDToDelete);
-              _showDialog("Success","order uploaded. ",1);
+             // _showDialog("Success","order uploaded. ",1);
 
             } else {
               _showDialog("Error", responseBody["error_code"], 0);
