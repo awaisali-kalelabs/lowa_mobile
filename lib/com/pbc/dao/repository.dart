@@ -61,6 +61,8 @@ class Repository {
         db.execute(
             "CREATE TABLE selected_pjp(PJPID TEXT,PJPName TEXT, is_selected INTEGER DEFAULT 0)");
         db.execute(
+            "CREATE TABLE update_location(IsAllow INTEGER)");
+        db.execute(
             "CREATE TABLE outlet_no_orders_images(id INTEGER, file_type_id INTEGER, file TEXT,is_uploaded INTEGER DEFAULT 0)");
         db.execute(
             "CREATE TABLE outlet_Registration_images(id INTEGER, file_type_id TEXT, file TEXT,is_uploaded INTEGER DEFAULT 0)");
@@ -85,7 +87,6 @@ class Repository {
             "CREATE TABLE outlet_order_items(id INTEGER,source_id INTEGER,order_id INTEGER,product_id INTEGER,discount REAL,quantity INTEGER,amount REAL,created_on TEXT,rate REAL,product_label TEXT, unit_quantity INTEGER, is_promotion INTEGER, promotion_id INTEGER,DiscountID INTEGER,defaultDiscount INTEGER,maximumDiscount INTEGER)");
         db.execute(
             "CREATE TABLE users(user_id INTEGER,display_name TEXT,designation TEXT,distributor_employee_id TEXT,password TEXT, created_on TEXT, department TEXT , IsOutletLocationUpdate INTEGER)");
-        db.execute("CREATE TABLE no_order_reasons(id INTEGER,label TEXT)");
         db.execute(
             "CREATE TABLE outlet_no_orders(id INTEGER,outlet_id INTEGER,reason_type_id INTEGER,is_uploaded INTEGER,uuid TEXT,created_on TEXT,lat TEXT,lng TEXT,accuracy TEXT ,PJP INTEGER)");
 
@@ -1595,13 +1596,14 @@ class Repository {
     // Query the table for all The Dogs.
 
     final List<Map> maps = await db.rawQuery(
-        "select user_id,display_name  from users");
+        "select user_id,display_name,IsOutletLocationUpdate  from users");
 
     // Convert the List<Map<String, dynamic> into a List<Dog>.
     //print('list: ');
     //print(maps);
     return maps;
   }
+
   Future<List<Map<String, dynamic>>> getUser(
       int UserId, String Password) async {
     // Get a reference to the database.
@@ -1645,7 +1647,20 @@ class Repository {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+  Future<void> insertlocation(User user) async {
+    // Get a reference to the database.
+    final Database db = await database;
 
+    // Insert the Dog into the correct table. Also specify the
+    // `conflictAlgorithm`. In this case, if the same dog is inserted
+    // multiple times, it replaces the previous data.
+    // //print(product);
+    await db.insert(
+      'update_location',
+      user.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 
   Future<void> insertPJP(PJP pjp) async {
     final Database db = await database;

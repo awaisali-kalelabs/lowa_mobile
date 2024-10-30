@@ -313,8 +313,9 @@ class _Home extends State<Home> {
       if (fetchedUser.isNotEmpty) {
         String userName = fetchedUser[0]['display_name'];
         int userID = fetchedUser[0]['user_id'];
-
+        globals.IsOutletLocationUpdate = fetchedUser[0]['IsOutletLocationUpdate'];
         print("UserName: $userName");
+        print("IsOutletLocationUpdate: " + globals.IsOutletLocationUpdate.toString());
 
         globals.DisplayName = userName;
         globals.UserID = userID;
@@ -1240,32 +1241,21 @@ class _Home extends State<Home> {
   }
 
   Future _UploadOrder(context) async {
+    // Fetch current date and time
     DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
     String currDateTime = dateFormat.format(DateTime.now());
     var str = currDateTime.split(".");
-    //Position position=globals.currentPosition;
-
-  //  await repo.completeOrder( position.latitude,position.longitude,position.accuracy, globals.OutletID);
-
     String TimeStamp = str[0];
 
-    print("currDateTime" + TimeStamp);
+    // Get current location
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
 
-    int ORDERIDToDelete = 0;
-    AllOrders = new List();
+    AllOrders = [];
     await repo.getAllOrdersByIsUploaded(0).then((val) async {
-      setState(() {
-        AllOrders = val;
-
-        print("MAIN ORDER" + AllOrders.toString());
-      });
-      AllOrdersItems = new List();
-
-      print(AllOrders.toString());
+      AllOrders = val;
+      AllOrdersItems = [];
+int ORDERIDToDelete =0;
       for (int i = 0; i < AllOrders.length; i++) {
-        setState(() {
-          isAnythingUploaded = 1;
-        });
         String orderParam = "timestamp=" +
             TimeStamp +
             "&order_no=" +
@@ -1279,21 +1269,21 @@ class _Home extends State<Home> {
             "&uuid=" +
             globals.DeviceID +
             "&platform=android&lat=" +
-            AllOrders[i]['lat'] +
+            position.latitude.toString() +
             "&lng=" +
-            AllOrders[i]['lng'] +
+            position.longitude.toString() +
             "&accuracy=" +
-            AllOrders[i]['accuracy'];
+            position.accuracy.toString() +
+            "&PJP=" +
+            AllOrders[i]['PJP'].toString() +
+            "&version=" +
+            globals.appVersion +
+            "&Spot_Discount=" +
+            "";
 
         ORDERIDToDelete = AllOrders[i]['id'];
-        await repo
-            .getAllAddedItemsOfOrder(AllOrders[i]['id'])
-            .then((val) async {
-          setState(() {
-            AllOrdersItems = val;
-            print("ITEMS" + AllOrdersItems.toString());
-          });
-          String orderItemParam = "";
+        await repo.getAllAddedItemsOfOrder(AllOrders[i]['id']).then((val) async {
+          AllOrdersItems = val;
           for (int j = 0; j < AllOrdersItems.length; j++) {
             orderParam += "&product_id=" +
                 AllOrdersItems[j]['product_id'].toString() +
@@ -1307,6 +1297,12 @@ class _Home extends State<Home> {
                 AllOrdersItems[j]['is_promotion'].toString() +
                 "&promotion_id=" +
                 AllOrdersItems[j]['promotion_id'].toString() +
+                "&Spot_Discount_ID=" +
+                AllOrdersItems[j]['DiscountID'].toString() +
+                "&defaultDiscount=" +
+                AllOrdersItems[j]['defaultDiscount'].toString() +
+                "&maximumDiscount=" +
+                AllOrdersItems[j]['maximumDiscount'].toString() +
                 "";
           }
         });
@@ -1315,55 +1311,29 @@ class _Home extends State<Home> {
           "SessionID": EncryptSessionID(orderParam),
         };
 
-        var url =
-            Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncOrdersV9');
-        print(url);
+        var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncOrdersV13');
 
         try {
-          var response = await http.post(url,
-              headers: {
-                HttpHeaders.contentTypeHeader:
-                    'application/x-www-form-urlencoded'
-              },
-              body: QueryParameters);
+          var response = await http.post(
+            url,
+            headers: {
+              HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded',
+            },
+            body: QueryParameters,
+          );
 
           var responseBody = json.decode(utf8.decode(response.bodyBytes));
-          print('called4');
-          print(response.statusCode);
-          if (response.statusCode == 200) {
-            if (responseBody["success"] == "true") {
-              await repo.markOrderUploaded(ORDERIDToDelete);
-              //_showDialog("Success","order uploaded. ",1);
-            } else {
-              await _showDialog(
-                  "Error Uploading Order", responseBody["error_code"]);
-            }
+          if (response.statusCode == 200 && responseBody["success"] == "true") {
+            await repo.markOrderUploaded(ORDERIDToDelete);
           } else {
-            // If that response was not OK, throw an error.
-            setState(() {
-              isUploaded = 0;
-              isAnythingUploaded = 1;
-            });
-
-            await _showDialog("Error Uploading Order",
-                "An error has occured " + responseBody.statusCode);
+            _showDialog("Error", responseBody["error_code"]);
           }
         } catch (e) {
-          setState(() {
-            isUploaded = 0;
-            isAnythingUploaded = 1;
-          });
-
-          //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          await _showDialog(
-              "Error Uploading Order", "Check your internet connection");
-          break;
+          _showDialog("Error", "An error has occurred " + e.toString());
         }
-        //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
       }
     });
   }
-
   @override
   Widget build(BuildContext context) {
     checkForNewVersion(context);

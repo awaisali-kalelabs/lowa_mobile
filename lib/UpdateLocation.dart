@@ -211,12 +211,12 @@ class _Updatelocattion extends State<Updatelocattion> {
                 //   return false;
                 // }
 
-                if (_formKey.currentState.validate()) {
+         /*       if (_formKey.currentState.validate()) {*/
 
-
+                print("button called");
 
                   _registerOutlet(context);
-                } else {}
+              /*  } else {}*/
               },
             ),
           ],
@@ -476,6 +476,7 @@ class _Updatelocattion extends State<Updatelocattion> {
 
   Future _registerOutlet(context) async {
     Dialogs.showLoadingDialog(context, _keyLoader);
+    print("_registerOutlet called");
     //await repo.registerOutlet(Items);
     Navigator.of(context,rootNavigator: true).pop();
     _OutletLocationUpdate(context);
@@ -485,7 +486,7 @@ class _Updatelocattion extends State<Updatelocattion> {
   Future _OutletLocationUpdate(context) async {
     DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
     String currDateTime = dateFormat.format(DateTime.now());
-
+    print("_OutletLocationUpdate");
     String outletRegisterationsParams = "timestamp=" +
         globals.getCurrentTimestamp() +
         "&outlet_id=" +

@@ -486,8 +486,8 @@ class _LoginPageState extends State<LoginPage>
           'PJPName': responseBody['PJPName'],
         }));*/
 
-        globals.IsOutletLocationUpdate = responseBody['IsOutletLocationUpdate'];
-        print("IsOutletLocationUpdate "+globals.IsOutletLocationUpdate.toString());
+        /*globals.IsOutletLocationUpdate = responseBody['IsOutletLocationUpdate'];
+        print("IsOutletLocationUpdate "+globals.IsOutletLocationUpdate.toString());*/
         print(User.fromJson({
           'user_id': responseBody['UserID'],
           'display_name': responseBody['DisplayName'],
