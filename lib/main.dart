@@ -470,6 +470,7 @@ class _LoginPageState extends State<LoginPage>
 
 
         repo.deleteUsers();
+        repo.deleteUpdateLocationTable();
         repo.deletePJP();
         repo.insertUser(User.fromJson({
           'user_id': responseBody['UserID'],

@@ -12,7 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 // import 'package:connectivity_plus/connectivity_plus.dart';
 //wildspace1@%88
-String appVersion = "v4.0";
+String appVersion = "v4.3";
 final oCcy = new NumberFormat("#,##0");
 final oCcy1 = new NumberFormat("#,##0.##");
 double maxDiscountPercentage = 0;
@@ -30,7 +30,7 @@ int Rate  = 0;
 /*
 int neworderId = 0;
 */
-
+int unregisterID = 0;
 String Discount = "";
 //int pjpid=0;
 String selectedPJP;

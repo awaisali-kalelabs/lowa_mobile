@@ -45,7 +45,7 @@ class Repository {
       // Set the path to the database. Note: Using the `join` function from the
       // `path` package is best practice to ensure the path is correctly
       // constructed for each platform.
-      join(await getDatabasesPath(), 'delivery_managerV92.db'),
+      join(await getDatabasesPath(), 'delivery_managerV95.db'),
       // When the database is first created, create a table to store dogs.
       onUpgrade: _onUpgrade,
       onCreate: (db, version) {
@@ -71,6 +71,9 @@ class Repository {
             "CREATE TABLE products( product_id INTEGER,product_label TEXT,package_id INTEGER,package_label TEXT,sort_order INTEGER,brand_id INTEGER,brand_label TEXT,unit_per_case INTEGER,lrb_type_id INTEGER);");
         db.execute(
             "CREATE TABLE pre_sell_outlets2(outlet_id INTEGER,outlet_name TEXT,day_number INTEGER,owner TEXT ,address TEXT,telephone TEXT,nfc_tag_id TEXT, visit_type INTEGER,lat TEXT,lng TEXT,accuracy TEXT,area_label TEXT, sub_area_label TEXT,is_alternate_visible INTEGER,pic_channel_id TEXT, channel_label TEXT, order_created_on_date TEXT, common_outlets_vpo_classifications TEXT , Visit TEXT, purchaser_name TEXT, purchaser_mobile_no TEXT, cache_contact_nic TEXT,IsGeoFence INTEGER,Radius INTEGER,channel_id INTEGER,channel_name TEXT,PJP INTEGER)");
+        db.execute(
+            "CREATE TABLE UpdateLocation(outlet_id INTEGER,lat TEXT,lng TEXT,accuracy TEXT,is_Upload INTEGER DEFAULT 0)");
+
 
         db.execute("CREATE TABLE product_lrb_types(id INTEGER,label TEXT)");
 
@@ -81,7 +84,7 @@ class Repository {
             "CREATE TABLE outlet_product_prices(price_id INTEGER,outlet_id INTEGER,product_id INTEGER,raw_case REAL,unit TEXT)");
 
         db.execute(
-            "CREATE TABLE outlet_orders(id INTEGER,outlet_id INTEGER,is_completed INTEGER,is_uploaded INTEGER,total_amount REAL,uuid TEXT,created_on TEXT,lat TEXT,lng TEXT,accuracy TEXT,PJP INTEGER)");
+            "CREATE TABLE outlet_orders(id INTEGER,outlet_id INTEGER,is_completed INTEGER,is_uploaded INTEGER,total_amount REAL,uuid TEXT,created_on TEXT,lat TEXT,lng TEXT,accuracy TEXT,PJP INTEGER,Is_Register INTEGER DEFAULT 0)");
 
         db.execute(
             "CREATE TABLE outlet_order_items(id INTEGER,source_id INTEGER,order_id INTEGER,product_id INTEGER,discount REAL,quantity INTEGER,amount REAL,created_on TEXT,rate REAL,product_label TEXT, unit_quantity INTEGER, is_promotion INTEGER, promotion_id INTEGER,DiscountID INTEGER,defaultDiscount INTEGER,maximumDiscount INTEGER)");
@@ -104,6 +107,7 @@ class Repository {
 
         db.execute(
             "CREATE TABLE registered_outlets(id_for_update INTEGER,outlet_name TEXT,mobile_request_id TEXT,mobile_timestamp TEXT, channel_id INTEGER,area_label TEXT,sub_area_label TEXT,address TEXT, owner_name TEXT,owner_cnic TEXT, owner_mobile_no TEXT,purchaser_name TEXT,purchaser_mobile_no TEXT, is_owner_purchaser INTEGER, lat REAL, lng REAL, accuracy INTEGER, created_on TEXT,created_by INTEGER,is_uploaded INTEGER,is_new INTEGER,outletchannel INTEGER )");
+        db.execute("CREATE TABLE no_order_reasons(id INTEGER,label TEXT)");
 
 
         db.execute(
@@ -188,6 +192,18 @@ class Repository {
       await db.rawInsert(
           "insert into promotions_active(promotion_id,outlet_id) values  (?,?) ",
           [promotionId,outletId ]);
+    } catch (error) {
+      //print(error);
+    }
+  }
+  Future<void> insertUpdateLocation(outletId,lat,lng,accuracy) async {
+    await this.initdb();
+    final Database db = await database;
+    try {
+
+      await db.rawInsert(
+          "insert into UpdateLocation(outlet_id,lat,lng,accuracy) values  (?,?,?,?) ",
+          [outletId,lat,lng,accuracy ]);
     } catch (error) {
       //print(error);
     }
@@ -323,6 +339,21 @@ class Repository {
 
     return maps;
   }
+  Future<List<Map<String, dynamic>>> getAllUnregisterAddedItemsOfOrderByIsPromotion(
+      int orderId, isPromotion) async {
+    await this.initdb();
+    final Database db = await database;
+    List args = new List();
+    args.add(globals.unregisterID);
+    args.add(isPromotion);
+    print("orderId in getAllAddedItemsOfOrderByIsPromotiondsd"+globals.unregisterID.toString());
+    // Query the table for all The Dogs.
+    final List<Map> maps = await db.rawQuery(
+        "select * from outlet_order_items where order_id=?1 and is_promotion=?2", args);
+    //print(maps);
+
+    return maps;
+  }
   Future changePromotionProduct(id, productId, productLabel) async {
     await this.initdb();
     final Database db = await database;
@@ -350,7 +381,17 @@ class Repository {
         args);
     return true;
   }
-
+  Future UpdateLocation(outlet_id) async {
+    await this.initdb();
+    final Database db = await database;
+print("outlet_id ::"+outlet_id.toString());
+    List args = new List();
+    args.add(outlet_id);
+    await db.rawUpdate(
+        'update UpdateLocation set is_upload=1 where outlet_id=?1',
+        args);
+    return true;
+  }
 
   Future<void> deletePromotionsProductsFree() async {
     final Database db = await database;
@@ -362,7 +403,10 @@ class Repository {
     final Database db = await database;
     await db.delete('promotions_active');
   }
-
+  Future<void> deleteUpdateLocationTable() async {
+    final Database db = await database;
+    await db.delete('UpdateLocation');
+  }
   Future<void> deletePromotionsProducts() async {
     final Database db = await database;
     await db.delete('promotions_products');
@@ -477,6 +521,15 @@ class Repository {
 
     final List<Map> maps = await db.rawQuery(
         "select * from outlet_mark_close where is_uploaded=?1", args);
+    //print(maps.toString());
+    return maps;
+  }
+  Future<List<Map<String, dynamic>>> getUpdateLocation() async {
+    await this.initdb();
+    final Database db = await database;
+
+    final List<Map> maps = await db.rawQuery(
+        "select * from UpdateLocation where is_Upload=0");
     //print(maps.toString());
     return maps;
   }
@@ -1056,7 +1109,40 @@ class Repository {
       return false;
     }
   }
+  Future initOrderunregister(id, outletId, isCompleted, isUploaded, totalAmount, uuid,
+      createdOn, lat, lng, accuracy,PJP) async {
+    await this.initdb();
+    final Database db = await database;
 
+    int i = 0;
+    try {
+      i = await db.rawInsert(
+          'insert into outlet_orders (id,outlet_id,is_completed,is_uploaded,total_amount,uuid,created_on, lat, lng, accuracy,PJP,Is_Register) values  (?,?,?,?,?,?,DATETIME("now","5 hours"),?,?,?,?,?) ',
+          [
+            id,
+            outletId,
+            isCompleted,
+            isUploaded,
+            totalAmount,
+            uuid,
+            lat,
+            lng,
+            accuracy,
+            PJP,
+            1
+          ]);
+    } catch (error) {
+      //print("//print ERROR");
+      //print(error);
+    }
+    if (i > 0) {
+      //print("created");
+      return true;
+    } else {
+      //print("not created");
+      return false;
+    }
+  }
   Future initOrder(id, outletId, isCompleted, isUploaded, totalAmount, uuid,
       createdOn, lat, lng, accuracy,PJP) async {
     await this.initdb();
@@ -1192,11 +1278,12 @@ class Repository {
     return maps;
   }
   Future<List<Map<String, dynamic>>> getAllOrdersunregistered2(
-      int orderid) async {
+      int unregisterorderid) async {
+    print("unregisterorderid inside Function :"+unregisterorderid.toString());
     await this.initdb();
     final Database db = await database;
     List args = new List();
-    args.add(orderid);
+    args.add(unregisterorderid);
 
     // Query the table for all The Dogs.
     final List<Map> maps = await db.rawQuery(
@@ -1228,7 +1315,33 @@ class Repository {
     //print(maps.toString());
     return maps;
   }
-
+  Future<List<Map<String, dynamic>>> getAllUnregisterOrdersByIsUploaded(
+      int isUploaded) async {
+    await this.initdb();
+    final Database db = await database;
+    List args = new List();
+    args.add(isUploaded);
+    // Query the table for all The Dogs.
+    final List<Map> maps = await db.rawQuery(
+        "select * from outlet_orders where is_completed=1 and is_uploaded=?1 and Is_Register=1",
+        args);
+    //print(maps.toString());
+    return maps;
+  }
+  Future<List<Map<String, dynamic>>> getAllUnregisterOrdersByIsUploadedLocal(
+      int isUploaded , int ID) async {
+    await this.initdb();
+    final Database db = await database;
+    List args = new List();
+    args.add(isUploaded);
+    args.add(ID);
+    // Query the table for all The Dogs.
+    final List<Map> maps = await db.rawQuery(
+        "select * from outlet_orders where is_completed=1 and is_uploaded=?1 and Is_Register=1 and id=?2",
+        args);
+    print("getAllUnregisterOrdersByIsUploadedLocal"+maps.toString());
+    return maps;
+  }
   Future<List<Map<String, dynamic>>> getAllOrdersForSyncReport() async {
     await this.initdb();
     final Database db = await database;
@@ -1265,7 +1378,17 @@ class Repository {
         args1);
     return maps;
   }
-
+  Future getOrderItemunregisterInfo(int orderId, int productId) async {
+    await this.initdb();
+    final Database db = await database;
+    List args1 = new List();
+    args1.add(orderId);
+    args1.add(productId);
+    final List<Map> maps = await db.rawQuery(
+        "select * from outlet_order_items where order_id=?1 and product_id=?2",
+        args1);
+    return maps;
+  }
   /*Future addItemToCurrentOrderV0(int orderId, List item) async {
     await this.initdb();
     final Database db = await database;
@@ -1370,8 +1493,7 @@ class Repository {
         // Print INSERT query for forced new entry
         print("Executing INSERT query (forced new entry): insert into outlet_order_items with args: $args");
         await db.rawInsert(
-            'insert into outlet_order_items (order_id ,product_id ,discount,quantity ,amount ,created_on,rate,'
-                'product_label, unit_quantity, is_promotion, promotion_id, id, source_id,DiscountID,defaultDiscount,maximumDiscount) values  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            'insert into outlet_order_items (order_id, product_id, discount, quantity, amount, created_on, rate, product_label, unit_quantity, is_promotion, promotion_id, id, source_id, DiscountID, defaultDiscount, maximumDiscount) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             args
         );
       } else if (maps.isEmpty) {
@@ -1379,8 +1501,7 @@ class Repository {
         // Print INSERT query for new entry
         print("Executing INSERT query (new entry): insert into outlet_order_items with args: $args");
         await db.rawInsert(
-            'insert into outlet_order_items (order_id ,product_id ,discount,quantity ,amount ,created_on,rate,'
-                'product_label, unit_quantity, is_promotion, promotion_id,id,source_id,DiscountID,defaultDiscount,maximumDiscount) values  (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            'insert into outlet_order_items (order_id, product_id, discount, quantity, amount, created_on, rate, product_label, unit_quantity, is_promotion, promotion_id, id, source_id, DiscountID, defaultDiscount, maximumDiscount) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             args
         );
       } else {
@@ -1399,29 +1520,145 @@ class Repository {
           // Print UPDATE query for non-promotion
           print("Executing UPDATE query (non-promotion): update outlet_order_items with args: $args2");
           await db.rawUpdate(
-              'update outlet_order_items set quantity=?1,discount=?2,amount=?3, rate=?4, unit_quantity=?7,is_promotion=?8, promotion_id=?9 where order_id=?5 and product_id=?6',
+              'update outlet_order_items set quantity=?, discount=?, amount=?, rate=?, unit_quantity=?, is_promotion=?, promotion_id=? where order_id=? and product_id=?',
               args2
           );
         } else {
           // Print UPDATE query for promotion
           print("Executing UPDATE query (promotion): update outlet_order_items with args: $args2");
           await db.rawUpdate(
-              'update outlet_order_items set quantity=?1,discount=?2,amount=?3, rate=?4, unit_quantity=?7,is_promotion=?8, promotion_id=?9 where order_id=?5 and product_id=?6 and promotion_id=?9',
+              'update outlet_order_items set quantity=?, discount=?, amount=?, rate=?, unit_quantity=?, is_promotion=?, promotion_id=? where order_id=? and product_id=? and promotion_id=?',
               args2
           );
         }
       }
     }
 
-    List args = [];
-    args.add(orderId);
-    args.add(totalAmount);
+    // Fetch the current total_amount for this orderId
+    final List<Map> currentAmountResult = await db.rawQuery(
+        'select total_amount from outlet_orders where id = ?',
+        [orderId]
+    );
+
+    // Get the current total amount, defaulting to 0 if not found
+    double currentTotalAmount = currentAmountResult.isNotEmpty ? currentAmountResult[0]['total_amount'] ?? 0.0 : 0.0;
+
+    // Add new totalAmount to the current total amount
+    double updatedTotalAmount = currentTotalAmount + totalAmount;
 
     // Print UPDATE query for outlet_orders
-    print("Executing UPDATE query for outlet_orders: update outlet_orders set total_amount=${args[1]} where id=${args[0]}");
+    print("Executing UPDATE query for outlet_orders: update outlet_orders set total_amount=$updatedTotalAmount where id=$orderId");
     await db.rawUpdate(
-        'update outlet_orders set is_completed=0,total_amount=?2 where id=?1',
-        args
+        'update outlet_orders set is_completed=0, total_amount=? where id=?',
+        [updatedTotalAmount, orderId]
+    );
+
+    return isNewEntry;
+  }
+  Future<int> addItemToCurrentOrderUnregister(int orderId, List item, isForcedNewEntry) async {
+    await this.initdb();
+    final Database db = await database;
+    int isNewEntry = 0;
+    print("ORDER ID: " + orderId.toString());
+    double totalAmount = 0.0;
+
+    for (int i = 0; i < item.length; i++) {
+      List args = [];
+      args.add(globals.unregisterID);
+      args.add(item[i]['product_id']);
+      args.add(item[i]['discount']);
+      args.add(item[i]['quantity']);
+      args.add(item[i]['amount']);
+      double Amount = item[i]['amount'];
+      args.add(item[i]['created_on']);
+      args.add(item[i]['rate']);
+      args.add(item[i]['product_label']);
+      args.add(item[i]['unit_quantity']);
+      args.add(item[i]['is_promotion']);
+      args.add(item[i]['promotion_id']);
+      args.add(item[i]['id']);
+      args.add(item[i]['source_id']);
+      args.add(item[i]['DiscountID']);
+      args.add(item[i]['defaultDiscount']);
+      args.add(item[i]['maximumDiscount']);
+      totalAmount += Amount;
+      print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+      print(item[i]['discount'].toString());
+      print(item[i]['quantity'].toString());
+      double withoutdiscountamount = 0.0;
+      List args1 = [];
+      args1.add(globals.unregisterID);
+      args1.add(item[i]['product_id']);
+
+      // Print SELECT query
+      print("Executing SELECT query: select * from outlet_order_items where order_id=${args1[0]} and product_id=${args1[1]}");
+      final List<Map> maps = await db.rawQuery(
+          "select * from outlet_order_items where order_id=?1 and product_id=?2",
+          args1
+      );
+
+      if (isForcedNewEntry == 1) {
+        // Print INSERT query for forced new entry
+        print("Executing INSERT query (forced new entry): insert into outlet_order_items with args: $args");
+        await db.rawInsert(
+            'insert into outlet_order_items (order_id, product_id, discount, quantity, amount, created_on, rate, product_label, unit_quantity, is_promotion, promotion_id, id, source_id, DiscountID, defaultDiscount, maximumDiscount) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            args
+        );
+      } else if (maps.isEmpty) {
+        isNewEntry = 1;
+        // Print INSERT query for new entry
+        print("Executing INSERT query (new entry): insert into outlet_order_items with args: $args");
+        await db.rawInsert(
+            'insert into outlet_order_items (order_id, product_id, discount, quantity, amount, created_on, rate, product_label, unit_quantity, is_promotion, promotion_id, id, source_id, DiscountID, defaultDiscount, maximumDiscount) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            args
+        );
+      } else {
+        List args2 = [];
+        args2.add(item[i]['quantity']);
+        args2.add(item[i]['discount']);
+        args2.add(item[i]['amount']);
+        args2.add(item[i]['rate']);
+        args2.add(orderId);
+        args2.add(item[i]['product_id']);
+        args2.add(item[i]['unit_quantity']);
+        args2.add(item[i]['is_promotion']);
+        args2.add(item[i]['promotion_id']);
+
+        if (item[i]['is_promotion'] == 0) {
+          // Print UPDATE query for non-promotion
+          print("Executing UPDATE query (non-promotion): update outlet_order_items with args: $args2");
+          await db.rawUpdate(
+              'update outlet_order_items set quantity=?, discount=?, amount=?, rate=?, unit_quantity=?, is_promotion=?, promotion_id=? where order_id=? and product_id=?',
+              args2
+          );
+        } else {
+          // Print UPDATE query for promotion
+          print("Executing UPDATE query (promotion): update outlet_order_items with args: $args2");
+          await db.rawUpdate(
+              'update outlet_order_items set quantity=?, discount=?, amount=?, rate=?, unit_quantity=?, is_promotion=?, promotion_id=? where order_id=? and product_id=? and promotion_id=?',
+              args2
+          );
+        }
+      }
+    }
+
+    // Fetch the current total_amount for this unregisterID
+    final List<Map> currentAmountResult = await db.rawQuery(
+        'select total_amount from outlet_orders where id = ?',
+        [globals.unregisterID]
+    );
+
+    // Get the current total amount, defaulting to 0 if not found
+    double currentTotalAmount = currentAmountResult.isNotEmpty ? currentAmountResult[0]['total_amount'] ?? 0.0 : 0.0;
+
+    // Add new totalAmount to the current total amount
+    double updatedTotalAmount = currentTotalAmount + totalAmount;
+
+    // Print UPDATE query for outlet_orders
+    print("Executing UPDATE query for outlet_orders: update outlet_orders set total_amount=$updatedTotalAmount where id=${globals.unregisterID}");
+    await db.rawUpdate(
+        'update outlet_orders set is_completed=0, total_amount=? where id=?',
+        [updatedTotalAmount, globals.unregisterID]
     );
 
     return isNewEntry;
@@ -1496,7 +1733,13 @@ class Repository {
 
     return true;
   }
-
+  Future<bool> UpdateLocationLocally(double lat, double lng, double accuracy, int outlet_id) async {
+    final Database db = await database;
+    List args = [lat, lng, accuracy, outlet_id];
+    await db.rawUpdate(
+        'UPDATE pre_sell_outlets2 SET lat = ?, lng = ?, accuracy = ? WHERE outlet_id = ?', args);
+    return true;
+  }
   Future markOrderUploaded(int orderId) async {
     await this.initdb();
     final Database db = await database;
@@ -1542,7 +1785,20 @@ class Repository {
 
     return maps;
   }
+  Future<List<Map<String, dynamic>>> getAllAddedItemsOfOrderUnregister(
+      int orderId) async {
+    await this.initdb();
+    final Database db = await database;
+    List args = new List();
+    args.add(orderId);
 
+    // Query the table for all The Dogs.
+    final List<Map> maps = await db.rawQuery(
+        "select * from outlet_order_items where order_id=?1", args);
+    //print(maps);
+
+    return maps;
+  }
   Future<void> deleteUploadedOrder(orderId) async {
     final Database db = await database;
     List args = new List();
@@ -2032,7 +2288,7 @@ class Repository {
     for (int i = 0; i < formFields.length; i++) {
       print("saved "+ i.toString());
       List args = new List();
-      args.add(globals.OutletIdforupdate.toString());
+      args.add(0.toString());
       args.add(formFields[i]['outlet_name'].toString());
       args.add(formFields[i]['mobile_request_id'].toString());
 

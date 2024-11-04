@@ -32,7 +32,7 @@ class UnregisteredOrderCartView extends StatefulWidget {
   }
 
   @override
-  _UnregisteredOrderCartView createState() => _UnregisteredOrderCartView(OrderId);
+  _UnregisteredOrderCartView createState() => _UnregisteredOrderCartView();
 }
 
 class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
@@ -54,18 +54,18 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
   double defaultDiscount = 0;
   int DiscountIDmain = 0;
   bool isLoading = false;
-  _UnregisteredOrderCartView(int OrderId) {
+/*  _UnregisteredOrderCartView(int OrderId) {
     this.OrderId = OrderId;
-  }
-
+  }*/
 
 
   @override
   void initState() {
+    super.initState();
 
     AllOrders = new List();
     freeProductsQuantity = new List();
-    repo.getAllOrdersunregistered2(globals.unregisterorderid).then((val) async {
+    repo.getAllOrdersunregistered2(globals.unregisterID).then((val) async {
       setState(() {
         AllOrders = val;
       });
@@ -73,7 +73,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
       AllOrdersItems = new List();
       for (int i = 0; i < AllOrders.length; i++) {
         print("AllOrders :"+AllOrders.toString());
-        repo.getAllAddedItemsOfOrderByIsPromotion(AllOrders[i]['id'], 0).then((val) async {
+        repo.getAllUnregisterAddedItemsOfOrderByIsPromotion(globals.unregisterID, 0).then((val) async {
           setState(() {
             AllOrdersItems = val;
             print("AllOrdersItems :"+AllOrdersItems.toString());
@@ -85,7 +85,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
           });
         });
 
-        repo.getAllAddedItemsOfOrderByIsPromotion(AllOrders[i]['id'], 1).then((val) async {
+        repo.getAllUnregisterAddedItemsOfOrderByIsPromotion(globals.unregisterID, 1).then((val) async {
           setState(()   {
             AllOrdersItemsPromotion = val;
             for(int i=0;i<val.length;i++){
@@ -862,7 +862,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
             position = new Position(accuracy: 0, latitude: 0, longitude: 0);
           }
           print("position:"+position.toString());
-          await repo.completeOrder2( position.latitude,position.longitude,position.accuracy, globals.unregisterorderid);
+          await repo.completeOrder2( position.latitude,position.longitude,position.accuracy, globals.unregisterID);
           await repo.setVisitType(globals.OutletID, 1);
           Navigator.of(context, rootNavigator: true).pop('dialog');
           globals.showLoader(context); // Show the loader
@@ -925,7 +925,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
     }else{
       Navigator.of(context, rootNavigator: true).pop('dialog');
       print("position:"+position.toString());
-      await repo.completeOrder2( position.latitude,position.longitude,position.accuracy, globals.unregisterorderid);
+      await repo.completeOrder2( position.latitude,position.longitude,position.accuracy, globals.unregisterID);
       await repo.setVisitType(globals.OutletID, 1);
       // globals.showLoader(context);
 
@@ -1175,7 +1175,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
 
         int ORDERIDToDelete = 0;
         AllOrders = new List();
-        await repo.getAllOrdersByIsUploaded(0).then((val) async {
+        await repo.getAllUnregisterOrdersByIsUploaded(0).then((val) async {
 
           AllOrders = val;
           /*
@@ -1215,7 +1215,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
 
             ORDERIDToDelete = AllOrders[i]['id'];
             await repo
-                .getAllAddedItemsOfOrder(AllOrders[i]['id'])
+                .getAllAddedItemsOfOrderUnregister(globals.unregisterID)
                 .then((val) async {
               AllOrdersItems = val;
               /*
@@ -1390,7 +1390,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
                 AllOrdersItems = new List();
                 totalAmount = 0.0;
                 for (int i = 0; i < AllOrders.length; i++) {
-                  repo.getAllAddedItemsOfOrderByIsPromotion(AllOrders[i]['id'], 0).then((val) async {
+                  repo.getAllUnregisterAddedItemsOfOrderByIsPromotion(AllOrders[i]['id'], 0).then((val) async {
                     setState(() {
                       AllOrdersItems = val;
                       totalAddedProducts = AllOrdersItems.length;
@@ -1401,7 +1401,7 @@ class _UnregisteredOrderCartView extends State<UnregisteredOrderCartView> {
                   });
 
 
-                  repo.getAllAddedItemsOfOrderByIsPromotion(AllOrders[i]['id'], 1).then((val) async {
+                  repo.getAllUnregisterAddedItemsOfOrderByIsPromotion(AllOrders[i]['id'], 1).then((val) async {
                     setState(() {
                       AllOrdersItemsPromotion = val;
                     });

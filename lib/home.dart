@@ -79,7 +79,7 @@ class _Home extends State<Home> {
   Future<void> initState() {
     super.initState();
     String DeviceID;
-   //checkForNewVersion()
+    //checkForNewVersion()
     _getDeviceId().then((val)
     {
       setState(() {
@@ -248,7 +248,7 @@ class _Home extends State<Home> {
             allowDismissal: false,
             dialogTitle: 'Update Available',
             dialogText:
-                'Please update your app to get latest features and best experience',
+            'Please update your app to get latest features and best experience',
             updateButtonText: 'Update',
             dismissButtonText: 'Later',
             dismissAction: () {
@@ -298,7 +298,7 @@ class _Home extends State<Home> {
     List<Map<String, dynamic>> fetchedPJPs = await repo.getSelectedPJPs();
     if (fetchedPJPs.isNotEmpty) {
       String fetchedPJP = fetchedPJPs[0]
-          ['PJPID']; // Assuming you want the first PJPID from the list
+      ['PJPID']; // Assuming you want the first PJPID from the list
       print("fetchedPJP :" + fetchedPJP.toString());
       globals.selectedPJP = fetchedPJP;
     } else {
@@ -451,7 +451,7 @@ class _Home extends State<Home> {
           var response = await http.post(url,
               headers: {
                 HttpHeaders.contentTypeHeader:
-                    'application/x-www-form-urlencoded'
+                'application/x-www-form-urlencoded'
               },
               body: QueryParameters);
 
@@ -512,7 +512,7 @@ class _Home extends State<Home> {
           print(AllOutletsMarkedClose[i]['image_path']);
           File photoFile = File(AllOutletsMarkedClose[i]['image_path']);
           var stream =
-              new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
+          new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
           var length = await photoFile.length();
 
           var url = Uri.http(globals.ServerURL,
@@ -657,7 +657,7 @@ class _Home extends State<Home> {
           var response = await http.post(url,
               headers: {
                 HttpHeaders.contentTypeHeader:
-                    'application/x-www-form-urlencoded'
+                'application/x-www-form-urlencoded'
               },
               body: QueryParameters);
 
@@ -692,12 +692,12 @@ class _Home extends State<Home> {
       AllMarkedAttendancesPhotos = val;
       for (int i = 0; i < AllMarkedAttendancesPhotos.length; i++) {
         int ORDERIDToDelete =
-            int.parse(AllMarkedAttendancesPhotos[i]['mobile_request_id']);
+        int.parse(AllMarkedAttendancesPhotos[i]['mobile_request_id']);
         try {
           print(AllMarkedAttendancesPhotos[i]['image_path']);
           File photoFile = File(AllMarkedAttendancesPhotos[i]['image_path']);
           var stream =
-              new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
+          new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
           var length = await photoFile.length();
           //var localUrl = Uri.http(globals.ServerURLLocal,"/nisa_portal/mobile/MobileUploadMarkAttendaceImage");
           var url = Uri.http(globals.ServerURL,
@@ -707,7 +707,7 @@ class _Home extends State<Home> {
 
           var request = new http.MultipartRequest("POST", url);
           request.fields['value1'] =
-              AllMarkedAttendancesPhotos[i]['mobile_request_id'];
+          AllMarkedAttendancesPhotos[i]['mobile_request_id'];
 
           var multipartFile = new http.MultipartFile('file', stream, length,
               filename: fileName);
@@ -738,12 +738,12 @@ class _Home extends State<Home> {
 
       for (int i = 0; i < AllMerchandsingPhotos.length; i++) {
         int ORDERIDToDelete =
-            int.parse(AllMerchandsingPhotos[i]['mobile_request_id']);
+        int.parse(AllMerchandsingPhotos[i]['mobile_request_id']);
         try {
           File photoFile = File(AllMerchandsingPhotos[i]['image']);
 
           var stream =
-              new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
+          new http.ByteStream(DelegatingStream.typed(photoFile.openRead()));
           var length = await photoFile.length();
           var url = Uri.http(
               globals.ServerURL, '/portal/mobile/MobileUploadOrdersImageV2');
@@ -788,25 +788,25 @@ class _Home extends State<Home> {
 
   Future<bool> _onWillPop() async {
     return (await showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: new Text('Are you sure?'),
-            content: new Text('Do you want to logout?'),
-            actions: <Widget>[
-              new ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: new Text('No'),
-              ),
-              new ElevatedButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                ),
-                child: new Text('Yes'),
-              ),
-            ],
+      context: context,
+      builder: (context) => new AlertDialog(
+        title: new Text('Are you sure?'),
+        content: new Text('Do you want to logout?'),
+        actions: <Widget>[
+          new ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: new Text('No'),
           ),
-        )) ??
+          new ElevatedButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+            ),
+            child: new Text('Yes'),
+          ),
+        ],
+      ),
+    )) ??
         false;
   }
 
@@ -825,6 +825,86 @@ class _Home extends State<Home> {
     }
 
     return ret2;
+  }
+  Future _OutletLocationUpdate(context) async {
+    DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
+    String currDateTime = dateFormat.format(DateTime.now());
+    print("_OutletLocationUpdate");
+    List AllUpdateLocation = new List();
+
+    await repo.getUpdateLocation().then((val) async {
+      setState(() {
+        AllUpdateLocation = val;
+
+        print("AllUpdateLocation :" + AllUpdateLocation.toString());
+      });
+      for (int i = 0; i < AllUpdateLocation.length; i++) {
+        String outletRegisterationsParams = "timestamp=" +
+            globals.getCurrentTimestamp() +
+            "&outlet_id=" +
+            AllUpdateLocation[i]['outlet_id'].toString() +
+            "&lat=" +
+            AllUpdateLocation[i]['lat'].toString() +
+            "&lng=" +
+            AllUpdateLocation[i]['lng'].toString() +
+            "&accuracy=" +
+            AllUpdateLocation[i]['accuracy'].toString() +
+            "&uuid=" +
+            globals.DeviceID +
+            "&updated_by=" +
+            globals.UserID.toString();
+        print("outletRegisterationsParams:" + outletRegisterationsParams);
+
+        /* String orderParam="timestamp="+globa+"&order_no="+AllOrders[i]['id'].toString()+"&outlet_id="+ globals.OutletID.toString()+"&created_on="+AllOrders[i]['created_on'].toString()+"&created_by=100450&uuid=656d30b8182fea88&platform=android&lat="+globals.currentPosition.latitude.toString()+"&lng="+globals.currentPosition.longitude.toString()+"&accuracy=21";
+        print("AllOrders[i]['id']"+AllOrders[i]['id'].toString());*/
+
+        var QueryParameters = <String, String>{
+          "SessionID": globals.EncryptSessionID(outletRegisterationsParams),
+        };
+        print("QueryParameters " + QueryParameters.toString());
+        var url = Uri.http(
+            globals.ServerURL, '/portal/mobile/MobileOutletLocationUpdate');
+
+
+        try {
+          var response = await http.post(url,
+              headers: {
+                HttpHeaders.contentTypeHeader:
+                'application/x-www-form-urlencoded'
+              },
+              body: QueryParameters);
+
+          var responseBody = json.decode(utf8.decode(response.bodyBytes));
+          print('called4' + responseBody.toString());
+          if (response.statusCode == 200) {
+            if (responseBody["success"] == "true") {
+              repo.UpdateLocation(AllUpdateLocation[i]['outlet_id'].toString());
+              print("Outlet Location is Updated");
+            } else {
+              print("False Response");
+              _showDialog2("Error", responseBody["error_code"], 0);
+              print("Error:" + responseBody["error_code"]);
+            }
+          } else {
+            print("Status code is not 200");
+            print("Error: An error has occured: " + responseBody.statusCode);
+          }
+        } catch (e) {
+          print("Inside Catch");
+          print("Error: An error has occured: " + e.toString());
+        }
+      }
+    });
+
+    /* Navigator.push(
+      context,
+      //
+
+      MaterialPageRoute(builder: (context) =>ShopAction()
+
+
+      ),
+    );*/
   }
 
   Future _UploadNoOrder(context) async {
@@ -870,14 +950,14 @@ class _Home extends State<Home> {
         };
 
         var url =
-            Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncNoOrdersV2');
+        Uri.http(globals.ServerURL, '/portal/mobile/MobileSyncNoOrdersV2');
         print(url);
 
         try {
           var response = await http.post(url,
               headers: {
                 HttpHeaders.contentTypeHeader:
-                    'application/x-www-form-urlencoded'
+                'application/x-www-form-urlencoded'
               },
               body: QueryParameters);
 
@@ -1005,139 +1085,23 @@ class _Home extends State<Home> {
   }
 
   Future _OutletRegisterationUpload(context) async {
+    print("============Selected PJP============" +
+        globals.selectedPJP.toString());
     int ORDERIDToDelete = 0;
     List AllRegisteredOutlets = new List();
     await repo.getAllRegisteredOutletsByIsUploaded(0, 1).then((val) async {
       setState(() {
         AllRegisteredOutlets = val;
+
         print("All Registered Outlets===>> " + AllRegisteredOutlets.toString());
       });
-
       for (int i = 0; i < AllRegisteredOutlets.length; i++) {
-        setState(() {
-          isAnythingUploaded = 1;
-        });
-        String outletRegisterationsParams = "timestamp=" +
-            globals.getCurrentTimestamp() +
-            "&outlet_name=" +
-            AllRegisteredOutlets[i]['outlet_name'] +
-            "&mobile_request_id=" +
-            (AllRegisteredOutlets[i]['mobile_request_id']).toString() +
-            "&mobile_timestamp=" +
-            AllRegisteredOutlets[i]['mobile_timestamp'] +
-            "&channel_id=" +
-            AllRegisteredOutlets[i]['channel_id'].toString() +
-            "&area_label=" +
-            AllRegisteredOutlets[i]['area_label'].toString() +
-            "&sub_area_label=" +
-            AllRegisteredOutlets[i]['sub_area_label'].toString() +
-            "&address=" +
-            AllRegisteredOutlets[i]['address'] +
-            "&owner_name=" +
-            AllRegisteredOutlets[i]['owner_name'] +
-            "&owner_cnic=" +
-            AllRegisteredOutlets[i]['owner_cnic'] +
-            "&owner_mobile_no=" +
-            AllRegisteredOutlets[i]['owner_mobile_no'] +
-            "&purchaser_name=" +
-            AllRegisteredOutlets[i]['purchaser_name'] +
-            "&purchaser_mobile_no=" +
-            AllRegisteredOutlets[i]['purchaser_mobile_no'] +
-            "&is_owner_purchaser=" +
-            AllRegisteredOutlets[i]['is_owner_purchaser'].toString() +
-            "&lat=" +
-            AllRegisteredOutlets[i]['lat'].toString() +
-            "&lng=" +
-            AllRegisteredOutlets[i]['lng'].toString() +
-            "&accuracy=" +
-            (AllRegisteredOutlets[i]['accuracy'])
-                .toStringAsFixed(3)
-                .toString() +
-            "&created_on=" +
-            AllRegisteredOutlets[i]['created_on'] +
-            "&created_by=" +
-            AllRegisteredOutlets[i]['created_by'].toString() +
-            "&uuid=" +
-            globals.DeviceID +
-            "&platform=android";
-        print("outletRegisterationsParams:" + outletRegisterationsParams);
+        globals.RegisterOUletOrderRequestID =  int.tryParse(AllRegisteredOutlets[i]['mobile_request_id']);
 
-        /* String orderParam="timestamp="+globa+"&order_no="+AllOrders[i]['id'].toString()+"&outlet_id="+ globals.OutletID.toString()+"&created_on="+AllOrders[i]['created_on'].toString()+"&created_by=100450&uuid=656d30b8182fea88&platform=android&lat="+_currentPosition.latitude.toString()+"&lng="+_currentPosition.longitude.toString()+"&accuracy=21";
-        print("AllOrders[i]['id']"+AllOrders[i]['id'].toString());*/
-
-        var QueryParameters = <String, String>{
-          "SessionID": globals.EncryptSessionID(outletRegisterationsParams),
-        };
-        //var localUrl="http://192.168.10.37:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
-        // var localUrl="http://192.168.30.125:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
-        var url = Uri.http(
-            globals.ServerURL, '/portal/mobile/MobileSyncOutletRegistration');
-
-        try {
-          var response = await http.post(url,
-              headers: {
-                HttpHeaders.contentTypeHeader:
-                    'application/x-www-form-urlencoded'
-              },
-              body: QueryParameters);
-
-          var responseBody = json.decode(utf8.decode(response.bodyBytes));
-          print('called4');
-          if (response.statusCode == 200) {
-            if (responseBody["success"] == "true") {
-              print("Saved");
-              repo.markOutletUploaded(
-                  int.tryParse(AllRegisteredOutlets[i]['mobile_request_id']));
-              //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-            } else {
-              // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-              setState(() {
-                isUploaded = 0;
-              });
-              await _showDialog(
-                  "Error Uploading Outlet", responseBody["error_code"]);
-              print("Error:" + responseBody["error_code"]);
-            }
-          } else {
-            //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-            setState(() {
-              isUploaded = 0;
-            });
-            await _showDialog("Error Uploading Outlet",
-                "An error has occured: " + responseBody.statusCode);
-            print("Error: An error has occured: " + responseBody.statusCode);
-          }
-        } catch (e) {
-          // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          setState(() {
-            isUploaded = 0;
-            isAnythingUploaded = 1;
-          });
-          await _showDialog(
-              "Error Uploading Outlet", "Check your internet connection");
-          break;
-        }
-      }
-    });
-  }
-
-  Future _OutletRegisterationUpload2(context) async {
-    int ORDERIDToDelete = 0;
-    List AllRegisteredOutlets = new List();
-    await repo.getAllRegisteredOutletsByIsUploaded(0, 0).then((val) async {
-      setState(() {
-        AllRegisteredOutlets = val;
-        print("All Registered Outlets===>> " + AllRegisteredOutlets.toString());
-      });
-
-      for (int i = 0; i < AllRegisteredOutlets.length; i++) {
-        setState(() {
-          isAnythingUploaded = 1;
-        });
-        String outletRegisterationsParams = "timestamp=" +
+        String orderParam = "timestamp=" +
             globals.getCurrentTimestamp() +
             "&id_for_update=" +
-            (AllRegisteredOutlets[i]['id_for_update']).toString() +
+            '0' +
             "&outlet_name=" +
             AllRegisteredOutlets[i]['outlet_name'] +
             "&mobile_request_id=" +
@@ -1169,76 +1133,191 @@ class _Home extends State<Home> {
             "&lng=" +
             AllRegisteredOutlets[i]['lng'].toString() +
             "&accuracy=" +
-            (AllRegisteredOutlets[i]['accuracy'])
-                .toStringAsFixed(3)
-                .toString() +
+            (AllRegisteredOutlets[i]['accuracy']).toString() +
             "&created_on=" +
             AllRegisteredOutlets[i]['created_on'] +
             "&created_by=" +
             AllRegisteredOutlets[i]['created_by'].toString() +
+            "&OutletChannel=" +
+            AllRegisteredOutlets[i]['outletchannel'].toString() +
             "&uuid=" +
             globals.DeviceID +
-            "&platform=android";
-        print("outletRegisterationsParams:" + outletRegisterationsParams);
+            "&version=" +
+            globals.appVersion +
+            "&platform=android" +
+            "&PJP=" +
+            globals.selectedPJP +
+            "&is_order=" +
+            1.toString();
+        print("outletRegisterationsParams:" + orderParam);
 
-        /* String orderParam="timestamp="+globa+"&order_no="+AllOrders[i]['id'].toString()+"&outlet_id="+ globals.OutletID.toString()+"&created_on="+AllOrders[i]['created_on'].toString()+"&created_by=100450&uuid=656d30b8182fea88&platform=android&lat="+_currentPosition.latitude.toString()+"&lng="+_currentPosition.longitude.toString()+"&accuracy=21";
+
+        DateFormat dateFormat = DateFormat("dd/MM/yyyy HH:mm:ss");
+        String currDateTime = dateFormat.format(DateTime.now());
+        var str = currDateTime.split(".");
+
+        String TimeStamp = str[0];
+
+        print("currDateTime" + TimeStamp);
+
+        int ORDERIDToDelete = 0;
+        AllOrders = new List();
+        await repo.getAllUnregisterOrdersByIsUploadedLocal(0, int.parse(AllRegisteredOutlets[i]['mobile_request_id'])).then((val) async {
+
+          AllOrders = val;
+          /*
+      setState(() {
+        AllOrders = val;
+
+        print("MAIN ORDER" + AllOrders.toString());
+      });
+      */
+          AllOrdersItems = new List();
+          print("AllOrders :"+AllOrders.toString());
+          for (int i = 0; i < AllOrders.length; i++) {
+            orderParam += "&timestamp=" +
+                TimeStamp +
+                "&order_no=" +
+                AllOrders[i]['id'].toString() +
+                "&outlet_id=" +
+                AllOrders[i]['outlet_id'].toString() +
+                "&created_on=" +
+                AllOrders[i]['created_on'].toString() +
+                "&created_by=" +
+                globals.UserID.toString() +
+                "&uuid=" +
+                globals.DeviceID +
+                "&platform=android&lat=" +
+                AllOrders[i]['lat'] +
+                "&lng=" +
+                AllOrders[i]['lng'] +
+                "&accuracy=" +
+                AllOrders[i]['accuracy'] +
+                "&PJP=" +
+                AllOrders[i]['PJP'].toString() +
+                "&version=" +
+                globals.appVersion +
+                "&Spot_Discount=" +
+                "" ;
+
+            ORDERIDToDelete = AllOrders[i]['id'];
+            await repo
+                .getAllAddedItemsOfOrderUnregister(AllOrders[i]['id'])
+                .then((val) async {
+              AllOrdersItems = val;
+              /*
+          setState(() {
+            AllOrdersItems = val;
+            print("ITEMS" + AllOrdersItems.toString());
+          });
+          */
+              print("AllOrdersItems :"+AllOrdersItems.toString());
+
+              print("orderParam 1 :" + orderParam.toString());
+              //  String orderItemParam = "";
+              for (int j = 0; j < AllOrdersItems.length; j++) {
+                double discount = AllOrdersItems[j]['discount'];   // Discount percentage
+                int quantity = AllOrdersItems[j]['quantity'];      // Product quantity
+                double discountedAmount = AllOrdersItems[j]['amount'];  // Amount after discount
+
+                // Calculate the price per item before discount
+                double pricePerItem = discountedAmount / quantity / ((100 - discount) / 100);
+
+                // Calculate the total amount before discount
+                double withoutDiscountAmount = pricePerItem * quantity;
+                print("fdsfsddddddddddddddddddddddddddddddddd");
+                print(withoutDiscountAmount);
+                orderParam += "&product_id=" +
+                    AllOrdersItems[j]['product_id'].toString() +
+                    "&quantity=" +
+                    AllOrdersItems[j]['quantity'].toString() +
+                    "&discount=" +
+                    AllOrdersItems[j]['discount'].toString() +
+                    "&unit_quantity=" +
+                    AllOrdersItems[j]['unit_quantity'].toString() +
+                    "&is_promotion=" +
+                    AllOrdersItems[j]['is_promotion'].toString() +
+                    "&promotion_id=" +
+                    AllOrdersItems[j]['promotion_id'].toString() +
+                    "&Spot_Discount_ID=" +
+                    AllOrdersItems[j]['DiscountID'].toString() +
+                    "&defaultDiscount=" +
+                    AllOrdersItems[j]['defaultDiscount'].toString() +
+                    "&maximumDiscount=" +
+                    AllOrdersItems[j]['maximumDiscount'].toString() +
+                    "&amount=" +
+                    withoutDiscountAmount.toString() +
+                    "";
+              }
+
+            });
+            print("orderParam: "+orderParam.toString());
+            //var response = await http.post(localUrl, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'},body: QueryParameters);
+          }
+
+        });
+        /* String orderParam="timestamp="+globa+"&order_no="+AllOrders[i]['id'].toString()+"&outlet_id="+ globals.OutletID.toString()+"&created_on="+AllOrders[i]['created_on'].toString()+"&created_by=100450&uuid=656d30b8182fea88&platform=android&lat="+globals.currentPosition.latitude.toString()+"&lng="+globals.currentPosition.longitude.toString()+"&accuracy=21";
         print("AllOrders[i]['id']"+AllOrders[i]['id'].toString());*/
 
         var QueryParameters = <String, String>{
-          "SessionID": globals.EncryptSessionID(outletRegisterationsParams),
+          "SessionID": globals.EncryptSessionID(orderParam),
         };
         //var localUrl="http://192.168.10.37:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
         // var localUrl="http://192.168.30.125:8080/nisa_portal/mobile/MobileSyncOutletRegistration";
         var url = Uri.http(
-            globals.ServerURL, '/portal/mobile/MobileSyncOutletUpdate');
+            globals.ServerURL, '/portal/mobile/MobileSyncOutletRegistration4');
 
         try {
           var response = await http.post(url,
               headers: {
                 HttpHeaders.contentTypeHeader:
-                    'application/x-www-form-urlencoded'
+                'application/x-www-form-urlencoded'
               },
               body: QueryParameters);
 
           var responseBody = json.decode(utf8.decode(response.bodyBytes));
           print('called4');
+          print('called4');
+          print('statusCode'+response.statusCode.toString());
           if (response.statusCode == 200) {
+            print("inside 200");
             if (responseBody["success"] == "true") {
+              print("inside success");
+
               print("Saved");
               repo.markOutletUploaded(
                   int.tryParse(AllRegisteredOutlets[i]['mobile_request_id']));
+              await repo.markOrderUploaded(ORDERIDToDelete);
+
               //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
             } else {
               // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-              setState(() {
-                isUploaded = 0;
-              });
-              await _showDialog(
-                  "Error Uploading Outlet", responseBody["error_code"]);
+              _showDialog2("Error", responseBody["error_code"], 0);
               print("Error:" + responseBody["error_code"]);
             }
           } else {
             //Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-            setState(() {
-              isUploaded = 0;
-            });
-            await _showDialog("Error Uploading Outlet",
-                "An error has occured: " + responseBody.statusCode);
+            //_showDialog("Error", "An error has occured: " + responseBody.statusCode, 0);
             print("Error: An error has occured: " + responseBody.statusCode);
           }
         } catch (e) {
           // Navigator.of(_keyLoader.currentContext,rootNavigator: true).pop();
-          setState(() {
-            isUploaded = 0;
-            isAnythingUploaded = 1;
-          });
-          await _showDialog(
-              "Error Uploading Outlet", "Check your internet connection");
-          break;
+          //_showDialog("Error", "An error has occured " + e.toString(), 1);
+          print("Error: An error has occured: " + e.toString());
         }
       }
     });
+    /* Navigator.push(
+      context,
+      //
+
+      MaterialPageRoute(builder: (context) =>ShopAction()
+
+
+      ),
+    );*/
   }
+
 
   Future _UploadOrder(context) async {
     // Fetch current date and time
@@ -1254,7 +1333,7 @@ class _Home extends State<Home> {
     await repo.getAllOrdersByIsUploaded(0).then((val) async {
       AllOrders = val;
       AllOrdersItems = [];
-int ORDERIDToDelete =0;
+      int ORDERIDToDelete =0;
       for (int i = 0; i < AllOrders.length; i++) {
         String orderParam = "timestamp=" +
             TimeStamp +
@@ -1269,11 +1348,11 @@ int ORDERIDToDelete =0;
             "&uuid=" +
             globals.DeviceID +
             "&platform=android&lat=" +
-            position.latitude.toString() +
+            AllOrders[i]['lat'].toString() +
             "&lng=" +
-            position.longitude.toString() +
+            AllOrders[i]['lng'].toString() +
             "&accuracy=" +
-            position.accuracy.toString() +
+            AllOrders[i]['accuracy'].toString() +
             "&PJP=" +
             AllOrders[i]['PJP'].toString() +
             "&version=" +
@@ -1326,10 +1405,10 @@ int ORDERIDToDelete =0;
           if (response.statusCode == 200 && responseBody["success"] == "true") {
             await repo.markOrderUploaded(ORDERIDToDelete);
           } else {
-            _showDialog("Error", responseBody["error_code"]);
+            _showDialog2("Error", responseBody["error_code"],0);
           }
         } catch (e) {
-          _showDialog("Error", "An error has occurred " + e.toString());
+          _showDialog2("Error", "An error has occurred " + e.toString(),0);
         }
       }
     });
@@ -1377,18 +1456,18 @@ int ORDERIDToDelete =0;
                       print("waiting......");
                     }
                     //Dialogs.showLoadingDialog(context, _scaffoldKey2);
-                    _UploadOrder(context).whenComplete(() => _UploadDocuments().whenComplete(() =>
+                    _OutletRegisterationUpload(context).whenComplete(() => _UploadDocuments().whenComplete(() =>
                         _UploadNoOrder(context) .whenComplete(() => _UploadDocumentNoOrder()
-                        .whenComplete(() => _OutletRegisterationUpload(context)
-                            .whenComplete(() => _OutletRegisterationUpload2(context)
-                                .whenComplete(() => _SyncMarkedAttendance()
-                                    .whenComplete(() => _UploadOutletMarkClosed()
-                                        .whenComplete(() => isUploaded == 1 && isAnythingUploaded == 1 ? _showDialogFinalMessage("Success", "Data Uploaded") : "")
-                                        .whenComplete(() => isAnythingUploaded == 0 ? _showDialog("Warning", "There is nothing to upload") : "")
-                                        .whenComplete(() => () {
-                                              _SyncMarkedAttendancePhoto();
-                                              _SyncMerchandisingPhoto();
-                                            }))))))));
+                            .whenComplete(() => _UploadOrder(context)
+                            .whenComplete(() => _SyncMarkedAttendance()
+                            .whenComplete(() => _UploadOutletMarkClosed()
+                            .whenComplete(() => _OutletLocationUpdate(context)
+                            .whenComplete(() => isUploaded == 1 && isAnythingUploaded == 1 ? _showDialogFinalMessage("Success", "Data Uploaded") : "")
+                            .whenComplete(() => isAnythingUploaded == 0 ? _showDialog("Warning", "There is nothing to upload") : "")
+                            .whenComplete(() => () {
+                          _SyncMarkedAttendancePhoto();
+                          _SyncMerchandisingPhoto();
+                        }))))))));
                   },
                 ),
                 Divider(
@@ -1399,7 +1478,7 @@ int ORDERIDToDelete =0;
                   leading: Icon(Icons.data_exploration, color: Colors.blue),
                   title: Text('Export DB'),
                   onTap: () {
-                   /* globals.Reset();*/
+                    /* globals.Reset();*/
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => DatabaseExport()),
@@ -1510,7 +1589,7 @@ int ORDERIDToDelete =0;
                                         elevation: 4,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(15.0),
+                                          BorderRadius.circular(15.0),
                                         ),
                                         child: Column(
                                           children: <Widget>[
@@ -1585,7 +1664,7 @@ int ORDERIDToDelete =0;
                                       ))),
                               Expanded(
                                   child:
-                                      Container(height: 180, child: chart())),
+                                  Container(height: 180, child: chart())),
                             ],
                           ),
                           Column(
@@ -1594,243 +1673,243 @@ int ORDERIDToDelete =0;
                                 height: 12.0,
                               ),
                               Container(
-                                  child: Card(
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(10, 10, 0, 10),
-                                      child: Align(
-                                          alignment: Alignment.topLeft,
-                                          child: Text(
-                                            "Activities",
-                                            style: TextStyle(
-                                                color: Colors.blue,
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.bold),
-                                          )),
-                                    ),
-                                    Container(
-                                      child: Divider(
-                                        height: 1,
-                                        color: Colors.blue,
+                                child: Card(
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Container(
+                                        padding:
+                                        EdgeInsets.fromLTRB(10, 10, 0, 10),
+                                        child: Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Text(
+                                              "Activities",
+                                              style: TextStyle(
+                                                  color: Colors.blue,
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.bold),
+                                            )),
                                       ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Expanded(
-                                            child: GestureDetector(
-                                                onTap: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Attendance()),
-                                                  );
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.all(10),
-                                                  child: Column(
-                                                    children: <Widget>[
-                                                      Image.asset(
-                                                        "assets/images/calendar.png",
-                                                        width: 55,
-                                                      ),
-                                                      Padding(
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0.0,
-                                                                5.0,
-                                                                0.0,
-                                                                0.0),
-                                                        child: Text(
-                                                          'Attendance',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.black),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                            ),
+                                      Container(
+                                        child: Divider(
+                                          height: 1,
+                                          color: Colors.blue,
                                         ),
-                                        Expanded(
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Expanded(
                                             child: GestureDetector(
-                                                onTap: () => Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            PreSellRoute(2222)),
-                                                  ),
-                                                child: Container(
-                                                  padding: EdgeInsets.all(10),
-                                                  child: Column(
-                                                    children: <Widget>[
-                                                      Image.asset(
-                                                        "assets/images/place.png",
-                                                        width: 55,
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          Attendance()),
+                                                );
+                                              },
+                                              child: Container(
+                                                padding: EdgeInsets.all(10),
+                                                child: Column(
+                                                  children: <Widget>[
+                                                    Image.asset(
+                                                      "assets/images/calendar.png",
+                                                      width: 55,
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                      EdgeInsets.fromLTRB(
+                                                          0.0,
+                                                          5.0,
+                                                          0.0,
+                                                          0.0),
+                                                      child: Text(
+                                                        'Attendance',
+                                                        style: TextStyle(
+                                                            color:
+                                                            Colors.black),
                                                       ),
-                                                      Padding(
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0.0,
-                                                                5.0,
-                                                                0.0,
-                                                                0.0),
-                                                        child: Text(
-                                                          'Visit',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.black),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
+                                                    ),
+                                                  ],
                                                 ),
+                                              ),
                                             ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Expanded(
+                                          ),
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () => Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        PreSellRoute(2222)),
+                                              ),
+                                              child: Container(
+                                                padding: EdgeInsets.all(10),
+                                                child: Column(
+                                                  children: <Widget>[
+                                                    Image.asset(
+                                                      "assets/images/place.png",
+                                                      width: 55,
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                      EdgeInsets.fromLTRB(
+                                                          0.0,
+                                                          5.0,
+                                                          0.0,
+                                                          0.0),
+                                                      child: Text(
+                                                        'Visit',
+                                                        style: TextStyle(
+                                                            color:
+                                                            Colors.black),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Expanded(
                                             child: Container(
-                                          padding: EdgeInsets.all(10),
-                                          child: Column(
-                                            children: <Widget>[
-                                              Image.asset(
-                                                "assets/images/complain.png",
-                                                width: 55,
-                                              ),
-                                              Padding(
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      0.0, 5.0, 0.0, 0.0),
-                                                  child: Text(
-                                                    'Complaint',
-                                                    style: TextStyle(
-                                                        color: Colors.black),
+                                              padding: EdgeInsets.all(10),
+                                              child: Column(
+                                                children: <Widget>[
+                                                  Image.asset(
+                                                    "assets/images/complain.png",
+                                                    width: 55,
                                                   ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        ),
-                                        Expanded(
-                                            child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      OutletRegisteration()),
-                                            );
-                                          },
-                                          child: Container(
-                                            padding: EdgeInsets.all(10),
-                                            child: Column(
-                                              children: <Widget>[
-                                                Image.asset(
-                                                  "assets/images/building.png",
-                                                  width: 55,
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      0.0, 5.0, 0.0, 0.0),
-                                                  child: Text(
-                                                    'Outlet Registeration',
-                                                    style: TextStyle(
-                                                        color: Colors.black),
+                                                  Padding(
+                                                    padding: EdgeInsets.fromLTRB(
+                                                        0.0, 5.0, 0.0, 0.0),
+                                                    child: Text(
+                                                      'Complaint',
+                                                      style: TextStyle(
+                                                          color: Colors.black),
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          OutletRegisteration()),
+                                                );
+                                              },
+                                              child: Container(
+                                                padding: EdgeInsets.all(10),
+                                                child: Column(
+                                                  children: <Widget>[
+                                                    Image.asset(
+                                                      "assets/images/building.png",
+                                                      width: 55,
+                                                    ),
+                                                    Padding(
+                                                      padding: EdgeInsets.fromLTRB(
+                                                          0.0, 5.0, 0.0, 0.0),
+                                                      child: Text(
+                                                        'Outlet Registeration',
+                                                        style: TextStyle(
+                                                            color: Colors.black),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
                               ),
                               SizedBox(
                                 height: 12.0,
                               ),
                               Container(
                                   child: Card(
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Container(
-                                      padding:
-                                          EdgeInsets.fromLTRB(10, 10, 0, 10),
-                                      child: Align(
-                                          alignment: Alignment.topLeft,
-                                          child: Text(
-                                            "Reports",
-                                            style: TextStyle(
-                                                color: Colors.blue,
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                      ),
+                                    elevation: 4,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
                                     ),
-                                    Container(
-                                      child: Divider(
-                                        height: 1,
-                                        color: Colors.blue,
-                                      ),
-                                    ),
-                                    Row(
+                                    child: Column(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            padding: EdgeInsets.all(10),
-                                            child: Column(
-                                              children: <Widget>[
-                                                Image.asset(
-                                                  "assets/images/performance.png",
-                                                  width: 55,
-                                                ),
-                                                Padding(
-                                                    padding:
-                                                        EdgeInsets.fromLTRB(
-                                                            0.0, 5.0, 0.0, 0.0),
-                                                    child: Text(
-                                                      'Performance',
-                                                      style: TextStyle(
-                                                          color: Colors.black),
-                                                    ),
-                                                ),
-                                              ],
+                                      MainAxisAlignment.spaceEvenly,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Container(
+                                          padding:
+                                          EdgeInsets.fromLTRB(10, 10, 0, 10),
+                                          child: Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Text(
+                                              "Reports",
+                                              style: TextStyle(
+                                                  color: Colors.blue,
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.bold),
                                             ),
                                           ),
                                         ),
-                                        Expanded(
-                                            child: GestureDetector(
+                                        Container(
+                                          child: Divider(
+                                            height: 1,
+                                            color: Colors.blue,
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Expanded(
+                                              child: Container(
+                                                padding: EdgeInsets.all(10),
+                                                child: Column(
+                                                  children: <Widget>[
+                                                    Image.asset(
+                                                      "assets/images/performance.png",
+                                                      width: 55,
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                      EdgeInsets.fromLTRB(
+                                                          0.0, 5.0, 0.0, 0.0),
+                                                      child: Text(
+                                                        'Performance',
+                                                        style: TextStyle(
+                                                            color: Colors.black),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: GestureDetector(
                                                 onTap: () {
                                                   Navigator.pushAndRemoveUntil(
                                                       context,
@@ -1851,10 +1930,10 @@ int ORDERIDToDelete =0;
                                                       Padding(
                                                           padding: EdgeInsets
                                                               .fromLTRB(
-                                                                  0.0,
-                                                                  5.0,
-                                                                  0.0,
-                                                                  0.0),
+                                                              0.0,
+                                                              5.0,
+                                                              0.0,
+                                                              0.0),
                                                           child: Text(
                                                             'Stock',
                                                             style: TextStyle(
@@ -1864,98 +1943,98 @@ int ORDERIDToDelete =0;
                                                     ],
                                                   ),
                                                 ),
-                                            ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Expanded(
-                                          child: GestureDetector(
-                                              onTap: () {
-                                                Navigator.pushAndRemoveUntil(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            OrdersReportSelectDate()),
-                                                    ModalRoute.withName(
-                                                        "/order_report_select_date"));
-                                              },
-                                              child: Container(
-                                                padding: EdgeInsets.all(10),
-                                                child: Column(
-                                                  children: <Widget>[
-                                                    Image.asset(
-                                                      "assets/images/order.png",
-                                                      width: 55,
-                                                    ),
-                                                    Padding(
-                                                        padding:
-                                                            EdgeInsets.fromLTRB(
-                                                                0.0,
-                                                                5.0,
-                                                                0.0,
-                                                                0.0),
-                                                        child: Text(
-                                                          'Orders',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.black),
-                                                        ),
-                                                    ),
-                                                  ],
-                                                ),
                                               ),
-                                          ),
+                                            ),
+                                          ],
                                         ),
-                                        Expanded(
-                                            child: GestureDetector(
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Expanded(
+                                              child: GestureDetector(
                                                 onTap: () {
                                                   Navigator.pushAndRemoveUntil(
                                                       context,
                                                       MaterialPageRoute(
                                                           builder: (context) =>
-                                                              SalesReportSelectDate()),
+                                                              OrdersReportSelectDate()),
                                                       ModalRoute.withName(
-                                                          "/sales_report_select_date"));
+                                                          "/order_report_select_date"));
                                                 },
                                                 child: Container(
                                                   padding: EdgeInsets.all(10),
                                                   child: Column(
                                                     children: <Widget>[
                                                       Image.asset(
-                                                        "assets/images/sales.png",
+                                                        "assets/images/order.png",
                                                         width: 55,
                                                       ),
                                                       Padding(
                                                         padding:
+                                                        EdgeInsets.fromLTRB(
+                                                            0.0,
+                                                            5.0,
+                                                            0.0,
+                                                            0.0),
+                                                        child: Text(
+                                                          'Orders',
+                                                          style: TextStyle(
+                                                              color:
+                                                              Colors.black),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                                child: GestureDetector(
+                                                    onTap: () {
+                                                      Navigator.pushAndRemoveUntil(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  SalesReportSelectDate()),
+                                                          ModalRoute.withName(
+                                                              "/sales_report_select_date"));
+                                                    },
+                                                    child: Container(
+                                                      padding: EdgeInsets.all(10),
+                                                      child: Column(
+                                                        children: <Widget>[
+                                                          Image.asset(
+                                                            "assets/images/sales.png",
+                                                            width: 55,
+                                                          ),
+                                                          Padding(
+                                                            padding:
                                                             EdgeInsets.fromLTRB(
                                                                 0.0,
                                                                 5.0,
                                                                 0.0,
                                                                 0.0),
-                                                        child: Text(
-                                                          'Sales',
-                                                          style: TextStyle(
-                                                              color:
+                                                            child: Text(
+                                                              'Sales',
+                                                              style: TextStyle(
+                                                                  color:
                                                                   Colors.black),
-                                                        ),
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ],
-                                                  ),
-                                                ))),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
+                                                    ))),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
                                           MainAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Expanded(
-                                            child: GestureDetector(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Expanded(
+                                              child: GestureDetector(
                                                 onTap: () {
                                                   Navigator.pushAndRemoveUntil(
                                                       context,
@@ -1974,130 +2053,130 @@ int ORDERIDToDelete =0;
                                                         width: 55,
                                                       ),
                                                       Padding(
-                                                          padding: EdgeInsets
-                                                              .fromLTRB(
-                                                                  0.0,
-                                                                  5.0,
-                                                                  0.0,
-                                                                  0.0),
-                                                          child: Text(
-                                                            'Orders Sync',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .black),
-                                                          ),
+                                                        padding: EdgeInsets
+                                                            .fromLTRB(
+                                                            0.0,
+                                                            5.0,
+                                                            0.0,
+                                                            0.0),
+                                                        child: Text(
+                                                          'Orders Sync',
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .black),
+                                                        ),
                                                       ),
                                                     ],
                                                   ),
                                                 ),
+                                              ),
                                             ),
-                                        ),
-                                        Expanded(
-                                            child: GestureDetector(
-                                                onTap: () {
-                                                  Navigator.pushAndRemoveUntil(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              AttendanceSyncReportView()),
-                                                      ModalRoute.withName(
-                                                          "/attendance_sync_report"));
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.all(10),
-                                                  child: Column(
-                                                    children: <Widget>[
-                                                      Image.asset(
-                                                        "assets/images/sync.png",
-                                                        width: 55,
-                                                      ),
-                                                      Padding(
-                                                          padding: EdgeInsets
-                                                              .fromLTRB(
+                                            Expanded(
+                                                child: GestureDetector(
+                                                    onTap: () {
+                                                      Navigator.pushAndRemoveUntil(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  AttendanceSyncReportView()),
+                                                          ModalRoute.withName(
+                                                              "/attendance_sync_report"));
+                                                    },
+                                                    child: Container(
+                                                      padding: EdgeInsets.all(10),
+                                                      child: Column(
+                                                        children: <Widget>[
+                                                          Image.asset(
+                                                            "assets/images/sync.png",
+                                                            width: 55,
+                                                          ),
+                                                          Padding(
+                                                              padding: EdgeInsets
+                                                                  .fromLTRB(
                                                                   0.0,
                                                                   5.0,
                                                                   0.0,
                                                                   0.0),
-                                                          child: Text(
-                                                            'Attendance Sync',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .black),
-                                                          )),
-                                                    ],
-                                                  ),
-                                                ))),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      // crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-
-                                      children: [
-                                        Expanded(
-                                          child: GestureDetector(
-                                            onTap: isAfterFivePM != null &&
-                                                    isAfterFivePM
-                                                ? () {
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            DailyReports(),
+                                                              child: Text(
+                                                                'Attendance Sync',
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .black),
+                                                              )),
+                                                        ],
                                                       ),
-                                                    );
-                                                  }
-                                                : null,
-                                            // Disable the onTap function before
-                                            child: Container(
-                                              padding: EdgeInsets.all(10),
-                                              child: Row(
-                                                children: <Widget>[
-                                                  // Adding space to the left of the icon
-                                                  Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: 38),
-                                                    // Adjust the value as needed
-                                                    child: Column(
-                                                      children: <Widget>[
-                                                        Image.asset(
-                                                          "assets/images/sync.png",
-                                                          width: 55,
-                                                          color: isAfterFivePM
-                                                              ? null
-                                                              : Colors
+                                                    ))),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                          // crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+
+                                          children: [
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: isAfterFivePM != null &&
+                                                    isAfterFivePM
+                                                    ? () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          DailyReports(),
+                                                    ),
+                                                  );
+                                                }
+                                                    : null,
+                                                // Disable the onTap function before
+                                                child: Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Row(
+                                                    children: <Widget>[
+                                                      // Adding space to the left of the icon
+                                                      Padding(
+                                                        padding: EdgeInsets.only(
+                                                            left: 38),
+                                                        // Adjust the value as needed
+                                                        child: Column(
+                                                          children: <Widget>[
+                                                            Image.asset(
+                                                              "assets/images/sync.png",
+                                                              width: 55,
+                                                              color: isAfterFivePM
+                                                                  ? null
+                                                                  : Colors
                                                                   .grey, // Optionally, change the icon color to indicate it's disabled
-                                                        ),
-                                                        Padding(
-                                                          padding:
+                                                            ),
+                                                            Padding(
+                                                              padding:
                                                               EdgeInsets.only(
                                                                   top: 5.0),
-                                                          // Adjust the top padding to add space between the icon and the text
-                                                          child: Text(
-                                                            'Daily reports',
-                                                            style: TextStyle(
-                                                              color: isAfterFivePM
-                                                                  ? Colors.black
-                                                                  : Colors
+                                                              // Adjust the top padding to add space between the icon and the text
+                                                              child: Text(
+                                                                'Daily reports',
+                                                                style: TextStyle(
+                                                                  color: isAfterFivePM
+                                                                      ? Colors.black
+                                                                      : Colors
                                                                       .grey, // Change text color to indicate it's disabled
+                                                                ),
+                                                              ),
                                                             ),
-                                                          ),
+                                                          ],
                                                         ),
-                                                      ],
-                                                    ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
+                                                ),
                                               ),
                                             ),
-                                          ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                              ))
+                                  ))
                             ],
                           ),
                         ],
@@ -2110,7 +2189,7 @@ int ORDERIDToDelete =0;
   }
 
   _showDialog(String Title, String Message) async {
-    Navigator.of(context, rootNavigator: true).pop('dialog');
+    // Navigator.of(context, rootNavigator: true).pop('dialog');
 
     if (Title == null) {
       Title = " ";
@@ -2143,6 +2222,43 @@ int ORDERIDToDelete =0;
                     context,
                     MaterialPageRoute(builder: (context) => Home()),
                     ModalRoute.withName("/home"));
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showDialog2(String Title, String Message, int isSuccess) {
+    // flutter defined function
+    if (globals.isLocalLoggedIn == 1) {
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text(Title),
+          content: new Text(Message),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new ElevatedButton(
+              child: new Text("Close"),
+              onPressed: () {
+                if (isSuccess == 1) {
+                  Navigator.push(
+                    context,
+                    //
+
+                    MaterialPageRoute(builder: (context) => Home()
+                      //  MaterialPageRoute(builder: (context) =>ShopAction_test()
+
+                    ),
+                  );
+                } else {
+                  Navigator.of(context).pop();
+                }
               },
             ),
           ],
@@ -2214,7 +2330,7 @@ int ORDERIDToDelete =0;
                 ),
                 behaviorPosition: charts.BehaviorPosition.bottom,
                 titleOutsideJustification:
-                    charts.OutsideJustification.middleDrawArea)
+                charts.OutsideJustification.middleDrawArea)
           ],
           // Configure the width of the pie slices to 30px. The remaining space in
           // the chart will be left as a hole in the center. Adjust the start

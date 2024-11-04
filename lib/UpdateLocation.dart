@@ -204,7 +204,7 @@ class _Updatelocattion extends State<Updatelocattion> {
                   style: TextStyle(
                     color: Colors.white,
                   )),
-              onPressed: () {
+              onPressed: () async {
                 globals.stopContinuousLocation();
                 // if (islocationGet == false) {
                 //   _showDialog("Error", "Please get GPS Location", 0);
@@ -212,7 +212,7 @@ class _Updatelocattion extends State<Updatelocattion> {
                 // }
 
          /*       if (_formKey.currentState.validate()) {*/
-
+               await repo.UpdateLocationLocally(double.tryParse(NewLatController.text),double.tryParse(NewLongController.text.toString()), double.tryParse(NewAccuracyController.text.toString()),globals.OutletID);
                 print("button called");
 
                   _registerOutlet(context);
@@ -478,6 +478,7 @@ class _Updatelocattion extends State<Updatelocattion> {
     Dialogs.showLoadingDialog(context, _keyLoader);
     print("_registerOutlet called");
     //await repo.registerOutlet(Items);
+    await repo.insertUpdateLocation(globals.OutletID.toString(),NewLatController.text.toString() ,NewLongController.text.toString(),NewAccuracyController.text.toString());
     Navigator.of(context,rootNavigator: true).pop();
     _OutletLocationUpdate(context);
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => ShopAction()));
@@ -526,7 +527,8 @@ class _Updatelocattion extends State<Updatelocattion> {
           print('called4' + responseBody.toString());
           if (response.statusCode == 200) {
             if (responseBody["success"] == "true") {
-repo.UpdateOutletLocation(globals.OutletID, NewLatController.text , NewLongController.text , NewAccuracyController.text);
+              repo.UpdateLocation(globals.OutletID.toString());
+              repo.UpdateOutletLocation(globals.OutletID, NewLatController.text , NewLongController.text , NewAccuracyController.text);
               print("Outlet Location is Updated");
             } else {
               print("False Response");

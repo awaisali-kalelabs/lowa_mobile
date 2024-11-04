@@ -61,7 +61,7 @@ class _UnregisteredAddToCart extends State<UnregisteredAddToCart> {
     print(globals.unregisterorderid);
     print(globals.ProductID);
     OutletOrder =
-    await repo.getOrderItemInfo(globals.unregisterorderid, globals.productId);
+    await repo.getOrderItemunregisterInfo(globals.unregisterorderid, globals.productId);
 
     OutletOrder = OutletOrder;
     if (OutletOrder.isNotEmpty) {
@@ -240,7 +240,7 @@ class _UnregisteredAddToCart extends State<UnregisteredAddToCart> {
       'defaultDiscount' : defaultDiscount,
       'maximumDiscount' : maximumDiscount
     });
-    int isNewEntry  = await  repo.addItemToCurrentOrder(orderId, Items, 0);
+    int isNewEntry  = await  repo.addItemToCurrentOrderUnregister(orderId, Items, 0);
 
     List<Map<String, dynamic>> product = await repo.getProductById(productId);
     List<Map<String, dynamic>> promotionalProduct = await repo.getAllPromotionalProduct(globals.OutletID, product[0]['package_id'], product[0]['brand_id']);
@@ -302,7 +302,7 @@ class _UnregisteredAddToCart extends State<UnregisteredAddToCart> {
           'defaultDiscount' : defaultDiscount,
           'maximumDiscount' : maximumDiscount
         });
-        repo.addItemToCurrentOrder(orderId, Items, isNewEntry);
+        repo.addItemToCurrentOrderUnregister(orderId, Items, isNewEntry);
 
       }
 

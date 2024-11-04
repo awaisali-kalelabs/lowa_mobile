@@ -46,8 +46,8 @@ class _UnregisteredOutletOrderImage extends State<UnregisteredOutletOrderImage> 
   void initiateOrder(List<OutletOrders> order) {
     for (var i = 0; i < order.length; i++) {
       globals.unregisterorderid=order[i].id;
-      repo.initOrder(
-          order[i].id,
+      repo.initOrderunregister(
+          globals.unregisterID,
          "",
           order[i].is_completed,
           order[i].is_uploaded,

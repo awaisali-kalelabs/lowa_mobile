@@ -16,7 +16,6 @@ import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:order_booker/com/pbc/dao/repository.dart';
 import 'package:order_booker/globals.dart';
-import 'package:order_booker/un_registered_outlet_orders.dart';
 //import 'package:order_booker/shopAction.dart';
 
 import 'UnregisteredOutletOrderImage.dart';
@@ -168,8 +167,8 @@ class _OutletRegisteration extends State<OutletRegisteration> {
 
         print("All Registered Outlets===>> " + AllRegisteredOutlets.toString());
       });
-
       for (int i = 0; i < AllRegisteredOutlets.length; i++) {
+
         String outletRegisterationsParams = "timestamp=" +
             globals.getCurrentTimestamp() +
             "&id_for_update=" +
@@ -551,6 +550,8 @@ class _OutletRegisteration extends State<OutletRegisteration> {
                       // Prepare arguments to register the outlet
                       List args = [];
                       String encodedOutletName = base64.encode(utf8.encode(outletNameController.text));
+                      globals.unregisterID = mobileRequestID;
+
                       args.add({
                         'outlet_name': encodedOutletName,
                         'mobile_request_id': mobileRequestID,

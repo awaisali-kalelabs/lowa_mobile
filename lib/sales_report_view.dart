@@ -79,12 +79,16 @@ class _SalesReportView extends State<SalesReportView> {
 
 
     String param="timestamp="+ currDateTime +"&UserID="+ globals.UserID.toString() +"&DeviceID="+ globals.DeviceID +""
-        "&platform=android&startDate="+ globals.salesReportStartDate +"&endDate="+ globals.salesReportEndDate +"";
+        "&platform=android&startDate="+ globals.salesReportStartDate +"&endDate="+ globals.salesReportEndDate +"&pjpid=" +
+        globals.selectedPJP.toString()+"";
+
     var QueryParameters =<String, String> {
       "SessionID":EncryptSessionID(param) ,
     };
+    print("QueryParameters" + param.toString());
     try{
-      var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileSalesReport', QueryParameters);
+      var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileSalesReportV3', QueryParameters);
+      print(url);
 //      Wave/grain/sales/MobileVFSalesContractExecute
       var response = await http.get(url, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'});
       var responseBody = json.decode(utf8.decode(response.bodyBytes));
@@ -354,7 +358,7 @@ class _SalesReportView extends State<SalesReportView> {
                                   child: Container(
                                       padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       child: Text(
-                                        e['OrderAmount'] ?? "",
+                                        e['OrderAmount'].toString() ?? "",
                                         style: TextStyle(
                                             fontSize: 11, color: Colors.black),
                                         textAlign: TextAlign.right,
@@ -374,7 +378,7 @@ class _SalesReportView extends State<SalesReportView> {
                                   child: Container(
                                       padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
                                       child: Text(
-                                        e['SalesAmount'] ?? "",
+                                        e['SalesAmount'].toString() ?? "",
                                         style: TextStyle(
                                             fontSize: 11, color: Colors.black),
                                         textAlign: TextAlign.right,

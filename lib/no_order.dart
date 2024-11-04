@@ -58,10 +58,10 @@ class _NoOrder extends State<NoOrder> {
   List<Map<String, dynamic>> NoOrderReasons;
 
   @override
-  void initState() {
-    //NoOrderReasons=new List();
-    noOrderReason = 0;
+  void initState()  {
     Repository repo = new Repository();
+
+    noOrderReason = 0;
     //weeK DAY to be Placed
     weekday = globals.WeekDay;
     NoOrderReasons = new List();
@@ -75,8 +75,49 @@ class _NoOrder extends State<NoOrder> {
     } else {
       isSelected[0] = true;
     }
+    _getLocation();
   }
+  double _latitude = 0.0;
+  double _longitude = 0.0;
+  double Accuracy = 0.0;
+  Future<void> _getLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
 
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+        Accuracy = position.accuracy;
+
+      });
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+  void setStateGeo() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low);
+    globals.channellat = position.latitude;
+    globals.channellng = position.longitude;
+    globals.channelacc = position.accuracy;
+  }
+  double _calculateDistance() {
+    double latDouble = double.parse(globals.IsGeoFenceLat);
+    double lngDouble = double.parse(globals.IsGeoFenceLng);
+    double distanceInMeters = Geolocator.distanceBetween(
+      _latitude,
+      _longitude,
+      latDouble,
+      lngDouble,
+    );
+
+    // Convert the distance to other units if needed
+    // For example, to kilometers: distanceInKm = distanceInMeters / 1000;
+
+    return distanceInMeters;
+  }
   setNoOrderReason(int val) {
     setState(() {
       noOrderReason = val;
@@ -189,92 +230,159 @@ class _NoOrder extends State<NoOrder> {
  // }
   }
   saveNoOrder() async {
+    List OutletData = new List();
+    OutletData = await repo.SelectOutletByID(globals.OutletID);
+    globals.IsGeoFence = OutletData[0]["IsGeoFence"];
+    globals.IsGeoFenceLat = OutletData[0]["lat"];
+    globals.IsGeoFenceLng = OutletData[0]["lng"];
+    globals.Radius = OutletData[0]["Radius"];
+    //NoOrderReasons=new List();
+    double distance = _calculateDistance();
+    print("Distance==>"+distance.toString());
+    int Distance2 = globals.Radius;
+
     Dialogs.showLoadingDialog(context, _keyLoader);
     Position position = globals.currentPosition;
-    if (position == null) {
-      globals.getCurrentLocation(context).then((position1) {
-        position = position1;
-      }).timeout(
-        Duration(seconds: 7),
-        onTimeout: (() {
-          print("i am here timedout");
-          setState(() {
-            isLocationTimedOut = true;
-          });
-        }),
-      ).whenComplete(() {
-        double lat = 0.0;
-        double lng = 0.0;
-        double accuracy = 0.0;
-        print(position);
-        if (position != null || isLocationTimedOut) {
-          if (isLocationTimedOut == false) {
-            lat = position.latitude;
-            lng = position.longitude;
-            accuracy = position.accuracy;
-          }
+    if ( globals.IsGeoFence == 0 ||  globals.IsGeoFence == null || globals.IsGeoFence == "0") {
+      if (position == null) {
+        globals.getCurrentLocation(context).then((position1) {
+          position = position1;
+        }).timeout(
+          Duration(seconds: 7),
+          onTimeout: (() {
+            print("i am here timedout");
+            setState(() {
+              isLocationTimedOut = true;
+            });
+          }),
+        ).whenComplete(() {
+          double lat = 0.0;
+          double lng = 0.0;
+          double accuracy = 0.0;
           print(position);
-          repo.saveNoOrder(
+          if (position != null || isLocationTimedOut) {
+            if (isLocationTimedOut == false) {
+              lat = position.latitude;
+              lng = position.longitude;
+              accuracy = position.accuracy;
+            }
+            print(position);
+            repo.saveNoOrder(
+                globals.orderId,
+                globals.OutletID,
+                noOrderReason,
+                lat,
+                lng,
+                accuracy,
+                globals.DeviceID,
+                globals.selectedPJP
+            );
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+            _UploadNoOrder();
+            repo.setVisitType(globals.OutletID, 2).then((value) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ShopAction()),
+              );
+            });
+          } else {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                // return object of type Dialog
+                return AlertDialog(
+                  title: new Text("Alert"),
+                  content: new Text("Please allow location to proceed"),
+                  actions: <Widget>[
+                    // usually buttons at the bottom of the dialog
+                    new ElevatedButton(
+                      child: new Text("Close"),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+        });
+      }
+      else {
+        repo.saveNoOrder(
             globals.orderId,
             globals.OutletID,
             noOrderReason,
-            lat,
-            lng,
-            accuracy,
+            position.latitude,
+            position.longitude,
+            position.accuracy,
             globals.DeviceID,
-              globals.selectedPJP
-          );
-          Navigator.of(context, rootNavigator: true).pop('dialog');
-          _UploadNoOrder();
-          repo.setVisitType(globals.OutletID, 2).then((value) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ShopAction()),
-            );
-          });
-        } else {
-          Navigator.of(context, rootNavigator: true).pop('dialog');
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              // return object of type Dialog
-              return AlertDialog(
-                title: new Text("Alert"),
-                content: new Text("Please allow location to proceed"),
-                actions: <Widget>[
-                  // usually buttons at the bottom of the dialog
-                  new ElevatedButton(
-                    child: new Text("Close"),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-        }
-      });
-    } else {
-      repo.saveNoOrder(
-        globals.orderId,
-        globals.OutletID,
-        noOrderReason,
-        position.latitude,
-        position.longitude,
-        position.accuracy,
-        globals.DeviceID,
-        globals.selectedPJP
-      );
-      Navigator.of(context, rootNavigator: true).pop('dialog');
-      await _UploadNoOrder(); //(context);
-      repo.setVisitType(globals.OutletID, 2).then((value) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ShopAction()),
+            globals.selectedPJP
         );
-      });
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+        await _UploadNoOrder(); //(context);
+        repo.setVisitType(globals.OutletID, 2).then((value) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ShopAction()),
+          );
+        });
+      }
+    }else{
+      if(distance < Distance2){
+        print("inside if");
+        Position position = globals.currentPosition;
+        repo.saveNoOrder(
+            globals.orderId,
+            globals.OutletID,
+            noOrderReason,
+            position.latitude,
+            position.longitude,
+            position.accuracy,
+            globals.DeviceID,
+            globals.selectedPJP
+        );
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+        _UploadNoOrder();
+        repo.setVisitType(globals.OutletID, 2).then((value) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ShopAction()),
+          );
+        });
+      }
+      else{
+        print("inside Else");
+
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            // return object of type Dialog
+            return AlertDialog(
+              title: new Text("Error"),
+              content: new Text(
+                  'Can\'t place order, you are ${distance
+                      .toInt()} meters away from the shop.'),
+              actions: <Widget>[
+                // usually buttons at the bottom of the dialog
+                new ElevatedButton(
+                  child: new Text("Close"),
+                  onPressed: () {
+                    Navigator.pop(
+                      context,
+                      MaterialPageRoute(builder: (context) => OrderCartView()),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
+
   }
 
   Future SaveOutletImage() async {

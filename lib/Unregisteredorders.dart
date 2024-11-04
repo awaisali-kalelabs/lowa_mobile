@@ -226,7 +226,7 @@ class _UnregisteredOrders extends State<UnregisteredOrders> {
       });
       AllOrdersItems = new List();
       for (int i = 0; i < AllOrders.length; i++) {
-        repo.getAllAddedItemsOfOrder(AllOrders[i]['id']).then((val) async {
+        repo.getAllAddedItemsOfOrderUnregister(AllOrders[i]['id']).then((val) async {
           setState(() {
             AllOrdersItems = val;
             //totalAddedProducts = AllOrdersItems.length;
@@ -237,7 +237,7 @@ class _UnregisteredOrders extends State<UnregisteredOrders> {
         });
 
 
-        repo.getAllAddedItemsOfOrderByIsPromotion(AllOrders[i]['id'], 0).then((val) async {
+        repo.getAllUnregisterAddedItemsOfOrderByIsPromotion(AllOrders[i]['id'], 0).then((val) async {
           setState(() {
 
             totalAddedProducts = val.length;
@@ -460,8 +460,8 @@ class _UnregisteredOrders extends State<UnregisteredOrders> {
     // repo.deleteAllUnUsedOrder(outlet_id);
 
     for (var i = 0; i < order.length; i++) {
-      repo.initOrder(
-          order[i].id,
+      repo.initOrderunregister(
+          globals.unregisterID,
           order[i].outlet_id,
           order[i].is_completed,
           order[i].is_uploaded,
@@ -477,7 +477,7 @@ class _UnregisteredOrders extends State<UnregisteredOrders> {
   }
 
   void addItemOrder(orderId, List Items) {
-    repo.addItemToCurrentOrder(orderId, Items, 0);
+    repo.addItemToCurrentOrderUnregister(orderId, Items, 0);
   }
 
   double getProductPrice(productId, outletId) {

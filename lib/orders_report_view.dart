@@ -84,13 +84,14 @@ class _OrdersReportView extends State<OrdersReportView> {
 
 
     String param="timestamp="+ currDateTime +"&UserID="+ globals.UserID.toString() +"&DeviceID="+ globals.DeviceID +""
-        "&platform=android&startDate="+ globals.ordersReportStartDate +"&endDate="+ globals.ordersReportEndDate +"";
+        "&platform=android&startDate="+ globals.ordersReportStartDate +"&endDate="+ globals.ordersReportEndDate +"&pjpid=" +
+        globals.selectedPJP.toString()+"";
     print(EncryptSessionID(param));
     var QueryParameters =<String, String> {
       "SessionID":EncryptSessionID(param) ,
     };
     try{
-      var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileOrdersReportV2', QueryParameters);
+      var url = Uri.http(globals.ServerURL, '/portal/mobile/MobileOrdersReportV3', QueryParameters);
 //      Wave/grain/sales/MobileVFOrdersContractExecute
       var response = await http.get(url, headers: {HttpHeaders.contentTypeHeader: 'application/x-www-form-urlencoded'});
       var responseBody = json.decode(utf8.decode(response.bodyBytes));

@@ -827,25 +827,31 @@ class _OrderCartView extends State<OrderCartView> {
             .whenComplete(() async {
           print("inside if");
           if (position != null || isLocationTimedOut) {
-            if(isLocationTimedOut){
-              position = new Position(accuracy: 0, latitude: 0, longitude: 0);
+            // Only set position to (0,0,0) if necessary
+            if (isLocationTimedOut && position == null) {
+              position = Position(accuracy: 0, latitude: 0, longitude: 0);
             }
-            print("position:"+position.toString());
-            await repo.completeOrder( position.latitude,position.longitude,position.accuracy, globals.OutletID);
+
+            print("position: ${position.toString()}");
+
+            // Only proceed if position is valid
+            if (position.latitude != 0 && position.longitude != 0) {
+              await repo.completeOrder(position.latitude, position.longitude, position.accuracy, globals.OutletID);
+            } else {
+              print("Position is invalid or timed out; handling alternative logic if needed.");
+            }
+
             await repo.setVisitType(globals.OutletID, 1);
             Navigator.of(context, rootNavigator: true).pop('dialog');
             _UploadOrder(context);
             _UploadDocuments();
 
-            // _UploadNoOrder(context);
-
-
             Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => PreSellRoute(2222)),
                 ModalRoute.withName("/PreSellRoute"));
-
-          } else {
+          }
+else {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             showDialog(
               context: context,
@@ -892,8 +898,8 @@ class _OrderCartView extends State<OrderCartView> {
       if(distance < Distance2){
         print("inside if");
         Position position = globals.currentPosition;
-        await repo.completeOrder(globals.channellat, globals.channellat,
-            globals.channelacc, globals.OutletID);
+        await repo.completeOrder(position.latitude,position.longitude,
+            position.accuracy, globals.OutletID);
         await repo.setVisitType(globals.OutletID, 1);
         Navigator.of(context, rootNavigator: true).pop('dialog');
 //            //1	1	Test Outlet K/S	1	System	MANDI TOWN	03001234747		1	31.6089111000000000000	71.0783096000000000000	Lahore 	Sub Area Label 4	1	6	Karyana Store	2024-03-14	E	7	System	03001234747		1	100
